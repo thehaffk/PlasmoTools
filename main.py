@@ -6,7 +6,7 @@ import os
 intents = disnake.Intents.all()
 
 bot = commands.Bot(owner_ids=[737501414141591594, 222718720127139840, 191836876980748298],
-                   activity=disnake.Activity(type=disnake.ActivityType.watching, text='kto'),
+                   status=disnake.Status.invisible,
                    intents=intents,
                    sync_commands=True,
                    sync_permissions=True,

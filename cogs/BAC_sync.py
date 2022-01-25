@@ -52,18 +52,29 @@ class BACSynchronization(commands.Cog):
     async def on_member_ban(self, guild, member):
         if not guild.id == settings.plasmo_rp_guild:
             return False
-        await self.sync(member)
+        if member not in self.bac.members:
+            try:
+                await member.send(embed=disnake.Embed(title='Вы были забанены на Plasmo RP',
+                                                      color=disnake.Color.red(),
+                                                      description=f'Узнать причину бана, оспорить решение '
+                                                                  f'администрации или разбаниться можно '
+                                                                  f'только тут - {settings.bac["invite"]}'))
+            except Exception as e:
+                print(e)
+        else:
+            await self.sync(member)
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild, member):
         if not guild.id == settings.plasmo_rp_guild:
             return False
-        await self.sync(member)
-
-    @commands.Cog.listener()
-    async def on_member_ban(self, guild, member):
-        if not guild.id == settings.plasmo_rp_guild:
-            return False
+        try:
+            await member.send(embed=disnake.Embed(title='Вас разбанили на Plasmo RP',
+                                                  color=disnake.Color.green(),
+                                                  description=f'Держите инвайт и не забывайте соблюдать '
+                                                              f'правила сервера {settings.plasmo_rp["invite"]}'))
+        except Exception as e:
+            print(e)
         await self.sync(member)
 
     @commands.Cog.listener()
@@ -74,11 +85,12 @@ class BACSynchronization(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print('ready')
+        print('BAC ready')
         self.bac = self.bot.get_guild(settings.bac['id'])
         self.bac_pass = self.bac.get_role(settings.bac['pass'])
         self.bac_nonpass = self.bac.get_role(settings.bac['no_pass'])
         self.bac_banned = self.bac.get_role(settings.bac['banned'])
+
 
     @commands.slash_command(name='everyone-sync', guild_ids=[settings.bac['id']])
     @commands.has_permissions(manage_roles=True)
