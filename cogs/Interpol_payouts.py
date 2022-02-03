@@ -1,14 +1,17 @@
 import sqlite3
 import disnake
+import payout as payout
 import requests
+from aiohttp.client import ClientSession
 from disnake.ext import commands
 
 import settings
+import plasmoapi
 
 
 async def autocomplete_card(inter: disnake.ApplicationCommandInteraction, user_input: str):
     if len(user_input) < 2:
-        return ['Запрос должен быть длиннее двух символов((']
+        user_input = inter.author.display_name
     try:
         cards_request = requests.get(url=f'https://rp.plo.su/api/bank/search/cards?value={user_input}',
                                      cookies={'rp_token': settings.plasmo_token})
@@ -16,7 +19,7 @@ async def autocomplete_card(inter: disnake.ApplicationCommandInteraction, user_i
             return ['Cards not found']
     except Exception as e:
         print(e)
-        return ['(']
+        return ['An error occurred']
     if cards_request.json()['data']:
         all_cards = cards_request.json()['data'][:25]
         formatted_cards = []
@@ -25,7 +28,7 @@ async def autocomplete_card(inter: disnake.ApplicationCommandInteraction, user_i
                                    f'{card["holder"]} - {card["name"]}')
         return formatted_cards
     else:
-        return ['(']
+        return ['Not found']
 
 
 async def autocomplete_amount(inter, user_input):
@@ -38,14 +41,168 @@ async def autocomplete_payout_message(inter, user_input: str):
 
 class InterpolPayouts(commands.Cog):
     def __init__(self, bot):
+        self.bank = None
+        self.head_role = None
+        self.deputy_role = None
         self.cursor = None
         self.interpol_guild = None
         self.conn = None
         self.player = None
         self.bot = bot
 
-    async def payout(self):
-        pass
+    async def log_payout(self,
+                         status: bool,
+                         sender: disnake.User,
+                         user: disnake.User,
+                         amount: int,
+                         message: str,
+                         payout_id: int = None,
+                         error=None,
+                         card=None):
+        if not payout_id:
+            message = message.replace('"', '\'')
+            self.cursor.execute('INSERT INTO payouts '
+                                '(discord_id, sender_id, message, amount, date, card, paid, canceled) '
+                                'VALUES '
+                                f'({user.id}, {sender.id}, "{message}", {amount}, datetime(), {card}, {status}, False)')
+            self.conn.commit()
+            payout_id = self.cursor.lastrowid
+        else:
+            message = message.replace('"', '\'')
+            self.cursor.execute(f'UPDATE payouts SET '
+                                f'discord_id={user.id}, '
+                                f'sender_id={sender.id}, '
+                                f'message="{message}", '
+                                f'amount={amount}, '
+                                f'date=datetime(), '
+                                f'card={card}, '
+                                f'paid={status},'
+                                f'canceled=False '
+                                f'WHERE id = {payout_id}')
+            self.conn.commit()
+
+        if error == 'LOWBALANCE':
+            await self.interpol_guild.get_channel(settings.interpol['payout_logs']).send(
+                content=f'<@&{settings.interpol["interpol_head"]}>',
+                embed=disnake.Embed(
+                    title='На карте интерпола недостаточно средств',
+                    description=f'Не удалось выплатить счет на сумму {amount}<:DIAMOND:931501976448012308> игроку'
+                                f' {user.display_name}',
+                    color=disnake.Color.red()
+                )
+            )
+        elif error == 'CARDNOTFOUND':
+            try:
+                await user.send(
+                    content=user.mention,
+                    embed=disnake.Embed(
+                        title='Карта не указана',
+                        description=f'Не удалось выплатить премию в {amount}<:DIAMOND:931501976448012308> потому что '
+                                    f'карта для выплат не указана. \n'
+                                    f'Воспользуйтесь /установить-карту чтобы указать карту для выплат',
+                        color=disnake.Color.red()
+                    )
+                )
+            except Exception as e:
+                print(e)
+                await self.interpol_guild.get_channel(settings.interpol['logs']).send(
+                    content=user.mention,
+                    embed=disnake.Embed(
+                        title='Карта не указана',
+                        description=f'Не удалось выплатить премию в {amount}<:DIAMOND:931501976448012308> потому что '
+                                    f'карта для выплат не указана. \n'
+                                    f'Воспользуйтесь /установить-карту в дискорде интерпола чтобы указать карту для '
+                                    f'выплат',
+                        color=disnake.Color.red()
+                    )
+                )
+        elif error:
+            pass
+
+        if status:
+            async with ClientSession() as session:
+                webhook = disnake.Webhook.from_url(settings.interpol_announcements_webhook_url, session=session)
+                log_embed = disnake.Embed(
+                    description=f'{user.mention} получает выплату в {amount}<:DIAMOND:931501976448012308>\n\n'
+                                f'Сообщение: {message}',
+                    color=disnake.Color.red()
+                ).set_author(name=user.display_name,
+                             icon_url=f'https://rp.plo.su/avatar/'
+                                      f'{user.display_name}')
+                log_embed.set_footer(text='Выплатил ' + sender.display_name,
+                                     icon_url=f'https://rp.plo.su/avatar/{sender.display_name}'
+                                     )
+                await webhook.send(content=user.mention,
+                                   embed=log_embed)
+
+        else:
+            await self.interpol_guild.get_channel(settings.interpol['payout_logs']).send(
+                content="",
+                embed=disnake.Embed(
+                    title=f'[{payout_id}] Выплата не удалась',
+                    description=f'Выплата на сумму {amount}<:DIAMOND:931501976448012308> игроку'
+                                f' {user.mention} не была закончена\n'
+                                f'Сообщение: {message}\n'
+                                f'Выплатил: {sender.mention}',
+                    color=disnake.Color.red(),
+
+                )
+            )
+
+    async def payout(self,
+                     sender: disnake.User,
+                     user: disnake.User,
+                     amount: int,
+                     message: str,
+                     payout_id=None):
+        payout_card = self.cursor.execute(f'SELECT card FROM payout_cards WHERE discord_id = {user.id}').fetchone()[0]
+        if not payout_card:
+            await self.log_payout(
+                status=False,
+                sender=sender,
+                user=user,
+                amount=amount,
+                message=message,
+                error='CARDNOTFOUND',
+                payout_id=payout_id
+            )
+            return False
+
+        interpol_card = plasmoapi.BankCard(Bank=self.bank, card_id=settings.interpol['card'])
+        try:
+            balance = interpol_card.balance
+        except plasmoapi.ResponseError:
+            return False  # TODO: Add error logger
+        if balance < amount:
+            await self.log_payout(
+                status=False,
+                sender=sender,
+                user=user,
+                amount=amount,
+                message=message,
+                card=int(payout_card.replace('EB-', '')),
+                error='LOWBALANCE',
+                payout_id=payout_id
+            )
+            return False
+
+        try:
+            interpol_card.transfer(to=payout_card,
+                                   amount=amount,
+                                   message=message)
+        except plasmoapi.ResponseError:
+            return False  # TODO: Add logger
+
+        await self.log_payout(  # Successful payout
+            status=True,
+            sender=sender,
+            user=user,
+            amount=amount,
+            message=message,
+            card=int(payout_card.replace('EB-', '')),
+            payout_id=payout_id
+        )
+        return True
 
     @commands.slash_command(name='установить-карту', guild_ids=[settings.interpol['id']])
     async def setcard(self,
@@ -59,7 +216,7 @@ class InterpolPayouts(commands.Cog):
         ----------
         card: Карта для выплат. Найдите карту или введите в формате 3666. Не успевает прогрузить - добавьте пробел
         """
-        if self.player not in inter.author.roles:
+        if self.player not in inter.author.roles or card == 'Not Found' or card == 'An error occurred':
             return await inter.response.send_message(f'Умный дохуя? Пошел нахуй', ephemeral=True)
         await inter.response.defer(ephemeral=True)
 
@@ -103,19 +260,73 @@ class InterpolPayouts(commands.Cog):
         """
         if self.player not in user.roles:
             return await inter.response.send_message(f'Умный дохуя? Пошел нахуй', ephemeral=True)
+        await inter.response.defer(ephemeral=True)
+        await self.payout(sender=inter.author,
+                          user=user,
+                          message=message,
+                          amount=amount,
+                          )
+        await inter.edit_original_message(
+            embed=disnake.Embed(title='Дело сделано',
+                                color=disnake.Color.green())
+        )
+
+    '''
+    @commands.Cog.listener()
+    async def on_message(self, message: disnake.Message):
+        if message.channel.id != settings.interpol['payouts']:
+            return
+        message: disnake.Message
+
+        for word in settings.interpol['event_keywords']:
+            if word in message.content:
+                await message.add_reaction(emoji=settings.interpol['event_reaction'])
+                return
+
+        await message.add_reaction(emoji=settings.interpol['fake_call_reaction'])
+    '''
+    '''
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, reaction: disnake.Reaction, user: disnake.Member):
+        if reaction.message.channel.id != settings.interpol['payouts'] or user.bot:
+            return
+        if not (reaction.emoji == settings.interpol['fake_call_reaction'] or
+                reaction.emoji == settings.interpol['event_reaction']):
+            return
+
+        if not (user.id in self.bot.owner_ids or self.deputy_role in user.roles or self.head_role in user.roles):
+            await reaction.remove(user)
+            try:
+                await user.send(embed=disnake.Embed(title='Вы не можете подтверждать выплаты',
+                                                    color=disnake.Color.dark_red()))
+            except Exception as e:
+                print(e)
+            return
+    '''
 
     @commands.Cog.listener()
     async def on_ready(self):
         self.interpol_guild = self.bot.get_guild(settings.interpol['id'])
+        self.deputy_role = self.interpol_guild.get_role(settings.interpol['deputy'])
+        self.head_role = self.interpol_guild.get_role(settings.interpol['interpol_head'])
         self.player = self.interpol_guild.get_role(settings.interpol['player'])
         self.conn = sqlite3.connect('interpol.db')
         self.cursor = self.conn.cursor()
+        self.bank = plasmoapi.Bank(token=settings.plasmo_token)
 
-    @commands.Cog.listener()
-    async def on_message(self, message: disnake.Message):
-        if message.channel.id != settings.interpol['id']:
-            pass
+    '''
+    @disnake.ext.commands.message_command(name='Выплата (ивент)', default_permission=True,
+                                          guild_ids=[settings.interpol['id']],
+                                          auto_sync=True)
+    async def payout_event_button(self, inter: disnake.ApplicationCommandInteraction, msg: disnake.Message):
+        await inter.response.defer()
 
+    @disnake.ext.commands.message_command(name='Выплата(ложный вызов)', default_permission=True,
+                                          guild_ids=[settings.interpol['id']],
+                                          auto_sync=True)
+    async def payout_fakecall_button(self, inter: disnake.ApplicationCommandInteraction, msg: disnake.Message):
+        await inter.response.defer()
+    '''
 
 def setup(client):
     client.add_cog(InterpolPayouts(client))

@@ -20,7 +20,7 @@ class InterpolHR(commands.Cog):
     @commands.slash_command(name='нанять', guild_ids=[settings.interpol['id']])
     async def hire(self,
                    inter: disnake.ApplicationCommandInteraction,
-                   user: disnake.User,
+                   user: disnake.Member,
                    position: positions
                    ):
         """
@@ -52,7 +52,7 @@ class InterpolHR(commands.Cog):
 
         async with ClientSession() as session:
             webhook = disnake.Webhook.from_url(settings.interpol_announcements_webhook_url if
-                                               role in [settings.interpol['interpol'], settings.interpol['deputy']]
+                                               role.id in [settings.interpol['interpol'], settings.interpol['deputy']]
                                                else settings.interpol_court_announcements_webhook_url,
                                                session=session)
             hr_embed = disnake.Embed(description=f'{user.mention} принят на должность {settings.texts[position]}.',
@@ -64,14 +64,14 @@ class InterpolHR(commands.Cog):
                                 )
             await webhook.send(content=user.mention,
                                embed=hr_embed)
-        await inter.response.send_message(f'{user.mention} принят на должность {settings.texts[position]}.',
+        await inter.response.send_message(f'{user.mention} принят на должность **{settings.texts[position]}**.',
                                           ephemeral=True)
 
     @commands.has_permissions(manage_roles=True)
-    @commands.slash_command(name='уволить', guild_ids=[settings.interpol_guild])
+    @commands.slash_command(name='уволить', guild_ids=[settings.interpol['id']])
     async def fire(self,
                    inter: disnake.ApplicationCommandInteraction,
-                   user: disnake.User,
+                   user: disnake.Member,
                    position: positions,
                    reason: str = "Не указана",
                    ):
@@ -102,10 +102,10 @@ class InterpolHR(commands.Cog):
 
         async with ClientSession() as session:
             webhook = disnake.Webhook.from_url(settings.interpol_announcements_webhook_url if
-                                               role in [settings.interpol['interpol'], settings.interpol['deputy']]
+                                               role.id in [settings.interpol['interpol'], settings.interpol['deputy']]
                                                else settings.interpol_court_announcements_webhook_url,
                                                session=session)
-            HR_embed = disnake.Embed(description=f'{user.mention} снят с должности {settings.texts[position]}.\n\n'
+            HR_embed = disnake.Embed(description=f'{user.mention} снят с должности **{settings.texts[position]}**.\n\n'
                                                  f'{"    Причина: " + reason if reason != "Не указана" else ""}',
                                      color=disnake.Color.red()).set_author(name=user.display_name,
                                                                            icon_url=f'https://rp.plo.su/avatar/{user.display_name}')
@@ -117,7 +117,7 @@ class InterpolHR(commands.Cog):
         await inter.edit_original_message(content=f'{user.mention} снят с должности {settings.texts[position]}.')
 
     @commands.has_permissions(manage_roles=True)
-    @commands.slash_command(name='малоактивный', guild_ids=[settings.interpol_guild])
+    @commands.slash_command(name='малоактивный', guild_ids=[settings.interpol['id']])
     async def lowactive(self,
                         inter: disnake.ApplicationCommandInteraction,
                         user: disnake.User,
@@ -158,7 +158,7 @@ class InterpolHR(commands.Cog):
         await inter.edit_original_message(content=f'{user.mention} стал малоактивным.',)
 
     @commands.has_permissions(manage_roles=True)
-    @commands.slash_command(name='исправился', guild_ids=[settings.interpol_guild])
+    @commands.slash_command(name='исправился', guild_ids=[settings.interpol['id']])
     async def remove_lowactive(self,
                                inter: disnake.ApplicationCommandInteraction,
                                user: disnake.User,

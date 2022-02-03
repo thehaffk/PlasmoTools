@@ -24,7 +24,7 @@ interpol_court_announcements_webhook_url = 'https://discord.com/api/webhooks/932
 interpol = {
     'id': 828683007635488809,  # Guild
 
-    'card': 'EB-9871',  # Card
+    'card': 2777,  # Card
 
     'interpol': 841024765183262750,  # Интерпол роль
     'arbiter': 928729647271796746,  # Судья роль
@@ -44,7 +44,7 @@ interpol = {
     'fake_call_reaction': '🤡',
     'payed_reaction': '✅',
 
-    'event_keywords': ['ивент', 'мко', 'суд'],
+    'event_keywords': ['ивент', 'мко', 'суд', 'набор', 'шоу'],
 }
 
 texts = {

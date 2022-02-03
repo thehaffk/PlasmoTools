@@ -91,7 +91,6 @@ class BACSynchronization(commands.Cog):
         self.bac_nonpass = self.bac.get_role(settings.bac['no_pass'])
         self.bac_banned = self.bac.get_role(settings.bac['banned'])
 
-
     @commands.slash_command(name='everyone-sync', guild_ids=[settings.bac['id']])
     @commands.has_permissions(manage_roles=True)
     async def everyone_sync(self, inter: disnake.ApplicationCommandInteraction):
@@ -138,6 +137,15 @@ class BACSynchronization(commands.Cog):
             embed=embed_counter,
             ephemeral=True)
         await self.sync(user)
+
+    @disnake.ext.commands.message_command(name='Sync', default_permission=True,
+                                          guild_ids=[settings.bac['id']])
+    async def sync_button(self, inter: disnake.ApplicationCommandInteraction, msg: disnake.Message):
+        await inter.response.defer(ephemeral=True)
+        await self.sync(msg.author)
+        embed_counter = disnake.Embed(title=(f'Синхронизация {msg.author} | ' + str(inter.guild)), color=0xffff00)
+        await inter.edit_original_message(
+            embed=embed_counter)
 
 
 def setup(client):
