@@ -3,8 +3,9 @@
 
 
 from typing import List
-from requests import post, get
+
 import requests
+from requests import post, get
 
 api_link = 'https://rp.plo.su/api'
 

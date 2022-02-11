@@ -1,9 +1,13 @@
 import asyncio
+import logging
 
 import disnake
 import requests
 from disnake.ext import commands
+
 import settings
+
+logger = logging.getLogger(__name__)
 
 
 def Difference(li1, li2):
@@ -86,17 +90,13 @@ class PlasmoLogger(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print('Logger ready')
         self.digital_drugs = self.bot.get_guild(settings.digital_drugs['id'])
         self.bans_channel = self.digital_drugs.get_channel(settings.digital_drugs['bans'])
         self.roles_channel = self.digital_drugs.get_channel(settings.digital_drugs['roles'])
         self.nicknames_channel = self.digital_drugs.get_channel(settings.digital_drugs['nicknames'])
         self.monitored_roles = [settings.plasmo_rp_roles[role] for role in settings.plasmo_rp_roles]
 
-        guild = self.bot.get_guild(settings.plasmo_rp['id'])
-        member = self.digital_drugs.get_member(921851330790834187)
-        # await self.on_member_unban(guild=guild, member=member)
-        print('Logger loaded')
+        logger.info('Ready')
 
 
 def setup(client):

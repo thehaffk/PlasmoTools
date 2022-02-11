@@ -1,6 +1,10 @@
+import logging
+
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands.errors import MissingPermissions, MissingRole, NotOwner
+
+logger = logging.getLogger(__name__)
 
 
 class ErrorHandler(commands.Cog):
@@ -22,9 +26,10 @@ class ErrorHandler(commands.Cog):
                                                                                                       'создателем бота для использования этой функции.',
                                                         color=disnake.Color.red()))
         else:
+            logger.error(error)
             await inter.send(embed=disnake.Embed(title='Error',
                                                  description=f'Возникла неожиданная ошибка.\n\n`{error}`',
-                                                 color=disnake.Color.red()), ephemeral=True)    
+                                                 color=disnake.Color.red()), ephemeral=True)
             raise error
 
 

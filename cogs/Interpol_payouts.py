@@ -1,12 +1,15 @@
 import sqlite3
+import logging
+
 import disnake
-import payout as payout
 import requests
 from aiohttp.client import ClientSession
 from disnake.ext import commands
 
 import settings
 import plasmoapi
+
+logger = logging.getLogger(__name__)
 
 
 async def autocomplete_card(inter: disnake.ApplicationCommandInteraction, user_input: str):
@@ -18,7 +21,7 @@ async def autocomplete_card(inter: disnake.ApplicationCommandInteraction, user_i
         if cards_request.status_code != 200 or not cards_request.json()['status']:
             return ['Cards not found']
     except Exception as e:
-        print(e)
+        logger.warning(e)
         return ['An error occurred']
     if cards_request.json()['data']:
         all_cards = cards_request.json()['data'][:25]
@@ -104,7 +107,7 @@ class InterpolPayouts(commands.Cog):
                     )
                 )
             except Exception as e:
-                print(e)
+                logger.warning(e)
                 await self.interpol_guild.get_channel(settings.interpol['logs']).send(
                     content=user.mention,
                     embed=disnake.Embed(
@@ -300,7 +303,7 @@ class InterpolPayouts(commands.Cog):
                 await user.send(embed=disnake.Embed(title='Вы не можете подтверждать выплаты',
                                                     color=disnake.Color.dark_red()))
             except Exception as e:
-                print(e)
+                logger.warning(e)
             return
     '''
 
@@ -313,6 +316,8 @@ class InterpolPayouts(commands.Cog):
         self.conn = sqlite3.connect('interpol.db')
         self.cursor = self.conn.cursor()
         self.bank = plasmoapi.Bank(token=settings.plasmo_token)
+
+        logger.info('Ready')
 
     '''
     @disnake.ext.commands.message_command(name='Выплата (ивент)', default_permission=True,
@@ -327,6 +332,7 @@ class InterpolPayouts(commands.Cog):
     async def payout_fakecall_button(self, inter: disnake.ApplicationCommandInteraction, msg: disnake.Message):
         await inter.response.defer()
     '''
+
 
 def setup(client):
     client.add_cog(InterpolPayouts(client))

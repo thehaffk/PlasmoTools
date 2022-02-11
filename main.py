@@ -1,7 +1,20 @@
+import logging
+import os
+
 import disnake
 from disnake.ext import commands
+
 import settings
-import os
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] [%(name)s/%(levelname)s]: %(message)s',
+    handlers=[
+        logging.FileHandler("bot.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger()
 
 intents = disnake.Intents.all()
 
@@ -16,8 +29,9 @@ for file in os.listdir('./cogs'):
     if file.endswith(".py"):
         try:
             bot.load_extension(f"cogs.{file[:-3]}")
-            print(f"Загружен: {file}")
+            logger.debug(f"Загружен: {file}", extra={'file': file})
         except Exception as e:
-            print(f"Не удалось загрузить: {file} по причине {e}")
+            logger.warning(f"Не удалось загрузить: {file} по причине {e}")
 
-bot.run(settings.token)
+if __name__ == '__main__':
+    bot.run(settings.token)

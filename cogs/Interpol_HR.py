@@ -1,15 +1,21 @@
-import disnake
-from disnake.ext import commands, tasks
-from aiohttp.client import ClientSession
-import settings
-import sqlite3
 import datetime
+import sqlite3
+import logging
+
+
+import disnake
+from aiohttp.client import ClientSession
+from disnake.ext import commands, tasks
+
+import settings
+
+logger = logging.getLogger(__name__)
 
 positions = commands.option_enum({
     settings.texts['interpol']: 'interpol',
     settings.texts['arbiter']: 'arbiter',
     settings.texts['secretary']: 'secretary',
-    settings.texts['deputy']: 'deputy'})
+    settings.texts['deputy']: 'deputy'})  # TODO: Remove this
 
 
 class InterpolHR(commands.Cog):
@@ -28,20 +34,15 @@ class InterpolHR(commands.Cog):
 
         Parameters
         ----------
-        :param inter: Interaction
-        :param user: Участник сервера для найма.
-        :param position: Должность
+        inter: Inter
+        inter: Interaction
+        user: Участник сервера для найма.
+        position: Должность
         """
         if self.player not in user.roles:  # Player check
             return await inter.response.send_message(f'Умный дохуя? Пошел нахуй', ephemeral=True)
         await inter.response.defer(ephemeral=True)
 
-        # Permissions check (+ hierarchy)
-        if (position == 'deputy' or self.interpol_guild.get_role(settings.interpol['deputy']) in user.roles) \
-                and (not self.interpol_guild.get_role(settings.interpol['interpol_head']) in inter.author.roles or
-                     inter.author.id not in self.bot.owner_ids):
-            return await inter.edit_original_message(embed=disnake.Embed(title='У вас нет прав на это',
-                                                                         color=disnake.Color.red()))
 
         role = self.interpol_guild.get_role(settings.interpol[position])
         if role in user.roles:
@@ -88,11 +89,6 @@ class InterpolHR(commands.Cog):
             return await inter.response.send_message(f'Умный дохуя? Пошел нахуй', ephemeral=True)
 
         await inter.response.defer(ephemeral=True)
-        if (position == 'deputy' or self.interpol_guild.get_role(settings.interpol['deputy']) in user.roles) \
-                and (not self.interpol_guild.get_role(settings.interpol['interpol_head']) in inter.author.roles or
-                     inter.author.id not in self.bot.owner_ids):
-            return await inter.edit_original_message(embed=disnake.Embed(title='У вас нет прав на это',
-                                                                         color=disnake.Color.red()))
 
         role = self.interpol_guild.get_role(settings.interpol[position])
         if role not in user.roles:
@@ -320,7 +316,7 @@ class InterpolHR(commands.Cog):
         self.player = self.interpol_guild.get_role(settings.interpol['player'])
         self.conn = sqlite3.connect('interpol.db')
         self.cursor = self.conn.cursor()
-        print('HR - Ready')
+        logger.info('Ready')
         await self.check_vacations()
 
 

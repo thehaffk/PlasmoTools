@@ -21,6 +21,8 @@ interpol_vacation_webhook_url = 'https://discord.com/api/webhooks/92875924466316
                                 'L7cNvdVumYEIaqEJKTHdQzR_Ao-v5ZiyG-hSFOaRKugKrMz7SQXbOh37k6_8DjzqDdXW'
 interpol_court_announcements_webhook_url = 'https://discord.com/api/webhooks/932722555641532447/' \
                                            'yoCa6O9DBVXxXFMA7udfx1RJVvxA4S-C4cLyYpfjjjQuRkhS8GCmHJbsUwSA57sBEHkP'
+
+
 interpol = {
     'id': 828683007635488809,  # Guild
 
@@ -46,6 +48,24 @@ interpol = {
 
     'event_keywords': ['ивент', 'мко', 'суд', 'набор', 'шоу'],
 }
+
+infrastructure = {
+    'id': 756750263351771146,  # Guild
+
+    'card': 2777,  # Card
+
+    'deputy': 895736618156167188,  # Зам роль
+    'player': 810985435903557685,  # Игрок роль
+    'keeper': 918075165919817778,
+
+    'logs': 941750297619988521,  # Канал с логами
+    'payouts': 870664569419354192,
+    'payout_logs': 941750297619988521,
+
+}
+
+infrastructure_announcements_webhook_url = "https://discord.com/api/webhooks/941475496728870972/" \
+                                           "Ck6a8nSda7Nzjiv-RHg1UxRANHoLjNU7eBnPVlkNVKjchcuBvTX1AttlxoGe2s6LuPB4"
 
 texts = {
     'interpol': 'Интерпол',

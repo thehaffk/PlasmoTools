@@ -1,7 +1,12 @@
+import logging
+
 import disnake
 import requests
 from disnake.ext import commands
+
 import settings
+
+logger = logging.getLogger(__name__)
 
 
 class BACSynchronization(commands.Cog):
@@ -15,15 +20,15 @@ class BACSynchronization(commands.Cog):
     async def sync(self, member):
         if member not in self.bac.members or member.bot:
             return False
-        print(f'Syncing {member} ({member.display_name})')
+        logger.info(f'Syncing {member} ({member.display_name})')
         try:
-            data = requests.get(f'https://rp.plo.su/api/user/profile?discord_id={member.id}').json()
+            data: dict = requests.get(f'https://rp.plo.su/api/user/profile?discord_id={member.id}').json()
         except ConnectionError:
             return False
         if not data['status']:
             return False
 
-        data = data['data']
+        data: dict = data['data']
         bac_member = self.bac.get_member(member.id)
 
         try:
@@ -34,12 +39,13 @@ class BACSynchronization(commands.Cog):
             else:
                 await bac_member.add_roles(self.bac_nonpass)
                 await bac_member.remove_roles(self.bac_pass)
+
             if "banned" in data and data['banned']:
                 await bac_member.add_roles(self.bac_banned)
             else:
                 await bac_member.remove_roles(self.bac_banned)
         except Exception as e:
-            print('BAC Sync', e)
+            logger.warning(e, )
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
@@ -60,7 +66,7 @@ class BACSynchronization(commands.Cog):
                                                                   f'администрации или разбаниться можно '
                                                                   f'только тут - {settings.bac["invite"]}'))
             except Exception as e:
-                print(e)
+                logger.warning(e)
         else:
             await self.sync(member)
 
@@ -74,7 +80,7 @@ class BACSynchronization(commands.Cog):
                                                   description=f'Держите инвайт и не забывайте соблюдать '
                                                               f'правила сервера {settings.plasmo_rp["invite"]}'))
         except Exception as e:
-            print(e)
+            logger.warning(e)
         await self.sync(member)
 
     @commands.Cog.listener()
@@ -83,20 +89,16 @@ class BACSynchronization(commands.Cog):
             return False
         await self.sync(member)
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('BAC ready')
-        self.bac = self.bot.get_guild(settings.bac['id'])
-        self.bac_pass = self.bac.get_role(settings.bac['pass'])
-        self.bac_nonpass = self.bac.get_role(settings.bac['no_pass'])
-        self.bac_banned = self.bac.get_role(settings.bac['banned'])
-
     @commands.slash_command(name='everyone-sync', guild_ids=[settings.bac['id']])
     @commands.has_permissions(manage_roles=True)
     async def everyone_sync(self, inter: disnake.ApplicationCommandInteraction):
 
         """
         Синхронизировать всех пользователей на сервере.
+
+        Parameters
+        -----------
+        inter: Inter
 
         """
 
@@ -128,6 +130,7 @@ class BACSynchronization(commands.Cog):
 
         Parameters
         ----------
+        inter: Inter
         user: Пользователь которого нужно синхронизировать
 
         """
@@ -146,6 +149,14 @@ class BACSynchronization(commands.Cog):
         embed_counter = disnake.Embed(title=(f'Синхронизация {msg.author} | ' + str(inter.guild)), color=0xffff00)
         await inter.edit_original_message(
             embed=embed_counter)
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.bac = self.bot.get_guild(settings.bac['id'])
+        self.bac_pass = self.bac.get_role(settings.bac['pass'])
+        self.bac_nonpass = self.bac.get_role(settings.bac['no_pass'])
+        self.bac_banned = self.bac.get_role(settings.bac['banned'])
+        logger.info('Ready')
 
 
 def setup(client):
