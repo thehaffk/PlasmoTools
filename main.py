@@ -29,9 +29,9 @@ for file in os.listdir('./cogs'):
     if file.endswith(".py"):
         try:
             bot.load_extension(f"cogs.{file[:-3]}")
-            logger.debug(f"Загружен: {file}", extra={'file': file})
+            logger.debug(f"Загружен: {file}")
         except Exception as e:
-            logger.warning(f"Не удалось загрузить: {file} по причине {e}")
+            logger.critical(f"Не удалось загрузить: {file} по причине {e}")
 
 if __name__ == '__main__':
     bot.run(settings.token)
