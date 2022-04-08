@@ -1,10 +1,10 @@
 """
 Cog-file for synchronization nicknames and roles at BAC discord guild
 """
-
+import asyncio
 import logging
 import disnake
-import requests
+from aiohttp import ClientSession
 from disnake import HTTPException
 from disnake.ext import commands
 
@@ -36,32 +36,52 @@ class BACSynchronization(commands.Cog):
         if member not in self.bac_guild.members or member.bot:
             return False
         logger.info(f"Syncing {member} ({member.display_name})")
-        try:
-            request: dict = requests.get(  # TODO: Refactor, change to async
-                f"https://rp.plo.su/api/user/profile?discord_id={member.id}"
-            ).json()
-        except ConnectionError:
-            return False
-        if not request["status"]:
-            return False
+        # try:
+        #     request: dict = requests.get(  # TODO: Refactor, change to async
+        #         f"https://rp.plo.su/api/user/profile?discord_id={member.id}"
+        #     ).json()
+        # except ConnectionError:
+        #     return False
+        # if not request["status"]:
+        #     return False
+        #
+        # user_data: dict = request["data"]  # TODO: Remake to plasmo.py object
 
-        user_data: dict = request["data"]  # TODO: Remake to plasmo.py object
+        # TODO: Rewrite with plasmo.py
+        for tries in range(10):
+            async with ClientSession() as session:
+                async with session.get(
+                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}",
+                ) as response:
+                    try:
+                        user_data = (await response.json())["data"]
+                    except Exception as err:
+                        logger.warning("Could not get data from PRP API: %s", err)
+                        await asyncio.sleep(30)
+                        continue
+                    if response.status != 200:
+                        logger.warning("Could not get data from PRP API: %s", user_data)
+            break
+
+        is_banned: bool = user_data.get("banned", False)
+        has_pass: bool = user_data.get("on_server", False)
+        nickname: str = user_data.get("nick", "")
         bac_member: disnake.Member = self.bac_guild.get_member(member.id)
 
         try:
-            await bac_member.edit(nick=user_data["nick"])
+            await bac_member.edit(nick=nickname)
         except HTTPException:
             pass
 
         try:
-            if user_data["on_server"]:
-                await bac_member.add_roles(self.bac_has_pass_role)  # type: ignore
+            if has_pass:
+                await bac_member.add_roles(self.bac_has_pass_role)
                 await bac_member.remove_roles(self.bac_without_pass_role)
             else:
                 await bac_member.add_roles(self.bac_without_pass_role)
                 await bac_member.remove_roles(self.bac_has_pass_role)
 
-            if "banned" in user_data and user_data["banned"]:
+            if is_banned:
                 await bac_member.add_roles(self.bac_banned_role)
             else:
                 await bac_member.remove_roles(self.bac_banned_role)
@@ -75,7 +95,7 @@ class BACSynchronization(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(
-            self, before: disnake.Member, after: disnake.Member
+        self, before: disnake.Member, after: disnake.Member
     ) -> bool:
         """
         Discord event, called when member has been updated
@@ -99,13 +119,13 @@ class BACSynchronization(commands.Cog):
                         title="Вы были забанены на Plasmo RP",
                         color=disnake.Color.dark_red(),
                         description=f"Узнать причину бана, оспорить решение "
-                                    f"администрации или разбаниться можно "
-                                    f"только тут - {settings.BACGuild.invite_url}\n\n\n"
-                                f"⚡ by [digital drugs]({settings.DevServer.invite_url})",
+                        f"администрации или разбаниться можно "
+                        f"только тут - {settings.BACGuild.invite_url}\n\n\n"
+                        f"⚡ by [digital drugs]({settings.DevServer.invite_url})",
                     )
                 )
                 await member.send(
-                    content=f'{settings.BACGuild.invite_url}',
+                    content=f"{settings.BACGuild.invite_url}",
                 )
             except Exception as e:
                 logger.warning(e)
@@ -115,7 +135,7 @@ class BACSynchronization(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_unban(
-            self, guild: disnake.Guild, member: disnake.Member
+        self, guild: disnake.Guild, member: disnake.Member
     ) -> bool:
         """
         Called on discord event when user is unbanned, sends user DM to join PRP guild
@@ -128,13 +148,12 @@ class BACSynchronization(commands.Cog):
                     title="Вас разбанили на Plasmo RP",
                     color=disnake.Color.green(),
                     description=f"Держите инвайт и не забывайте соблюдать "
-                                f"правила сервера {settings.PlasmoRPGuild.invite_url}\n\n\n"
-                                f"⚡ by [digital drugs]({settings.DevServer.invite_url})",
+                    f"правила сервера {settings.PlasmoRPGuild.invite_url}\n\n\n"
+                    f"⚡ by [digital drugs]({settings.DevServer.invite_url})",
                 )
             )
             await member.send(
-                content=f'{settings.PlasmoRPGuild.invite_url}',
-
+                content=f"{settings.PlasmoRPGuild.invite_url}",
             )
         except Exception as e:
             logger.warning(e)
@@ -191,7 +210,7 @@ class BACSynchronization(commands.Cog):
     )
     @commands.has_permissions(manage_roles=True)
     async def sync_user(
-            self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
+        self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
     ):
         # Docstring is in russian because disnake automatically puts in command description
 
@@ -229,7 +248,7 @@ class BACSynchronization(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def sync_button(
-            self, inter: disnake.ApplicationCommandInteraction, msg: disnake.Message
+        self, inter: disnake.ApplicationCommandInteraction, msg: disnake.Message
     ):
         """
         Button that appears when you click on a member in Discord
@@ -253,7 +272,9 @@ class BACSynchronization(commands.Cog):
         self.bac_without_pass_role: disnake.Role = self.bac_guild.get_role(
             settings.BACGuild.without_pass_role_id
         )
-        self.bac_banned_role: disnake.Role = self.bac_guild.get_role(settings.BACGuild.banned_role_id)
+        self.bac_banned_role: disnake.Role = self.bac_guild.get_role(
+            settings.BACGuild.banned_role_id
+        )
 
         logger.info("%s Ready", __name__)
 
