@@ -1,10 +1,15 @@
+"""
+Config file for Plasmo Tools
+"""
+
 import os
 from builtins import bool
 from dataclasses import dataclass
-from types import NoneType
 from typing import Union
 
 from dotenv import load_dotenv
+
+__version__ = "0.4.2a"
 
 load_dotenv()
 
@@ -16,24 +21,59 @@ class DevServer:
     """
     Config for development(logging) server (digital drugs)
     """
+
     guild_id: int = 828683007635488809
-    bot_logs_channel_id: int = 935571295276503100
+    invite_url = "https://discord.gg/XYS43z7vj2"
+
+    bot_logs_channel_id: int = 961924513946271767
     ban_logs_channel_id: int = 935571311936278599
-    role_logs_channel_id: int = 935571326335320135
-    nicknames_channel_id: int = 935571360393068614
+    role_logs_channel_id: int = 935571360393068614
+    anticheat_logs_channel_id: int = 960908663814492180
+    death_logs_channel_id: int = 961632179304165396
+    force_warns_logs_channel_id: int = 961760968315133972
+    xray_logs_channel_id: int = 961694829316833360
+    admin_commands_channel_id: int = 961751903488852068
 
 
 class PlasmoRPGuild:
     """
     Config for Plasmo RP guild
     """
-    guild_id: int = 672312131760291842  # Discord server id
-    invite_url: str = "https://discord.gg/VJtCjwh"  # Discord invite
-    admin_role_id: int = 704364763248984145  # Administration role id
-    mko_head_role_id: int = 810492714235723777
-    mko_helper_role_id: int = 826366703591620618
-    interpol_role_id: int = 751723033357451335
-    banker_role_id: int = 826367015014498314
+
+    guild_id = 672312131760291842
+    invite_url = "https://discord.gg/VJtCjwh"
+
+    admin_role_id = 704364763248984145
+    president_role_id = 880065048792420403
+    mko_head_role_id = 810492714235723777
+    mko_helper_role_id = 826366703591620618
+    interpol_role_id = 751723033357451335
+    banker_role_id = 826367015014498314
+    player_role_id = 746628733452025866
+    monitored_roles = [
+        admin_role_id,
+        president_role_id,
+        mko_head_role_id,
+        mko_helper_role_id,
+        interpol_role_id,
+        banker_role_id,
+    ]
+
+    notifications_channel_id = 754644298720477264
+    game_channel_id = 753619083227824319
+    anticheat_logs_channel_id = 959332068993679400
+
+
+class BACGuild:  # TODO: Rename BAC(Big Appeal Court) to GCA(Grand Court of Appeal)
+    """
+    Config for Grand Court of Appeal discord guild
+    """
+
+    guild_id = 855532780187156501
+    invite_url = "https://discord.gg/KNaZPxxMHC"
+    banned_role_id = 860799809123778560
+    has_pass_role_id = 860799590721388574
+    without_pass_role_id = 928688505033474069
 
 
 @dataclass
@@ -133,21 +173,6 @@ old_texts = {
     "lowactive": "Малоактивный",
 }
 
-# BAC
-bac = {
-    "id": 855532780187156501,
-    "banned": 860799809123778560,
-    "pass": 860799590721388574,
-    "no_pass": 928688505033474069,
-    "invite": "https://discord.gg/KNaZPxxMHC",
-}
-
-# DD
-
-# Logs:
-# Bans + Unbans
-# Roles like interpol, banker, helper, admin etc
-#
 digital_drugs = {
     "id": 828683007635488809,
     "errors": 935571295276503100,
@@ -156,11 +181,11 @@ digital_drugs = {
     "nicknames": 935571360393068614,
 }
 
+plasmo_child_guilds = []
 
 test_guild = PlasmoStructureGuild(
     guild_id=841024625102422016,
     name="%STRUCTURENAME%",
-
     player_role_id=956985954395111494,
     support_role_id=956985476013756508,
     member_role_id=943982915413508186,
@@ -208,9 +233,9 @@ test_guild = PlasmoStructureGuild(
         "Главный Адвокат": 0,
         "Адвокат": 0,
         "Адвокат(Предварительно)": 0,
-
     },
 )
+plasmo_child_guilds.append(test_guild)
 
 interpol_guild = PlasmoStructureGuild(
     guild_id=828683007635488809,
@@ -255,6 +280,9 @@ interpol_guild = PlasmoStructureGuild(
         "Ученик": 0,
     },
 )
+plasmo_child_guilds.append(interpol_guild)
+
+"""
 economics_guild = PlasmoStructureGuild(
     guild_id=828683007635488809,
     name="Экономика",
@@ -292,7 +320,7 @@ economics_guild = PlasmoStructureGuild(
     invite_url="https://discord.gg/n9YMfZB2kJ",
     is_payouts_enabled=False,
     payouts_card="0001",
-    bearer_plasmo_token="Bearer " + os.getenv("economics_BEARER_PLASMO_TOKEN"),
+    bearer_plasmo_token="Bearer " + os.getenv("ECONOMICS_BEARER_PLASMO_TOKEN"),
 )
 infrastructure_guild = PlasmoStructureGuild(
     guild_id=828683007635488809,
@@ -450,11 +478,5 @@ court_guild = PlasmoStructureGuild(
     bearer_plasmo_token="Bearer " + os.getenv("court_BEARER_PLASMO_TOKEN"),
 )
 
-plasmo_child_guilds = [
-    test_guild,
-    interpol_guild,
-    infrastructure_guild,
-    court_guild,
-    mko_guild,
-    culrure_guild,
-]
+
+"""
