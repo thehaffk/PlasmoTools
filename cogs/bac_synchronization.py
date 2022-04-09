@@ -76,12 +76,15 @@ class BACSynchronization(commands.Cog):
             else:
                 await bac_member.remove_roles(self.bac_banned_role)
 
-            return True
         except disnake.HTTPException as err:
             logger.warning(
                 err,
             )
             return False
+
+        await self.bot.get_cog("gca_mc_sync").sync(bac_member)
+
+        return True
 
     @commands.Cog.listener()
     async def on_member_update(
@@ -238,16 +241,17 @@ class BACSynchronization(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def sync_button(
-        self, inter: disnake.ApplicationCommandInteraction, msg: disnake.Message
+        self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
     ):
         """
         Button that appears when you click on a member in Discord
         """
         await inter.response.defer(ephemeral=True)
-        await self.sync(msg.author)
+        await self.sync(user)
         embed_counter = disnake.Embed(
-            title=(f"Синхронизация {msg.author} | " + str(inter.guild)), color=0xFFFF00
+            title=(f"Синхронизировал {user} | " + str(inter.guild))
         )
+
         await inter.edit_original_message(embed=embed_counter)
 
     @commands.Cog.listener()

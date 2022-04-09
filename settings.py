@@ -24,7 +24,7 @@ class DBConfig:
 
     # I know that hardcoding rawSQL is bad,
     # but I don`t have much time to refactor it for ORM
-    id = os.getenv("DB_IP")
+    ip = os.getenv("DB_IP")
     port = os.getenv("DB_PORT")
     user = os.getenv("DB_USER")
     password = os.getenv("DB_PASSWORD")

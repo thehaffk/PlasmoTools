@@ -22,7 +22,7 @@ class PlasmoLogger(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-        self.monitored_roles = None
+        self.monitored_roles: List[int] = []
         self.role_log_channel = None
         self.ban_logs_channel = None
         self.dev_guild = None

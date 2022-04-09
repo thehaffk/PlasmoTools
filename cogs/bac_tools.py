@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class BACTools(commands.Cog):  # TODO: Rename
     """
-    Cog for GCA(Grand Court of Appeal) tools, like announcements and sync with LuckPerms (Minecraft Permissions Plugin)
+    Cog for GCA(Grand Court of Appeal) tools - announcements
     """
 
     def __init__(self, bot: disnake.ext.commands.Bot):
