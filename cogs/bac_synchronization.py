@@ -36,16 +36,6 @@ class BACSynchronization(commands.Cog):
         if member not in self.bac_guild.members or member.bot:
             return False
         logger.info(f"Syncing {member} ({member.display_name})")
-        # try:
-        #     request: dict = requests.get(  # TODO: Refactor, change to async
-        #         f"https://rp.plo.su/api/user/profile?discord_id={member.id}"
-        #     ).json()
-        # except ConnectionError:
-        #     return False
-        # if not request["status"]:
-        #     return False
-        #
-        # user_data: dict = request["data"]  # TODO: Remake to plasmo.py object
 
         # TODO: Rewrite with plasmo.py
         for tries in range(10):

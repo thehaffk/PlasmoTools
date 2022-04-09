@@ -84,9 +84,17 @@ class BACGuild:  # TODO: Rename BAC(Big Appeal Court) to GCA(Grand Court of Appe
 
     guild_id = 855532780187156501
     invite_url = "https://discord.gg/KNaZPxxMHC"
+
+    admin_role_id = 861421925317607425
     banned_role_id = 860799809123778560
     has_pass_role_id = 860799590721388574
     without_pass_role_id = 928688505033474069
+    staff_role_id = 928698857666269305
+    defendant_role_id = 861958861790511115
+    juror_role_id = 894213967843581953
+
+    announcements_channel_id = 855532780670418956
+    dev_logs_channel_id = 960901660970987590
 
 
 @dataclass
