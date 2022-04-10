@@ -15,6 +15,7 @@ class BankTalons(commands.Cog):
     """
     Cog for 4
     """
+    print("4")
 
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
