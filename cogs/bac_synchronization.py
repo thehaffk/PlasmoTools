@@ -38,20 +38,25 @@ class BACSynchronization(commands.Cog):
         logger.info(f"Syncing {member} ({member.display_name})")
 
         # TODO: Rewrite with plasmo.py
+        user_data = None
         for tries in range(10):
             async with ClientSession() as session:
                 async with session.get(
                     url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}",
                 ) as response:
+                    if response.status != 200:
+                        logger.warning("Could not get data from PRP API: %s", await response.json())
+                        return False
                     try:
                         user_data = (await response.json())["data"]
                     except Exception as err:
                         logger.warning("Could not get data from PRP API: %s", err)
                         await asyncio.sleep(30)
                         continue
-                    if response.status != 200:
-                        logger.warning("Could not get data from PRP API: %s", user_data)
+
             break
+        if user_data is None:
+            return False
 
         is_banned: bool = user_data.get("banned", False)
         has_pass: bool = user_data.get("on_server", False)
@@ -81,8 +86,7 @@ class BACSynchronization(commands.Cog):
                 err,
             )
             return False
-
-        await self.bot.get_cog("gca_mc_sync").sync(bac_member)
+        await self.bot.get_cog("GCAMCSync").sync(bac_member)
 
         return True
 

@@ -9,7 +9,7 @@
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
     <data-source source="LOCAL" name="data" uuid="df2ce765-07fc-492d-8dc8-0423c523ebee">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>0d520d3b-3bfd-42b7-9ab0-19d9f7eb1b6f</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/../../../orders/order-kap119/data.db</jdbc-url>
@@ -21,7 +21,7 @@
       </libraries>
     </data-source>
     <data-source source="LOCAL" name="infrastructure" uuid="0ee8adbd-7fb9-4e15-aafd-da480ea0c9c4">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>0d520d3b-3bfd-42b7-9ab0-19d9f7eb1b6f</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/infrastructure.db</jdbc-url>
@@ -31,6 +31,13 @@
           <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.34.0/sqlite-jdbc-3.34.0.jar</url>
         </library>
       </libraries>
+    </data-source>
+    <data-source source="LOCAL" name="MySQL - plasmo_rp_off@54.37.129.120" uuid="97218cc4-bae2-40eb-9aac-a3be3b80b8e2">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://54.37.129.120:3306/plasmo_rp_off</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>
 </project>

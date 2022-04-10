@@ -9,7 +9,7 @@ from typing import Union
 
 from dotenv import load_dotenv
 
-__version__ = "0.4.2a"
+__version__ = "0.4.3a"
 
 load_dotenv()
 
@@ -25,7 +25,7 @@ class DBConfig:
     # I know that hardcoding rawSQL is bad,
     # but I don`t have much time to refactor it for ORM
     ip = os.getenv("DB_IP")
-    port = os.getenv("DB_PORT")
+    port = int(os.getenv("DB_PORT"))
     user = os.getenv("DB_USER")
     password = os.getenv("DB_PASSWORD")
 
@@ -89,6 +89,7 @@ class BACGuild:  # TODO: Rename BAC(Big Appeal Court) to GCA(Grand Court of Appe
     banned_role_id = 860799809123778560
     has_pass_role_id = 860799590721388574
     without_pass_role_id = 928688505033474069
+    culture_member_role_id = 962479868291977327
     staff_role_id = 928698857666269305
     defendant_role_id = 861958861790511115
     juror_role_id = 894213967843581953
@@ -136,7 +137,7 @@ class PlasmoStructureGuild:
     banker_role_id: Union[int, None] = None
 
     invite_url: Union[str, None] = None
-    structure_roles_dict: Union[dict[str, int], None] = None
+    structure_roles_dict: Union[dict, None] = None
 
     is_payouts_enabled: bool = False
     payouts_card: str = "0001"
