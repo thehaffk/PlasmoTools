@@ -14,6 +14,10 @@ import settings
 logger = logging.getLogger(__name__)
 
 
+# TODO: Death logger
+# TODO: fwarns logger
+
+
 class PlasmoLogger(commands.Cog):
     """
     Cog for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
@@ -22,10 +26,15 @@ class PlasmoLogger(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-        self.monitored_roles: List[int] = []
-        self.role_log_channel = None
-        self.ban_logs_channel = None
-        self.dev_guild = None
+        self.dev_guild: disnake.Guild = self.bot.get_guild(settings.DevServer.guild_id)
+        self.ban_logs_channel: disnake.TextChannel = self.dev_guild.get_channel(  # type: ignore
+            settings.DevServer.ban_logs_channel_id
+        )
+        self.role_log_channel: disnake.TextChannel = self.dev_guild.get_channel(  # type: ignore
+            settings.DevServer.role_logs_channel_id
+        )
+
+        self.monitored_roles: List[int] = settings.PlasmoRPGuild.monitored_roles
 
     @commands.Cog.listener()
     async def on_member_update(self, before: disnake.Member, after: disnake.Member):
@@ -144,7 +153,7 @@ class PlasmoLogger(commands.Cog):
                         logger.warning("Could not get data from PRP API: %s", user_data)
             break
 
-        nickname = user_data.get("nick", "Неизвестен")
+        nickname = user_data.get("nick", "unknown")
 
         log_embed = disnake.Embed(
             title="🔓 Игрок разбанен",
@@ -158,20 +167,10 @@ class PlasmoLogger(commands.Cog):
         )
         await msg.publish()
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    async def cog_load(self):
         """
         Init method
         """
-        self.dev_guild: disnake.Guild = self.bot.get_guild(settings.DevServer.guild_id)
-        self.ban_logs_channel: disnake.TextChannel = self.dev_guild.get_channel(
-            settings.DevServer.ban_logs_channel_id
-        )
-        self.role_log_channel: disnake.TextChannel = self.dev_guild.get_channel(
-            settings.DevServer.role_logs_channel_id
-        )
-
-        self.monitored_roles: List[int] = settings.PlasmoRPGuild.monitored_roles
 
         logger.info("%s Ready", __name__)
 

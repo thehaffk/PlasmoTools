@@ -33,20 +33,23 @@ bot = commands.Bot(
     sync_permissions=True,
 )
 
-for file in os.listdir("./cogs"):
-    if file.endswith(".py"):
-        try:
-            bot.load_extension(f"cogs.{file[:-3]}")
-            logger.debug(f"Загружен: {file}")
-        except Exception as err:
-            logger.critical(f"Не удалось загрузить: {file}\n по причине {err}")
 
-
-@bot.listen("on_ready")
+@bot.event
 async def on_ready():
     """
     On startup
     """
+    logger.info(f"On ready")
+
+    for file in os.listdir("./cogs"):
+        if file.endswith(".py"):
+            try:
+                logger.debug(f"Загружаю: {file}")
+                bot.load_extension(f"cogs.{file[:-3]}")
+                logger.debug(f"Загружен: %s", file)
+            except Exception as err:
+                logger.critical(f"Не удалось загрузить: {file}\n по причине {err}")
+
     await bot.get_channel(settings.DevServer.bot_logs_channel_id).send(
         embed=disnake.Embed(
             title="⚒ Plasmo Tools has been restarted",

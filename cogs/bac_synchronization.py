@@ -3,6 +3,7 @@ Cog-file for synchronization nicknames and roles at BAC discord guild
 """
 import asyncio
 import logging
+
 import disnake
 from aiohttp import ClientSession
 from disnake import HTTPException
@@ -21,10 +22,19 @@ class BACSynchronization(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-        self.bac_guild: disnake.Guild = None
-        self.bac_banned_role: disnake.Role = None
-        self.bac_without_pass_role: disnake.Role = None
-        self.bac_has_pass_role: disnake.Role = None
+        # Guilds
+        self.bac_guild: disnake.Guild = self.bot.get_guild(settings.BACGuild.guild_id)
+
+        # Roles
+        self.bac_has_pass_role: disnake.Role = self.bac_guild.get_role(
+            settings.BACGuild.has_pass_role_id
+        )
+        self.bac_without_pass_role: disnake.Role = self.bac_guild.get_role(
+            settings.BACGuild.without_pass_role_id
+        )
+        self.bac_banned_role: disnake.Role = self.bac_guild.get_role(
+            settings.BACGuild.banned_role_id
+        )
 
     async def sync(self, member: disnake.Member) -> bool:
         """
@@ -35,26 +45,44 @@ class BACSynchronization(commands.Cog):
         """
         if member not in self.bac_guild.members or member.bot:
             return False
-        logger.info(f"Syncing {member} ({member.display_name})")
+        logger.info("Syncing %s (%s)", member, member.display_name)
 
         # TODO: Rewrite with plasmo.py
-        user_data = None
-        for tries in range(10):
+        for _ in range(10):
             async with ClientSession() as session:
                 async with session.get(
-                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}",
+                        url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}",
                 ) as response:
+
+                    response_json = await response.json()
+
                     if response.status != 200:
-                        logger.warning("Could not get data from PRP API: %s", await response.json())
+                        logger.warning(
+                            "Could not get data from PRP API: %s",
+                            await response_json,
+                        )
                         return False
-                    try:
-                        user_data = (await response.json())["data"]
-                    except Exception as err:
-                        logger.warning("Could not get data from PRP API: %s", err)
-                        await asyncio.sleep(30)
+                    status = response_json.get("status")
+                    user_data = response_json.get("data", None)
+
+                    if not status:
+                        logger.warning(
+                            "Could not get data from PRP API: %s",
+                            response_json,
+                        )
+                        return False
+
+                    if user_data is None:
+                        logger.warning(
+                            "Could not get data from PRP API: \n %s \n %s",
+                            response.status,
+                            await response.text(),
+                        )
+                        await asyncio.sleep(10)
                         continue
 
             break
+
         if user_data is None:
             return False
 
@@ -86,7 +114,9 @@ class BACSynchronization(commands.Cog):
                 err,
             )
             return False
-        await self.bot.get_cog("GCAMCSync").sync(bac_member)
+        await self.bot.get_cog("GCAMCSync").sync(
+            member=bac_member, uuid=user_data.get("uuid", None)
+        )
 
         return True
 
@@ -116,16 +146,16 @@ class BACSynchronization(commands.Cog):
                         title="Вы были забанены на Plasmo RP",
                         color=disnake.Color.dark_red(),
                         description=f"Узнать причину бана, оспорить решение "
-                        f"администрации или разбаниться можно "
-                        f"только тут - {settings.BACGuild.invite_url}\n\n\n"
-                        f"⚡ by [digital drugs]({settings.DevServer.invite_url})",
+                                    f"администрации или разбаниться можно "
+                                    f"только тут - {settings.BACGuild.invite_url}\n\n\n"
+                                    f"⚡ by [digital drugs]({settings.DevServer.invite_url})",
                     )
                 )
                 await member.send(
                     content=f"{settings.BACGuild.invite_url}",
                 )
-            except Exception as e:
-                logger.warning(e)
+            except HTTPException as err:
+                logger.warning(err)
                 return False
         else:
             return await self.sync(member)
@@ -145,15 +175,15 @@ class BACSynchronization(commands.Cog):
                     title="Вас разбанили на Plasmo RP",
                     color=disnake.Color.green(),
                     description=f"Держите инвайт и не забывайте соблюдать "
-                    f"правила сервера {settings.PlasmoRPGuild.invite_url}\n\n\n"
-                    f"⚡ by [digital drugs]({settings.DevServer.invite_url})",
+                                f"правила сервера {settings.PlasmoRPGuild.invite_url}\n\n\n"
+                                f"⚡ by [digital drugs]({settings.DevServer.invite_url})",
                 )
             )
             await member.send(
                 content=f"{settings.PlasmoRPGuild.invite_url}",
             )
-        except Exception as e:
-            logger.warning(e)
+        except HTTPException as err:
+            logger.warning(err)
             return False
         return await self.sync(member)
 
@@ -182,14 +212,22 @@ class BACSynchronization(commands.Cog):
             title=("Синхронизация | " + str(inter.guild)), color=disnake.Color.yellow()
         )
 
-        embed_counter.add_field(name="🔃 Синхронизация", value=f"0 / {len(members)}")
+        progress_bar = f'[{"-" * 30}]'
+        embed_counter.add_field(
+            name="🔃 Синхронизация", value=f"0 / {len(members)}\n{progress_bar}"
+        )
 
         await inter.response.send_message(embed=embed_counter, ephemeral=True)
 
         for counter, member in enumerate(members):
             embed_counter.clear_fields()
+            progress_bar = (
+                f'[**-{"-" * (counter // (len(members) // 30))}**'
+                f'{"-" * (30 - (counter // (len(members) // 30)))}]'
+            )
             embed_counter.add_field(
-                name="🔃 Синхронизация", value=f"{counter} / {len(members)}\n {member}"
+                name="🔃 Синхронизация",
+                value=f"{counter} / {len(members)}\n {member}\n{progress_bar}",
             )
             await inter.edit_original_message(embed=embed_counter)
             await self.sync(member)
@@ -258,21 +296,10 @@ class BACSynchronization(commands.Cog):
 
         await inter.edit_original_message(embed=embed_counter)
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    async def cog_load(self):
         """
         Called when disnake bot object is ready
         """
-        self.bac_guild: disnake.Guild = self.bot.get_guild(settings.BACGuild.guild_id)
-        self.bac_has_pass_role: disnake.Role = self.bac_guild.get_role(
-            settings.BACGuild.has_pass_role_id
-        )
-        self.bac_without_pass_role: disnake.Role = self.bac_guild.get_role(
-            settings.BACGuild.without_pass_role_id
-        )
-        self.bac_banned_role: disnake.Role = self.bac_guild.get_role(
-            settings.BACGuild.banned_role_id
-        )
 
         logger.info("%s Ready", __name__)
 

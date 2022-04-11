@@ -9,7 +9,7 @@ from typing import Union
 
 from dotenv import load_dotenv
 
-__version__ = "0.4.3a"
+__version__ = "0.4.4a"
 
 load_dotenv()
 
@@ -96,6 +96,7 @@ class BACGuild:  # TODO: Rename BAC(Big Appeal Court) to GCA(Grand Court of Appe
 
     announcements_channel_id = 855532780670418956
     dev_logs_channel_id = 960901660970987590
+    mc_logs_channel_id = 963038030195748874
 
 
 @dataclass

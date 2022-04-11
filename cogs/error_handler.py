@@ -11,6 +11,7 @@ class ErrorHandler(commands.Cog):
     """
     Handler for disnake errors
     """
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -23,30 +24,30 @@ class ErrorHandler(commands.Cog):
                 embed=disnake.Embed(
                     title="У Вас недостаточно прав.",
                     description="Вам нужно "
-                    f"иметь роль <@&{error.missing_role}> для использования этой команды.",
+                                f"иметь роль <@&{error.missing_role}> для использования этой команды.",
                     color=disnake.Color.red(),
                 ),
-                ephemeral=True
+                ephemeral=True,
             )
         elif isinstance(error, MissingPermissions):
             return await inter.send(
                 embed=disnake.Embed(
                     title="У Вас недостаточно прав.",
                     description="Вам нужно "
-                    f"иметь пермишен **{error.missing_permissions[0]}** для использования этой команды.",
+                                f"иметь пермишен **{error.missing_permissions[0]}** для использования этой команды.",
                     color=disnake.Color.red(),
                 ),
-                ephemeral=True
+                ephemeral=True,
             )
         elif isinstance(error, NotOwner):
             return await inter.send(
                 embed=disnake.Embed(
                     title="У Вас недостаточно прав.",
                     description="Вам нужно быть "
-                    "создателем бота для использования этой функции.",
+                                "создателем бота для использования этой функции.",
                     color=disnake.Color.red(),
                 ),
-                ephemeral=True
+                ephemeral=True,
             )
         else:
             logger.error(error)

@@ -1,7 +1,8 @@
 """
-Cog-file for synchronization nicknames and roles at BAC discord guild
+Cog-file for synchronization nicknames and roles at GCA discord guild
 """
 import logging
+
 import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
@@ -12,11 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 # TODO: расписание сделать каким-то хуем
-# TODO: синхронизация с бд игры через aiomysql
-# TODO: синхронизация с бд кубов по кнопке
 
 
-class BACTools(commands.Cog):  # TODO: Rename
+class GCATools(commands.Cog):
     """
     Cog for GCA(Grand Court of Appeal) tools - announcements
     """
@@ -24,14 +23,28 @@ class BACTools(commands.Cog):  # TODO: Rename
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-        self.bac_guild = None
-        self.bac_banned_role = None
-        self.bac_has_pass_role = None
-        self.defendant_role = None
-        self.juror_role = None
+        # Guilds
+        self.gca_guild: disnake.Guild = bot.get_guild(settings.BACGuild.guild_id)
 
-        self.dev_logs_channel = None
-        self.announcements_channel = None
+        # Channels
+        self.announcements_channel: disnake.NewsChannel = self.gca_guild.get_channel(
+            settings.BACGuild.announcements_channel_id
+        )
+        self.dev_logs_channel: disnake.TextChannel = self.gca_guild.get_channel(
+            settings.BACGuild.dev_logs_channel_id
+        )
+
+        # Roles
+        self.defendant_role = self.gca_guild.get_role(
+            settings.BACGuild.defendant_role_id
+        )
+        self.juror_role = self.gca_guild.get_role(settings.BACGuild.juror_role_id)
+        self.gca_has_pass_role: disnake.Role = self.gca_guild.get_role(
+            settings.BACGuild.has_pass_role_id
+        )
+        self.gca_banned_role: disnake.Role = self.gca_guild.get_role(
+            settings.BACGuild.banned_role_id
+        )
 
     async def log_for_admins(
         self,
@@ -165,9 +178,7 @@ class BACTools(commands.Cog):  # TODO: Rename
         embed = disnake.Embed(
             title="🟩 Заявка одобрена",
             color=disnake.Color.dark_green(),
-            description="Положительно - **{0}{1}**\n\n{2}".format(
-                result, (f", проходка обнуляется" if reset_pass else ""), additions
-            ),
+            description=f"Положительно - **{result}{(', проходка обнуляется' if reset_pass else '')}**\n\n{additions}",
         ).set_footer(
             text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
             icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
@@ -370,30 +381,10 @@ class BACTools(commands.Cog):  # TODO: Rename
             reset_pass=reset_pass,
         )
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    async def cog_load(self):
         """
         Called when disnake bot object is ready
         """
-        self.bac_guild: disnake.Guild = self.bot.get_guild(settings.BACGuild.guild_id)
-
-        self.announcements_channel: disnake.NewsChannel = self.bac_guild.get_channel(
-            settings.BACGuild.announcements_channel_id
-        )
-        self.dev_logs_channel: disnake.TextChannel = self.bac_guild.get_channel(
-            settings.BACGuild.dev_logs_channel_id
-        )
-
-        self.defendant_role = self.bac_guild.get_role(
-            settings.BACGuild.defendant_role_id
-        )
-        self.juror_role = self.bac_guild.get_role(settings.BACGuild.juror_role_id)
-        self.bac_has_pass_role: disnake.Role = self.bac_guild.get_role(
-            settings.BACGuild.has_pass_role_id
-        )
-        self.bac_banned_role: disnake.Role = self.bac_guild.get_role(
-            settings.BACGuild.banned_role_id
-        )
 
         logger.info("%s Ready", __name__)
 
@@ -402,4 +393,4 @@ def setup(client):
     """
     Disnake internal setup function
     """
-    client.add_cog(BACTools(client))
+    client.add_cog(GCATools(client))
