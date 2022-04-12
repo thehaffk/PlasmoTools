@@ -3,10 +3,10 @@ Cog-file for synchronization nicknames and roles at BAC discord guild
 """
 import asyncio
 import logging
-from sqlite3 import OperationalError
 
 import aiomysql
 import disnake
+import pymysql
 from aiohttp import ClientSession
 from disnake.ext import commands
 
@@ -15,7 +15,7 @@ import settings
 logger = logging.getLogger(__name__)
 
 
-# TODO: расписание сделать каким-то хуем
+# TODO: Create auto-schedule
 
 
 class GCAMCSync(commands.Cog):
@@ -160,7 +160,7 @@ class GCAMCSync(commands.Cog):
                 query="SELECT permission FROM luckperms_user_permissions WHERE uuid = %s AND permission LIKE %s",
                 args=(uuid, "group.%"),
             )
-        except OperationalError as error:
+        except pymysql.err.OperationalError as error:
             logging.warning("Error whilst querying database %s", error)
             await self.update_db_connection()
             await self.sync(member=member, uuid=uuid)

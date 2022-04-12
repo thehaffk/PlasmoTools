@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 # TODO: Death logger
 # TODO: fwarns logger
+# TODO: cheat logger
 
 
 class PlasmoLogger(commands.Cog):

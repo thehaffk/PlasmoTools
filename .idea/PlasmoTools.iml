@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources/0ee8adbd-7fb9-4e15-aafd-da480ea0c9c4" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources/df2ce765-07fc-492d-8dc8-0423c523ebee" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.10 (PlasmoTools)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.9 (PlasmoTools)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">
