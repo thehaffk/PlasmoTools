@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataSource name="SQLite - interpol.db">
-  <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.32">
-    <root id="1">
-      <ServerVersion>3.34.0</ServerVersion>
-    </root>
+  <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.38">
+    <root id="1"/>
     <collation id="2" parent="1" name="BINARY"/>
     <collation id="3" parent="1" name="NOCASE"/>
     <collation id="4" parent="1" name="RTRIM"/>
@@ -1353,7 +1351,6 @@
     </column>
     <index id="498" parent="491" name="sqlite_autoindex_payout_cards_1">
       <ColNames>discord_id</ColNames>
-      <ColumnCollations></ColumnCollations>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
@@ -1362,10 +1359,10 @@
       <UnderlyingIndexName>sqlite_autoindex_payout_cards_1</UnderlyingIndexName>
     </key>
     <column id="500" parent="492" name="id">
+      <AutoIncrement>1</AutoIncrement>
       <DataType>INTEGER|0s</DataType>
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <SequenceIdentity>null</SequenceIdentity>
     </column>
     <column id="501" parent="492" name="discord_id">
       <DataType>INTEGER|0s</DataType>
@@ -1410,7 +1407,6 @@
     </column>
     <index id="509" parent="492" name="sqlite_autoindex_payouts_1">
       <ColNames>id</ColNames>
-      <ColumnCollations></ColumnCollations>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>

@@ -20,6 +20,8 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 intents = disnake.Intents.all()
+intents.typing = False
+intents.presences = False
 
 bot = commands.Bot(
     owner_ids=[
@@ -35,20 +37,20 @@ bot = commands.Bot(
 
 
 @bot.event
-async def on_ready():
+async def on_ready():  # TODO: bot.listen
     """
     On startup
     """
-    logger.info(f"On ready")
+    logger.info(f"On ready triggered")
 
     for file in os.listdir("./cogs"):
         if file.endswith(".py"):
             try:
-                logger.debug(f"Загружаю: {file}")
+                logger.debug(f"Loading: {file}")
                 bot.load_extension(f"cogs.{file[:-3]}")
-                logger.debug(f"Загружен: %s", file)
+                logger.debug(f"Loaded: %s", file)
             except Exception as err:
-                logger.critical(f"Не удалось загрузить: {file}\n по причине {err}")
+                logger.critical(f"Could not load cog: {file}\n reason: {err}")
 
     await bot.get_channel(settings.DevServer.bot_logs_channel_id).send(
         embed=disnake.Embed(

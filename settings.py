@@ -9,12 +9,13 @@ from typing import Union
 
 from dotenv import load_dotenv
 
-__version__ = "0.4.4a"
+__version__ = "0.4.5a"
 
 load_dotenv()
 
 token = os.getenv("TOKEN")
 plasmo_token = os.getenv("PLASMO_TOKEN")
+PLASMO_BANKER_TOKEN = os.getenv("PLASMO_BANKER_TOKEN")
 
 
 class DBConfig:
