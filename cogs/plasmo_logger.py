@@ -99,10 +99,13 @@ class PlasmoLogger(commands.Cog):
             return False
 
         # TODO: Rewrite with plasmo.py
+
+        await asyncio.sleep(10)
+
         for tries in range(10):
             async with ClientSession() as session:
                 async with session.get(
-                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
+                        url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
                 ) as response:
                     try:
                         user_data = (await response.json())["data"]
