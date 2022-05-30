@@ -10,12 +10,9 @@ import pymysql
 from aiohttp import ClientSession
 from disnake.ext import commands
 
-import settings
+from plasmotools import settings
 
 logger = logging.getLogger(__name__)
-
-
-# TODO: Create auto-schedule
 
 
 class GCAMCSync(commands.Cog):
@@ -25,30 +22,6 @@ class GCAMCSync(commands.Cog):
 
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
-        # Guilds
-        self.bac_guild: disnake.Guild = self.bot.get_guild(settings.BACGuild.guild_id)
-
-        # Channels
-        self.dev_logs_channel: disnake.TextChannel = self.bac_guild.get_channel(
-            settings.BACGuild.dev_logs_channel_id
-        )
-        self.mc_logs_channel: disnake.TextChannel = self.bac_guild.get_channel(
-            settings.BACGuild.mc_logs_channel_id
-        )
-
-        # Roles
-        self.defendant_role = self.bac_guild.get_role(
-            settings.BACGuild.defendant_role_id
-        )
-        self.juror_role = self.bac_guild.get_role(settings.BACGuild.juror_role_id)
-        self.bac_has_pass_role: disnake.Role = self.bac_guild.get_role(
-            settings.BACGuild.has_pass_role_id
-        )
-        self.bac_banned_role: disnake.Role = self.bac_guild.get_role(
-            settings.BACGuild.banned_role_id
-        )
-        self.conn = None
-        self.cursor: aiomysql.Cursor = None
 
     async def sync(self, member: disnake.Member, uuid=None) -> bool:
         """
@@ -130,10 +103,14 @@ class GCAMCSync(commands.Cog):
 
                 mc_actual_groups.append(group)
 
+            mc_logs_channel = self.bot.get_guild(
+                settings.BACGuild.guild_id
+            ).get_channel(settings.BACGuild.mc_logs_channel_id)
+
             # Remove group from mc
             for group in set(mc_actual_groups) - set(mc_groups):
                 logger.info(f"Removing {group} from {member.display_name} [{uuid}]")
-                await self.mc_logs_channel.send(
+                await mc_logs_channel.send(
                     f"[{__name__}/INFO]: Removing {group} from {member.display_name} [{uuid}]"
                 )
                 await self.cursor.execute(
@@ -146,7 +123,7 @@ class GCAMCSync(commands.Cog):
             # Add group to mc
             for group in set(mc_groups) - set(mc_actual_groups):
                 logger.info(f"Adding {group} to {member.display_name} [{uuid}]")
-                await self.mc_logs_channel.send(
+                await mc_logs_channel.send(
                     f"[{__name__}/INFO]: Adding {group} to {member.display_name} [{uuid}]"
                 )
                 await self.cursor.execute(
@@ -167,7 +144,6 @@ class GCAMCSync(commands.Cog):
 
     @commands.user_command(
         name="MC Sync",
-        default_permission=True,
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def force_sync_button(self, inter, user: disnake.Member):
@@ -198,6 +174,7 @@ class GCAMCSync(commands.Cog):
         """
         Updates connection to plasmo database
         """
+        # TODO: Transformate this to "async with conn as" construction
         logger.info("Updating database connection")
         self.conn = await aiomysql.connect(
             host=settings.DBConfig.ip,

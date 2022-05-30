@@ -9,7 +9,7 @@ from aiohttp import ClientSession
 from disnake import HTTPException
 from disnake.ext import commands
 
-import settings
+from plasmotools import settings
 
 logger = logging.getLogger(__name__)
 
@@ -22,20 +22,6 @@ class BACSynchronization(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-        # Guilds
-        self.bac_guild: disnake.Guild = self.bot.get_guild(settings.BACGuild.guild_id)
-
-        # Roles
-        self.bac_has_pass_role: disnake.Role = self.bac_guild.get_role(
-            settings.BACGuild.has_pass_role_id
-        )
-        self.bac_without_pass_role: disnake.Role = self.bac_guild.get_role(
-            settings.BACGuild.without_pass_role_id
-        )
-        self.bac_banned_role: disnake.Role = self.bac_guild.get_role(
-            settings.BACGuild.banned_role_id
-        )
-
     async def sync(self, member: disnake.Member) -> bool:
         """
         Synchronizes given member
@@ -43,7 +29,10 @@ class BACSynchronization(commands.Cog):
         :param member: member to sync
         :return: bool - success or failed
         """
-        if member not in self.bac_guild.members or member.bot:
+        if (
+                member not in self.bot.get_guild(settings.BACGuild.guild_id).members
+                or member.bot
+        ):
             return False
         logger.info("Syncing %s (%s)", member, member.display_name)
 
@@ -89,25 +78,31 @@ class BACSynchronization(commands.Cog):
         is_banned: bool = user_data.get("banned", False)
         has_pass: bool = user_data.get("on_server", False)
         nickname: str = user_data.get("nick", "")
-        bac_member: disnake.Member = self.bac_guild.get_member(member.id)
 
         try:
-            await bac_member.edit(nick=nickname)
+            await member.edit(nick=nickname)
         except HTTPException:
             pass
-
+        gca_guild: disnake.Guild = self.bot.get_guild(settings.BACGuild.guild_id)
+        has_pass_role: disnake.Role = gca_guild.get_role(
+            settings.BACGuild.has_pass_role_id
+        )
+        without_pass_role: disnake.Role = gca_guild.get_role(
+            settings.BACGuild.without_pass_role_id
+        )
+        banned_role: disnake.Role = gca_guild.get_role(settings.BACGuild.banned_role_id)
         try:
             if has_pass:
-                await bac_member.add_roles(self.bac_has_pass_role)
-                await bac_member.remove_roles(self.bac_without_pass_role)
+                await member.add_roles(has_pass_role)
+                await member.remove_roles(without_pass_role)
             else:
-                await bac_member.add_roles(self.bac_without_pass_role)
-                await bac_member.remove_roles(self.bac_has_pass_role)
+                await member.add_roles(without_pass_role)
+                await member.remove_roles(has_pass_role)
 
             if is_banned:
-                await bac_member.add_roles(self.bac_banned_role)
+                await member.add_roles(banned_role)
             else:
-                await bac_member.remove_roles(self.bac_banned_role)
+                await member.remove_roles(banned_role)
 
         except disnake.HTTPException as err:
             logger.warning(
@@ -115,14 +110,14 @@ class BACSynchronization(commands.Cog):
             )
             return False
         await self.bot.get_cog("GCAMCSync").sync(
-            member=bac_member, uuid=user_data.get("uuid", None)
+            member=member, uuid=user_data.get("uuid", None)
         )
 
         return True
 
     @commands.Cog.listener()
     async def on_member_update(
-        self, before: disnake.Member, after: disnake.Member
+            self, before: disnake.Member, after: disnake.Member
     ) -> bool:
         """
         Discord event, called when member has been updated
@@ -139,7 +134,7 @@ class BACSynchronization(commands.Cog):
         """
         if not guild.id == settings.PlasmoRPGuild.guild_id:
             return False
-        if member not in self.bac_guild.members or member.id == 737501414141591594:
+        if member not in self.bot.get_guild(settings.BACGuild.guild_id).members or member.id == 737501414141591594:
             try:
                 await member.send(
                     embed=disnake.Embed(
@@ -162,7 +157,7 @@ class BACSynchronization(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_unban(
-        self, guild: disnake.Guild, member: disnake.Member
+            self, guild: disnake.Guild, member: disnake.Member
     ) -> bool:
         """
         Called on discord event when user is unbanned, sends user DM to join PRP guild
@@ -245,7 +240,7 @@ class BACSynchronization(commands.Cog):
     )
     @commands.has_permissions(manage_roles=True)
     async def sync_user(
-        self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
+            self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
     ):
         # Docstring is in russian because disnake automatically puts in command description
 
@@ -279,11 +274,10 @@ class BACSynchronization(commands.Cog):
 
     @disnake.ext.commands.user_command(
         name="Синхронизировать",
-        default_permission=True,
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def sync_button(
-        self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
+            self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
     ):
         """
         Button that appears when you click on a member in Discord

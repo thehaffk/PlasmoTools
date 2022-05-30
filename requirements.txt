@@ -1,5 +1,6 @@
 aiohttp==3.8.1
-disnake==2.4.0
+disnake==2.5.1
 python-dotenv==0.20.0
-pymysql==0.9.3
-aiomysql==0.0.22
+aiomysql==0.1.1
+coloredlogs~=15.0.1
+PyMySQL~=1.0.2
