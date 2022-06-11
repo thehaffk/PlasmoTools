@@ -122,7 +122,7 @@ class BACSynchronization(commands.Cog):
         """
         Discord event, called when member has been updated
         """
-        if not before.guild.id == settings.PlasmoRPGuild.guild_id:
+        if before.guild.id != settings.PlasmoRPGuild.guild_id:
             return False
         if before.display_name != after.display_name or before.roles != after.roles:
             return await self.sync(after)
@@ -143,7 +143,7 @@ class BACSynchronization(commands.Cog):
                         description=f"Узнать причину бана, оспорить решение "
                                     f"администрации или разбаниться можно "
                                     f"только тут - {settings.BACGuild.invite_url}\n\n\n"
-                                    f"⚡ by [digital drugs]({settings.DevServer.invite_url})",
+                                    f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
                     )
                 )
                 await member.send(
@@ -171,7 +171,7 @@ class BACSynchronization(commands.Cog):
                     color=disnake.Color.green(),
                     description=f"Держите инвайт и не забывайте соблюдать "
                                 f"правила сервера {settings.PlasmoRPGuild.invite_url}\n\n\n"
-                                f"⚡ by [digital drugs]({settings.DevServer.invite_url})",
+                                f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
                 )
             )
             await member.send(

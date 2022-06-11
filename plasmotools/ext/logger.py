@@ -166,6 +166,14 @@ class PlasmoLogger(commands.Cog):
         )
         await msg.publish()
 
+    @commands.Cog.listener()
+    async def on_message(self, message: disnake.Message):
+        if message.guild.id == 672312131760291842 and message.type == disnake.MessageType.thread_created:
+            try:
+                await message.delete(delay=10)
+            except disnake.Forbidden:
+                ...
+
     async def cog_load(self):
         logger.info("%s Ready", __name__)
 

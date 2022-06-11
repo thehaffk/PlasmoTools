@@ -24,6 +24,7 @@ class PlasmoSync(commands.Bot):
         _intents.members = True
         _intents.bans = True
         _intents.dm_messages = True  # ????
+        _intents.messages = True
         _intents.guilds = True
 
         return cls(
@@ -79,6 +80,9 @@ class PlasmoSync(commands.Bot):
                         plasmo_guild_permissions.manage_events,
                         plasmo_guild_permissions.send_messages,
                         plasmo_guild_permissions.add_reactions,
+                        plasmo_guild_permissions.manage_messages,
+                        plasmo_guild_permissions.read_message_history,
+
                     ]
             ):
                 await log_channel.send(
@@ -88,7 +92,7 @@ class PlasmoSync(commands.Bot):
                         description="Обязательные для дальнейшей работы Plasmo Tools права отсутствуют, "
                                     "передобавьте бота по [ссылке]"
                                     "(https://discord.com/api/oauth2/authorize"
-                                    "?client_id=876907717837594646&permissions=422017617092&scope=bot%20applications.commands)",
+                                    "?client_id=876907717837594646&permissions=420943834308&scope=bot%20applications.commands)",
                     )
                 )
 
