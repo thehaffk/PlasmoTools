@@ -95,6 +95,7 @@ class BACGuild:  # TODO: Rename BAC(Big Appeal Court) to GCA(Grand Court of Appe
     culture_member_role_id = 962479868291977327
     staff_role_id = 928698857666269305
     defendant_role_id = 861958861790511115
+    committee_defendant_role_id = 989697153821724732
     juror_role_id = 894213967843581953
 
     announcements_channel_id = 855532780670418956

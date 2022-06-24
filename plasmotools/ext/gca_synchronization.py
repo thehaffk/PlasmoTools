@@ -109,9 +109,9 @@ class BACSynchronization(commands.Cog):
                 err,
             )
             return False
-        await self.bot.get_cog("GCAMCSync").sync(
-            member=member, uuid=user_data.get("uuid", None)
-        )
+        # await self.bot.get_cog("GCAMCSync").sync(
+        #     member=member, uuid=user_data.get("uuid", None)
+        # )
 
         return True
 

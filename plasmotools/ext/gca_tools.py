@@ -30,13 +30,13 @@ class GCATools(commands.Cog):
             conditions: str,
     ):
         """
-        Logs data about unbanned / or
+        Logs data about all gca decisions for admins
 
         """
         msg = (
             await self.bot.get_guild(settings.BACGuild.guild_id)
-                .get_channel(settings.BACGuild.dev_logs_channel_id)
-                .send(
+            .get_channel(settings.BACGuild.dev_logs_channel_id)
+            .send(
                 embed=disnake.Embed(
                     description=" | ".join(
                         [
@@ -91,8 +91,8 @@ class GCATools(commands.Cog):
 
         await (
             await self.bot.get_guild(settings.BACGuild.guild_id)
-                .get_channel(settings.BACGuild.announcements_channel_id)
-                .webhooks()
+            .get_channel(settings.BACGuild.announcements_channel_id)
+            .webhooks()
         )[0].send(
             content=user.mention,
             embed=disnake.Embed(
@@ -163,8 +163,8 @@ class GCATools(commands.Cog):
         self.announcements_channel: disnake.NewsChannel
         await (
             await self.bot.get_guild(settings.BACGuild.guild_id)
-                .get_channel(settings.BACGuild.announcements_channel_id)
-                .webhooks()
+            .get_channel(settings.BACGuild.announcements_channel_id)
+            .webhooks()
         )[0].send(content=user.mention, embed=embed)
 
         await inter.edit_original_message(content="Дело сделано")
@@ -369,6 +369,189 @@ class GCATools(commands.Cog):
             conditions=conditions,
             clear_inventory=clear_inventory,
             reset_pass=reset_pass,
+        )
+
+    @commands.slash_command(
+        name="комитет",
+        guild_ids=[settings.BACGuild.guild_id],
+    )
+    async def committee_placeholder(self, inter: ApplicationCommandInteraction):
+        """
+        Placeholder for sub commands
+        """
+        pass
+
+    @committee_placeholder.sub_command(
+        name="положительно",
+        guild_ids=[settings.BACGuild.guild_id],
+    )
+    async def committee_accepted(
+            self,
+            inter: ApplicationCommandInteraction,
+            user: disnake.Member,
+            tripetto_id: str,
+            result: str = commands.Param(
+                autocomplete=lambda *args: [
+                    "Разбан",
+                    "Красный варн снимается",
+                    "Два красных варна снимаются",
+                    "Разбан, красный варн снимается",
+                    "Разбан, два красных варна снимаются",
+                ]
+            ),
+            conditions: str = "",
+            clear_inventory: bool = False,
+            reset_pass: bool = False,
+            additions: str = "",
+    ):
+        """
+        Заявка одобрена комитетом
+
+        Parameters
+        ----------
+        user: Игрок
+        tripetto_id: ID заявки
+        result: Тип рассмотренной заявки
+        conditions: Условия
+        clear_inventory: Очистить инвентарь
+        reset_pass: Сбросить проходку
+        additions: Дополнительные условия, например снятие красных при разбане
+        inter: ApplicationCommandInteraction object
+
+
+        """
+        await inter.response.defer(ephemeral=True)
+
+        embed = disnake.Embed(
+            title="🟩 Заявка рассмотрена комитетом",
+            color=disnake.Color.dark_green(),
+            description=f"Положительно - **{result}{(', проходка обнуляется' if reset_pass else '')}**\n\n{additions}",
+        ).set_footer(
+            text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+            icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
+        )
+
+        if conditions:
+            embed.add_field(name="Требования к игроку", value=conditions)
+
+        self.announcements_channel: disnake.NewsChannel
+        await (
+            await self.bot.get_guild(settings.BACGuild.guild_id)
+            .get_channel(settings.BACGuild.announcements_channel_id)
+            .webhooks()
+        )[0].send(content=user.mention, embed=embed)
+        await user.remove_roles(
+            inter.guild.get_role(settings.BACGuild.committee_defendant_role_id),
+            reason="Рассмотрено",
+        )
+
+        await inter.edit_original_message(content="Дело сделано")
+
+        await self.log_for_admins(
+            user=user,
+            result=result,
+            additions=additions,
+            conditions=conditions,
+            clear_inventory=clear_inventory,
+            reset_pass=reset_pass,
+        )
+
+    @committee_placeholder.sub_command(
+        name="отрицательно",
+        guild_ids=[settings.BACGuild.guild_id],
+    )
+    async def committee_declined(
+            self,
+            inter: ApplicationCommandInteraction,
+            user: disnake.Member,
+            tripetto_id: str,
+            addition: str = "Вы сможете позже подать заявку на следующий апелляционный суд",
+    ):
+        """
+        Заявка рассмотрена комитетом
+
+        Parameters
+        ----------
+        user: Игрок
+        tripetto_id: ID заявки
+        addition: Примечание для игрока
+        inter: ApplicationCommandInteraction object
+
+        """
+        await inter.response.defer(ephemeral=True)
+
+        embed = disnake.Embed(
+            title="🟥 Заявка рассмотрена комитетом",
+            color=disnake.Color.red(),
+            description="Результат - **Отрицательно**",
+        ).set_footer(
+            text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+            icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
+        )
+
+        embed.add_field(name="Примечание", value=addition)
+
+        gca_guild = self.bot.get_guild(settings.BACGuild.guild_id)
+
+        self.announcements_channel: disnake.NewsChannel
+        await (
+            await gca_guild.get_channel(
+                settings.BACGuild.announcements_channel_id
+            ).webhooks()
+        )[0].send(
+            content=user.mention,
+            embed=embed,
+        )
+
+        await user.remove_roles(gca_guild.get_role(settings.BACGuild.committee_defendant_role_id), reason="Рассмотрено")
+
+        await inter.edit_original_message(content="Дело сделано")
+
+    @committee_placeholder.sub_command(
+        name="допущено",
+        guild_ids=[settings.BACGuild.guild_id],
+    )
+    async def commitee_approved(
+            self,
+            inter: ApplicationCommandInteraction,
+            user: disnake.Member,
+            tripetto_id: str,
+    ):
+        """
+        Заявка будет рассмотрена на комитете
+
+        Parameters
+        ----------
+        user: Игрок
+        tripetto_id: ID заявки
+        inter: ApplicationCommandInteraction object
+
+
+        """
+        await inter.response.defer(ephemeral=True)
+
+        gca_guild = self.bot.get_guild(settings.BACGuild.guild_id)
+
+        self.announcements_channel: disnake.NewsChannel
+        await (
+            await gca_guild.get_channel(
+                settings.BACGuild.announcements_channel_id
+            ).webhooks()
+        )[0].send(
+            content=user.mention,
+            embed=disnake.Embed(
+                title="🟨 Заявка будет рассмотрена комитетом",
+                color=disnake.Color.yellow(),
+            ).set_footer(
+                text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+                icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
+            ),
+        )
+
+        await inter.edit_original_message(content="Дело сделано")
+        await user.add_roles(
+            gca_guild.get_role(settings.BACGuild.committee_defendant_role_id),
+            reason="Дело будет рассмотрено комитетом",
         )
 
     async def cog_load(self):
