@@ -82,7 +82,6 @@ class PlasmoSync(commands.Bot):
                         plasmo_guild_permissions.add_reactions,
                         plasmo_guild_permissions.manage_messages,
                         plasmo_guild_permissions.read_message_history,
-
                     ]
             ):
                 await log_channel.send(

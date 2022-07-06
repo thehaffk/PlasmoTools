@@ -503,7 +503,10 @@ class GCATools(commands.Cog):
             embed=embed,
         )
 
-        await user.remove_roles(gca_guild.get_role(settings.BACGuild.committee_defendant_role_id), reason="Рассмотрено")
+        await user.remove_roles(
+            gca_guild.get_role(settings.BACGuild.committee_defendant_role_id),
+            reason="Рассмотрено",
+        )
 
         await inter.edit_original_message(content="Дело сделано")
 

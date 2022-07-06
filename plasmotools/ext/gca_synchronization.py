@@ -134,24 +134,23 @@ class BACSynchronization(commands.Cog):
         """
         if not guild.id == settings.PlasmoRPGuild.guild_id:
             return False
-        if member not in self.bot.get_guild(settings.BACGuild.guild_id).members or member.id == 737501414141591594:
-            try:
-                await member.send(
-                    embed=disnake.Embed(
-                        title="Вы были забанены на Plasmo RP",
-                        color=disnake.Color.dark_red(),
-                        description=f"Узнать причину бана, оспорить решение "
-                                    f"администрации или разбаниться можно "
-                                    f"только тут - {settings.BACGuild.invite_url}\n\n\n"
-                                    f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
-                    )
+        try:
+            await member.send(
+                embed=disnake.Embed(
+                    title="Вы были забанены на Plasmo RP",
+                    color=disnake.Color.dark_red(),
+                    description=f"Узнать причину бана, оспорить решение "
+                                f"администрации или разбаниться можно "
+                                f"только тут - {settings.BACGuild.invite_url}\n\n\n"
+                                f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
                 )
-                await member.send(
-                    content=f"{settings.BACGuild.invite_url}",
-                )
-            except HTTPException as err:
-                logger.warning(err)
-                return False
+            )
+            await member.send(
+                content=f"{settings.BACGuild.invite_url}",
+            )
+        except HTTPException as err:
+            logger.warning(err)
+            return False
         else:
             return await self.sync(member)
 
