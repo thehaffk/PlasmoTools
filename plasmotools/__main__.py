@@ -1,9 +1,3 @@
-"""
-main PlasmoTools file
-
-use `python3 main.py` to start bot
-"""
-
 # import asyncio
 import logging
 

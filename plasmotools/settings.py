@@ -15,6 +15,7 @@ __version__ = "0.0.5"
 DEBUG = bool(os.getenv("BOT_DEBUG", 0))
 TOKEN = os.getenv("TOKEN")
 ADMIN_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
+DATABASE_PATH = "plasmotools/data.sqlite"
 
 
 class DBConfig:

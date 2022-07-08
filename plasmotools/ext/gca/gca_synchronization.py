@@ -31,7 +31,7 @@ class BACSynchronization(commands.Cog):
         """
         if (
                 member not in self.bot.get_guild(settings.BACGuild.guild_id).members
-                or member.bot
+                or member.bot or not isinstance(member, disnake.Member)
         ):
             return False
         logger.info("Syncing %s (%s)", member, member.display_name)
@@ -136,8 +136,12 @@ class BACSynchronization(commands.Cog):
             return False
         try:
             await member.send(
+                "https://media.discordapp.net/"
+                "attachments/899202029656895518/971525622297931806/ezgif-7-17469e0166d2.gif"
+            )
+            await member.send(
                 embed=disnake.Embed(
-                    title="Вы были забанены на Plasmo RP",
+                    title="Вас забанили на Plasmo RP",
                     color=disnake.Color.dark_red(),
                     description=f"Узнать причину бана, оспорить решение "
                                 f"администрации или разбаниться можно "
@@ -164,6 +168,9 @@ class BACSynchronization(commands.Cog):
         if not guild.id == settings.PlasmoRPGuild.guild_id:
             return False
         try:
+            await member.send(
+                "https://tenor.com/view/est_slova_i_emozii_tozhe-gif-25247683"
+            )
             await member.send(
                 embed=disnake.Embed(
                     title="Вас разбанили на Plasmo RP",
