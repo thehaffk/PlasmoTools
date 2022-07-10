@@ -90,7 +90,7 @@ class Project:
             await db.commit()
 
 
-async def get_proejct(id: int) -> Optional[Project]:
+async def get_project(id: int) -> Optional[Project]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """SELECT 
@@ -136,7 +136,7 @@ async def register_project(
             ),
         )
         await db.commit()
-        return await get_proejct(cursor.lastrowid)
+        return await get_project(cursor.lastrowid)
 
 
 async def get_projects(guild_discord_id: Optional[int] = None) -> List[Project]:
