@@ -4,7 +4,7 @@ import logging
 from plasmotools import log
 from plasmotools import settings
 from plasmotools.bot import PlasmoSync
-from plasmotools.utils.plasmo_structures import setup_database
+from plasmotools.utils.database.plasmo_structures import setup_database
 
 log.setup()
 

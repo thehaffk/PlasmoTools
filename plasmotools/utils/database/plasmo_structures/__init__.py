@@ -19,13 +19,13 @@ from plasmotools.utils.database.plasmo_structures.projects import (
     Project,
     get_project,
     get_projects,
-    register_project
+    register_project,
 )
 from plasmotools.utils.database.plasmo_structures.roles import (
     Role,
     get_role,
     get_roles,
-    add_role
+    add_role,
 )
 
 PATH = settings.DATABASE_PATH
@@ -50,9 +50,6 @@ create table if not exists structure_guilds
     """
 create table if not exists structure_roles
 (
-    alias            text    not null
-        constraint structure_roles_pk
-            primary key,
     name             text    not null,
     guild_discord_id integer not null,
     role_discord_id  integer not null,
@@ -60,6 +57,10 @@ create table if not exists structure_roles
     webhook_url      text
 );
 """,
+    """
+    create unique index if not exists structure_roles_discord_id_uindex
+    on structure_roles (role_discord_id);
+    """,
     """
 create table if not exists structure_projects
 (

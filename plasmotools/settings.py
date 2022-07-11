@@ -18,17 +18,6 @@ ADMIN_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
 DATABASE_PATH = "plasmotools/data.sqlite"
 
 
-class DBConfig:
-    """
-    Config for plasmo db (mysql)
-    """
-
-    ip = os.getenv("DB_IP")
-    port = int(os.getenv("DB_PORT"))
-    user = os.getenv("DB_USER")
-    password = os.getenv("DB_PASSWORD")
-
-
 class LogsServer:
     guild_id = 828683007635488809
     invite_url = "https://discord.gg/XYS43z7vj2"
@@ -42,6 +31,12 @@ class LogsServer:
     admin_commands_channel_id = 961751903488852068
 
 
+class Emojis:
+    plasmo_tools_logo = "<:PlasmoSync:996079144825794560>"
+    enabled = "<:enabled:969672429981016084>"
+    disabled = "<:disabled:969672065160474684>"
+
+
 class DevServer:
     """
     Config for development(logging) server (digital drugs)
@@ -50,6 +45,7 @@ class DevServer:
     guild_id = 966785796902363188
     invite_url = "https://discord.gg/B6XGDn6x3r"
     bot_logs_channel_id = 980950597203292190
+    support_invite = "https://discord.gg/Xn7Ya9gv5a"
 
 
 class PlasmoRPGuild:

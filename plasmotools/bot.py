@@ -23,27 +23,37 @@ class PlasmoSync(commands.Bot):
         _intents = disnake.Intents.none()
         _intents.members = True
         _intents.bans = True
-        _intents.dm_messages = True  # ????
         _intents.messages = True
         _intents.guilds = True
+        _intents.guild_messages = True
 
         return cls(
             owner_ids=[
                 737501414141591594,  # /h#9140
                 222718720127139840,  # Apehum#1878
                 191836876980748298,  # KPidS#3754
+                706995136311197730,  # attica#5884
             ],
             status=disnake.Status.do_not_disturb,
             intents=_intents,
             sync_commands=True,
             command_prefix=commands.when_mentioned,
             allowed_mentions=disnake.AllowedMentions(everyone=False),
-            activity=disnake.Game(name="ъ"),
+            help_command=None,
+            description="PlasmoSync",
+            case_insensitive=True,
+            command_not_found=None,
         )
 
     async def on_ready(self):
         logger.info(f"Logged in as {self.user}")
         log_channel = self.get_channel(settings.DevServer.bot_logs_channel_id)
+        await self.change_presence(
+            activity=disnake.Activity(
+                type=disnake.ActivityType.watching,
+                name=f"{sum(len(server.members) for server in self.guilds)} members",
+            )
+        )
         await log_channel.send(
             embeds=[
                 disnake.Embed(

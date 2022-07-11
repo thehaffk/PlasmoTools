@@ -13,4 +13,9 @@ async def role_autocompleter(
     if inter.guild is None:
         return {}
     roles = await get_roles(guild_discord_id=inter.guild.id)
-    return {role.name: role for role in roles if role.available}
+
+    return (
+        {role.name: str(role.role_discord_id) for role in roles if role.available}
+        if roles
+        else {"Нет доступных ролей": "404"}
+    )

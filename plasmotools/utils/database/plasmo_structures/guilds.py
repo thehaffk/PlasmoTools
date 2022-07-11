@@ -90,9 +90,9 @@ async def get_guild(discord_id: int) -> Optional[Guild]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """SELECT 
-                discord_id, alias, player_role_id, head_role_id, public_chat_channel_id, logs_channel_id
-                FROM structure_guilds WHERE discord_id = ?
-                """,
+                    discord_id, alias, player_role_id, head_role_id, public_chat_channel_id, logs_channel_id
+                    FROM structure_guilds WHERE discord_id = ?
+                    """,
                 (discord_id,),
         ) as cursor:
             row = await cursor.fetchone()
@@ -132,9 +132,9 @@ async def get_all_guilds():
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """SELECT 
-                discord_id
-                FROM structure_guilds
-                """,
+                    discord_id
+                    FROM structure_guilds
+                    """,
         ) as cursor:
             rows = await cursor.fetchall()
             return [await get_guild(row[0]) for row in rows]

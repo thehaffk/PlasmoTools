@@ -31,7 +31,8 @@ class BACSynchronization(commands.Cog):
         """
         if (
                 member not in self.bot.get_guild(settings.BACGuild.guild_id).members
-                or member.bot or not isinstance(member, disnake.Member)
+                or member.bot
+                or not isinstance(member, disnake.Member)
         ):
             return False
         logger.info("Syncing %s (%s)", member, member.display_name)
@@ -79,10 +80,11 @@ class BACSynchronization(commands.Cog):
         has_pass: bool = user_data.get("on_server", False)
         nickname: str = user_data.get("nick", "")
 
-        try:
-            await member.edit(nick=nickname)
-        except HTTPException:
-            pass
+        if member.display_name != nickname:
+            try:
+                await member.edit(nick=nickname)
+            except HTTPException:
+                pass
         gca_guild: disnake.Guild = self.bot.get_guild(settings.BACGuild.guild_id)
         has_pass_role: disnake.Role = gca_guild.get_role(
             settings.BACGuild.has_pass_role_id
@@ -93,32 +95,29 @@ class BACSynchronization(commands.Cog):
         banned_role: disnake.Role = gca_guild.get_role(settings.BACGuild.banned_role_id)
         try:
             if has_pass:
-                await member.add_roles(has_pass_role)
-                await member.remove_roles(without_pass_role)
+                if has_pass_role not in [role.id for role in member.roles]:
+                    await member.add_roles(has_pass_role)
+                if without_pass_role in [role.id for role in member.roles]:
+                    await member.remove_roles(without_pass_role)
             else:
-                await member.add_roles(without_pass_role)
-                await member.remove_roles(has_pass_role)
+                if without_pass_role not in [role.id for role in member.roles]:
+                    await member.add_roles(without_pass_role)
+                if has_pass_role in [role.id for role in member.roles]:
+                    await member.remove_roles(has_pass_role)
 
-            if is_banned:
+            if is_banned and banned_role not in [role.id for role in member.roles]:
                 await member.add_roles(banned_role)
-            else:
+            elif banned_role in [role.id for role in member.roles]:
                 await member.remove_roles(banned_role)
 
         except disnake.HTTPException as err:
-            logger.warning(
-                err,
-            )
+            logger.warning("Could not edit member: %s", err)
             return False
-        # await self.bot.get_cog("GCAMCSync").sync(
-        #     member=member, uuid=user_data.get("uuid", None)
-        # )
 
         return True
 
     @commands.Cog.listener()
-    async def on_member_update(
-            self, before: disnake.Member, after: disnake.Member
-    ) -> bool:
+    async def on_member_update(self, before: disnake.Member, after: disnake.Member):
         """
         Discord event, called when member has been updated
         """
