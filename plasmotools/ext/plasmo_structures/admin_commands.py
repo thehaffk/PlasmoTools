@@ -161,13 +161,23 @@ class AdminCommands(commands.Cog):
             color=disnake.Color.green(),
             title=f"Все роли {inter.guild.name}",
         )
-        for role in roles:
+        if len(roles) == 0:
             embed.add_field(
-                name=f"{role.name}",
-                value=f"{settings.Emojis.enabled if role.available else settings.Emojis.disabled} "
-                      f"<@&{role.role_discord_id}> / {role.role_discord_id} \n ||{role.webhook_url}||",
-                inline=False,
+                name="Роли не найдены",
+                value="Добавьте через `/роли добавить`",
             )
+        else:
+            embed.add_field(
+                name="Название роли",
+                value="[Доступна ли роль] Пинг роли / Айди роли\nВебхук",
+            )
+            for role in roles:
+                embed.add_field(
+                    name=f"{role.name}",
+                    value=f"{settings.Emojis.enabled if role.available else settings.Emojis.disabled} "
+                          f"<@&{role.role_discord_id}> / `{role.role_discord_id}` \n ||{role.webhook_url}||",
+                    inline=False,
+                )
 
         await inter.send(embed=embed, ephemeral=True)
 
@@ -187,11 +197,12 @@ class AdminCommands(commands.Cog):
         Parameters
         ----------
         role: Роль
-        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.com/api/webhooks/{id}/{token})
+        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/api/webhooks/...)
         available: Доступна ли роль для найма и снятия
         name: Название роли, например "Интерпол"
 
         """
+        # TODO: Check webhook url with regex
         guild = await database.get_guild(inter.guild.id)
         if guild is None:
             await inter.send(
@@ -218,13 +229,20 @@ class AdminCommands(commands.Cog):
                 ephemeral=True,
             )
             return
-
+        await inter.response.defer(ephemeral=True)
         db_role = await database.get_role(role.id)
         if db_role is not None:
             await db_role.edit(
                 name=name,
                 webhook_url=webhook_url,
                 available=available,
+            )
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.green(),
+                    title="Роль обновлена",
+                    description=f"Роль `{name}` обновлена",
+                ),
             )
         else:
             await database.add_role(
@@ -233,6 +251,13 @@ class AdminCommands(commands.Cog):
                 name=name,
                 webhook_url=webhook_url,
                 available=available,
+            )
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.green(),
+                    title="Роль создана",
+                    description=f"Роль `{name}` зарегистрирована",
+                ),
             )
 
     @commands.guild_only()
