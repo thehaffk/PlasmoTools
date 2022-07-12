@@ -77,7 +77,7 @@ class BACSynchronization(commands.Cog):
             return False
 
         is_banned: bool = user_data.get("banned", False)
-        has_pass: bool = user_data.get("on_server", False)
+        has_pass: bool = user_data.get("has_access", False)
         nickname: str = user_data.get("nick", "")
 
         if member.display_name != nickname:

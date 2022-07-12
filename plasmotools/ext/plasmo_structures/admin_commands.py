@@ -337,6 +337,8 @@ class AdminCommands(commands.Cog):
             ephemeral=True,
         )
 
+    # TODO: Projects / payouts statistics
+
     async def cog_load(self):
         """
         Called when disnake bot object is ready
