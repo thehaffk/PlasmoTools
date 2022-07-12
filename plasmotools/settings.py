@@ -15,7 +15,7 @@ __version__ = "0.0.5"
 DEBUG = bool(os.getenv("BOT_DEBUG", 0))
 TOKEN = os.getenv("TOKEN")
 ADMIN_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
-DATABASE_PATH = "plasmotools/data.sqlite"
+DATABASE_PATH = "./data.sqlite"
 
 
 class LogsServer:
@@ -43,8 +43,10 @@ class DevServer:
     """
 
     guild_id = 966785796902363188
-    invite_url = "https://discord.gg/B6XGDn6x3r"
+
     bot_logs_channel_id = 980950597203292190
+    errors_channel_id = 996245098067144704
+
     support_invite = "https://discord.gg/Xn7Ya9gv5a"
 
 

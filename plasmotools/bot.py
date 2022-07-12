@@ -19,7 +19,7 @@ class PlasmoSync(commands.Bot):
 
     @classmethod
     def create(cls) -> "PlasmoSync":
-        """Create and return an instance of a Bot."""
+        """Create and return an instance of a Bot"""
         _intents = disnake.Intents.none()
         _intents.members = True
         _intents.bans = True

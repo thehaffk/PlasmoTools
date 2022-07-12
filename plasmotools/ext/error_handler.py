@@ -57,10 +57,20 @@ class ErrorHandler(commands.Cog):
                 embed=disnake.Embed(
                     title="Error",
                     description=f"Возникла неожиданная ошибка.\n\n`{error}`"
-                                f"\n\nРепортить баги можно тут - {settings.DevServer.invite_url}",
+                                f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
                     color=disnake.Color.red(),
                 ),
                 ephemeral=True,
+            )
+            await self.bot.get_channel(settings.DevServer.errors_channel_id).send(
+                embed=disnake.Embed(
+                    title="⚠⚠⚠",
+                    description=f"Возникла неожиданная ошибка.\n\n`{error}`",
+                    color=disnake.Color.brand_green(),
+                ).add_field(
+                    name="inter data",
+                    value=f"{inter.__dict__}",
+                )
             )
             raise error
 
