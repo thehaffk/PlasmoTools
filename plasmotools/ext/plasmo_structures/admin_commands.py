@@ -144,14 +144,10 @@ class AdminCommands(commands.Cog):
             ephemeral=True,
         )
 
-    @commands.guild_only()
-    @commands.default_member_permissions(administrator=True)
-    @commands.slash_command(name="роли")
-    async def roles_placeholder(self, inter: ApplicationCommandInteraction):
-        ...
 
     @commands.guild_only()
-    @roles_placeholder.sub_command(name="список")
+    @commands.slash_command(name="роли-список")
+    @commands.default_member_permissions(administrator=True)
     async def roles_list(self, inter: ApplicationCommandInteraction):
         """
         Получить список ролей в сервере
@@ -182,7 +178,8 @@ class AdminCommands(commands.Cog):
         await inter.send(embed=embed, ephemeral=True)
 
     @commands.guild_only()
-    @roles_placeholder.sub_command(name="добавить")
+    @commands.slash_command(name="роли-добавить")
+    @commands.default_member_permissions(administrator=True)
     async def roles_add(
             self,
             inter: ApplicationCommandInteraction,
@@ -261,7 +258,8 @@ class AdminCommands(commands.Cog):
             )
 
     @commands.guild_only()
-    @roles_placeholder.sub_command(name="удалить")
+    @commands.slash_command(name="роли-удалить")
+    @commands.default_member_permissions(administrator=True)
     async def roles_delete(
             self,
             inter: ApplicationCommandInteraction,
@@ -292,7 +290,8 @@ class AdminCommands(commands.Cog):
         )
 
     @commands.guild_only()
-    @roles_placeholder.sub_command(name="редактировать")
+    @commands.slash_command(name="роли-редактировать")
+    @commands.default_member_permissions(administrator=True)
     async def roles_edit(
             self,
             inter: ApplicationCommandInteraction,
