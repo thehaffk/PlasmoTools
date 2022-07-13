@@ -136,9 +136,9 @@ class AdminCommands(commands.Cog):
                 value=f"""
             `alias`: {guild.alias}
             `player_role`: <@&{guild.player_role_id}> / {guild.player_role_id} 
-            `head_role`: <@&{guild.head_role_id}> /{guild.head_role_id} 
-            `public_chat`: <#{guild.public_chat_channel_id}> /{guild.public_chat_channel_id} 
-            `logs_channel`: <#{guild.logs_channel_id}> /{guild.logs_channel_id} 
+            `head_role`: <@&{guild.head_role_id}> / {guild.head_role_id} 
+            `public_chat`: <#{guild.public_chat_channel_id}> / {guild.public_chat_channel_id} 
+            `logs_channel`: <#{guild.logs_channel_id}> / {guild.logs_channel_id} 
             """,
             ),
             ephemeral=True,
@@ -208,7 +208,7 @@ class AdminCommands(commands.Cog):
                     title="Ошибка",
                     description="Сервер не зарегистрирован как офицальная структура.\n"
                                 "Если вы считаете что это ошибка - обратитесь в "
-                                f"[поддержку digital drugs technologies]({settings.DevServer.invite_url})",
+                                f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
                 ephemeral=True,
             )
@@ -221,7 +221,7 @@ class AdminCommands(commands.Cog):
                     title="Ошибка",
                     description="Эта роль не может быть закреплена как нанимаемая\n"
                                 "Если вы считаете что это ошибка - обратитесь в "
-                                f"[поддержку digital drugs technologies]{settings.DevServer.invite_url}",
+                                f"[поддержку digital drugs technologies]{settings.DevServer.support_invite}",
                 ),
                 ephemeral=True,
             )

@@ -82,9 +82,14 @@ class UserManagement(commands.Cog):
         user: Игрок
         role: Роль [⚠ Выбирайте из списка]
         """
-        guild, db_role = await database.get_guild(inter.guild.id), await database.get_role(
-            role_discord_id=int(role)
-        )
+        try:
+            guild, db_role = await database.get_guild(inter.guild.id), await database.get_role(
+                role_discord_id=int(role)
+            )
+        except ValueError:
+            return await inter.send("https://tenor.com/view/%D0%B2%D0%B4%D1%83%D1%80%D0%BA%D1%83"
+                                    "-%D0%B4%D1%83%D1%80%D0%BA%D0%B0-%D0%BA%D0%BE%D1%82-%D0%BA%D0%BE%D1%82%D1%8D-gif-25825159",
+                                    ephemeral=True)
         if not await check_role(inter, guild, db_role):
             return
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
@@ -194,9 +199,15 @@ class UserManagement(commands.Cog):
         user: Игрок
         role: Роль [⚠ Выбирайте из списка]
         """
-        guild, db_role = await database.get_guild(inter.guild.id), await database.get_role(
-            role_discord_id=int(role)
-        )
+        try:
+            guild, db_role = await database.get_guild(inter.guild.id), await database.get_role(
+                role_discord_id=int(role)
+            )
+        except ValueError:
+            return await inter.send("https://tenor.com/view/%D0%B2%D0%B4%D1%83%D1%80%D0%BA%D1%83"
+                                    "-%D0%B4%D1%83%D1%80%D0%BA%D0%B0-%D0%BA%D0%BE%D1%82-%D0%BA%D0%BE%D1%82%D1%8D"
+                                    "-gif-25825159",
+                                    ephemeral=True)
         if not await check_role(inter, guild, db_role):
             return
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
