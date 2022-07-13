@@ -65,11 +65,11 @@ class ErrorHandler(commands.Cog):
             await self.bot.get_channel(settings.DevServer.errors_channel_id).send(
                 embed=disnake.Embed(
                     title="⚠⚠⚠",
-                    description=f"Возникла неожиданная ошибка.\n\n`{error}`",
+                    description=f"Возникла неожиданная ошибка.\n\n`{str(error)[:900]}`",
                     color=disnake.Color.brand_green(),
                 ).add_field(
                     name="inter data",
-                    value=f"{inter.__dict__}",
+                    value=f"{inter.__dict__}"[:1000],
                 )
             )
             raise error

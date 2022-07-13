@@ -33,27 +33,84 @@ class GCATools(commands.Cog):
         Logs data about all gca decisions for admins
 
         """
-        msg = (
-            await self.bot.get_guild(settings.BACGuild.guild_id)
-            .get_channel(settings.BACGuild.dev_logs_channel_id)
-            .send(
-                embed=disnake.Embed(
-                    description=" | ".join(
-                        [
-                            user.id,
-                            str(user),
-                            result,
-                            "Очищать инвентарь: " + str(clear_inventory),
-                            "Сбрасывать проходку: " + str(reset_pass),
-                            additions,
-                            conditions,
-                        ]
-                    ),
+        embed = disnake.Embed(
+            description=" | ".join(
+                [
+                    str(user.id),
+                    str(user.display_name),
+                    str(user),
+                    result,
+                    "Очищать инвентарь" if clear_inventory else "",
+                    "Сбрасывать проходку: " if reset_pass else "",
+                    additions,
+                    conditions,
+                ]
+            ),
+        )
+        components = []
+        if "разбан" in result.lower():
+            components.append(
+                disnake.ui.Button(
+                    custom_id=f"gca unban {user.id}",
+                    label="Разбанить",
+                    emoji="🔓",
                 )
             )
+        msg = await (self.bot.get_channel(settings.BACGuild.dev_logs_channel_id)).send(
+            embed=embed,
+            components=components,
         )
-
         await msg.add_reaction("✔")
+
+    @commands.Cog.listener()
+    async def on_button_click(self, inter: disnake.MessageInteraction):
+        if inter.component.custom_id.startswith("gca unban"):
+            if inter.author.id not in self.bot.owner_ids:
+                return await inter.send(
+                    embed=disnake.Embed(
+                        title="У Вас недостаточно прав.",
+                        description="Вам нужно быть "
+                                    "администратором Plasmo или разработчиком бота для использования этой функции.",
+                        color=disnake.Color.red(),
+                    ),
+                    ephemeral=True
+                )
+
+            user_id = inter.component.custom_id.split(" ")[-1]
+            plasmo = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
+            await inter.response.defer(ephemeral=True)
+            try:
+                await plasmo.unban(
+                    disnake.Object(id=user_id), reason=f"Разбан решением БАС / {inter.author.display_name}"
+                )
+            except disnake.NotFound:
+                await inter.message.edit(components=[])
+                return await inter.send(
+                    embed=disnake.Embed(
+                        title="Ошибка",
+                        description=f"Не удалось разбанить пользователя: Пользователь не в бане",
+                        color=disnake.Color.red(),
+                    ),
+                    ephemeral=True
+                )
+            except disnake.HTTPException as err:
+                return await inter.send(
+                    embed=disnake.Embed(
+                        title="Ошибка",
+                        description=f"Не удалось разбанить пользователя: {err}",
+                        color=disnake.Color.red(),
+                    ),
+                    ephemeral=True
+                )
+            await inter.send(
+                embed=disnake.Embed(
+                    title="Успех",
+                    description="Игрок разбанен",
+                    color=disnake.Color.green(),
+                ),
+                ephemeral=True
+            )
+            await inter.message.edit(components=[])
 
     @commands.slash_command(
         name="заявка",
