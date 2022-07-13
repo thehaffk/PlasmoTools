@@ -40,7 +40,7 @@ class GCATools(commands.Cog):
                 embed=disnake.Embed(
                     description=" | ".join(
                         [
-                            user.display_name,
+                            user.id,
                             str(user),
                             result,
                             "Очищать инвентарь: " + str(clear_inventory),
