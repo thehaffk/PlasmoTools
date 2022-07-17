@@ -93,26 +93,21 @@ class BACSynchronization(commands.Cog):
             settings.BACGuild.without_pass_role_id
         )
         banned_role: disnake.Role = gca_guild.get_role(settings.BACGuild.banned_role_id)
-        try:
-            if has_pass:
-                if has_pass_role not in [role.id for role in member.roles]:
-                    await member.add_roles(has_pass_role)
-                if without_pass_role in [role.id for role in member.roles]:
-                    await member.remove_roles(without_pass_role)
-            else:
-                if without_pass_role not in [role.id for role in member.roles]:
-                    await member.add_roles(without_pass_role)
-                if has_pass_role in [role.id for role in member.roles]:
-                    await member.remove_roles(has_pass_role)
+        if has_pass:
+            if has_pass_role not in [role.id for role in member.roles]:
+                await member.add_roles(has_pass_role)
+            if without_pass_role in [role.id for role in member.roles]:
+                await member.remove_roles(without_pass_role)
+        else:
+            if without_pass_role not in [role.id for role in member.roles]:
+                await member.add_roles(without_pass_role)
+            if has_pass_role in [role.id for role in member.roles]:
+                await member.remove_roles(has_pass_role)
 
-            if is_banned and banned_role not in [role.id for role in member.roles]:
-                await member.add_roles(banned_role)
-            elif banned_role in [role.id for role in member.roles]:
-                await member.remove_roles(banned_role)
-
-        except disnake.HTTPException as err:
-            logger.warning("Could not edit member: %s", err)
-            return False
+        if is_banned and banned_role.id not in [role.id for role in member.roles]:
+            await member.add_roles(banned_role)
+        elif banned_role.id in [role.id for role in member.roles]:
+            await member.remove_roles(banned_role)
 
         return True
 
