@@ -112,7 +112,7 @@ class PlasmoLogger(commands.Cog):
         log_embed = disnake.Embed(
             title="☠️ Игрок забанен",
             color=disnake.Color.red(),
-            description=f"[{nickname}]"
+            description=f"[{nickname if nickname else member.display_name}]("
                         f"(https://rp.plo.su/u/{nickname}) был забанен\n\n"
                         f"**Причина:**\n{reason.strip()}"
                         f"\n\n⚡ by [digital drugs technologies]({settings.LogsServer.invite_url})",
@@ -154,7 +154,7 @@ class PlasmoLogger(commands.Cog):
         log_embed = disnake.Embed(
             title="🔓 Игрок разбанен",
             color=disnake.Color.green(),
-            description=f"[{nickname}]"
+            description=f"[{nickname if nickname else member.name}]"
                         f"(https://rp.plo.su/u/{nickname}) был разбанен"
                         f"\n\n⚡ by [digital drugs]({settings.LogsServer.invite_url})",
         )

@@ -1,10 +1,13 @@
 import logging
+from typing import Optional
 
 import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
 from plasmotools import settings
+from plasmotools.utils import formatters
+from plasmotools.utils.api.tokens import get_token_scopes
 from plasmotools.utils.database import plasmo_structures as database
 
 logger = logging.getLogger(__name__)
@@ -144,7 +147,6 @@ class AdminCommands(commands.Cog):
             ephemeral=True,
         )
 
-
     @commands.guild_only()
     @commands.slash_command(name="роли-список")
     @commands.default_member_permissions(administrator=True)
@@ -160,7 +162,7 @@ class AdminCommands(commands.Cog):
         if len(roles) == 0:
             embed.add_field(
                 name="Роли не найдены",
-                value="Добавьте через `/роли добавить`",
+                value="Добавьте через `/роли-добавить`",
             )
         else:
             embed.add_field(
@@ -337,6 +339,243 @@ class AdminCommands(commands.Cog):
         )
 
     # TODO: Projects / payouts statistics
+
+    # TODO: move roles, projects and payouts to separate files
+
+    @commands.guild_only()
+    @commands.slash_command(name="проекты")
+    async def projects(self, inter: ApplicationCommandInteraction):
+        """
+        Помощь по проектам и выплатам
+        """
+        guild = await database.get_guild(inter.guild.id)
+        if guild is None:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Сервер не зарегистрирован как офицальная структура.\n"
+                                "Если вы считаете что это ошибка - обратитесь в "
+                                f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                ),
+                ephemeral=True,
+            )
+            return
+        await inter.send(
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                description="Проекты в Plasmo Tools - это упрощение системы выплат. Создайте проект через "
+                            "/проекты-создать чтобы получить доступ к /выплата\n\n"
+                            f"**plasmo_token**: Чтобы получить токен плазмо - "
+                            f"откройте тикет в [дискорде DDT]({settings.DevServer.support_invite}). (Как только мне "
+                            f"будет не лень я сделаю адекватное автоматическое получение токена)",
+            ),
+            ephemeral=True,
+        )
+
+    @commands.guild_only()
+    @commands.slash_command(name="проекты-создать")
+    @commands.default_member_permissions(administrator=True)
+    async def projects_create(
+            self,
+            inter: ApplicationCommandInteraction,
+            name: str,
+            webhook_url: str,
+            plasmo_bearer_token: str,
+            from_card: int = commands.Param(gt=0, lt=10000),
+    ):
+        """
+        Зарегистрировать проект
+
+        Parameters
+        ----------
+        name: Название проекта, например "Интерпол"
+        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/api/webhooks/...)
+        from_card: Номер карты, с которой будет производиться выплата
+        plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
+        """
+        # todo: автокопмлит для карт
+        guild = await database.get_guild(inter.guild.id)
+        if guild is None:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Сервер не зарегистрирован как офицальная структура.\n"
+                                "Если вы считаете что это ошибка - обратитесь в "
+                                f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                ),
+                ephemeral=True,
+            )
+            return
+        await inter.response.defer(ephemeral=True)
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.dark_green(),
+                title="Верифицирую токен...",
+            ),
+        )
+        scopes = await get_token_scopes(plasmo_bearer_token)
+        if "bank:transfer" not in scopes and "bank:manage" not in scopes:
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Указан неправильный токен. ||Missing bank:manage / bank:transfer scopes||\n"
+                                f"Получите новый в [поддержке DDT]({settings.DevServer.support_invite})",
+                ),
+            )
+            return
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.dark_green(),
+                title="Регистрирую проект...",
+            ),
+        )
+        db_project = await database.register_project(
+            name=name,
+            guild_discord_id=inter.guild.id,
+            is_active=True,
+            webhook_url=webhook_url,
+            from_card=from_card,
+            plasmo_bearer_token=plasmo_bearer_token,
+        )
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Проект успешно зарегистрирован",
+                description=f"Проект: {name}\n"
+                            f"Вебхук: {webhook_url}\n"
+                            f"Карта: {from_card}\n"
+                            f"Токен: ||{plasmo_bearer_token[:-5]}\\*\\*\\*\\*||\n"
+                            f"ID: {db_project.id}",
+            ),
+        )
+
+    @commands.guild_only()
+    @commands.slash_command(name="проекты-редактировать")
+    @commands.default_member_permissions(administrator=True)
+    async def projects_edit(
+            self,
+            inter: ApplicationCommandInteraction,
+            project_id: int,
+            name: Optional[str] = None,
+            webhook_url: Optional[str] = None,
+            is_active: Optional[bool] = None,
+            from_card: Optional[int] = commands.Param(default=None),
+            plasmo_bearer_token: Optional[str] = None,
+    ):
+        """
+        Редактировать проект в базе данных
+
+        Parameters
+        ----------
+        project_id: Айди проекта
+        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.com/api/webhooks/{id}/{token})
+        is_active: Доступен ли проект
+        name: Название проекта, например "Интерпол" или "Постройка суда"
+        from_card: Номер карты, с которой будет производиться выплата
+        plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
+        """
+        await inter.response.defer(ephemeral=True)
+        db_project = await database.get_project(project_id)
+        if db_project is None:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Проект не найден",
+                ),
+                ephemeral=True,
+            )
+            return
+        await db_project.edit(
+            name=name,
+            is_active=is_active,
+            webhook_url=webhook_url,
+            from_card=from_card,
+            plasmo_bearer_token=plasmo_bearer_token,
+        )
+
+        await inter.send(
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Проект отредактирован",
+            ),
+            ephemeral=True,
+        )
+
+    @commands.guild_only()
+    @commands.slash_command(name="проекты-удалить")
+    @commands.default_member_permissions(administrator=True)
+    async def projects_delete(
+            self,
+            inter: ApplicationCommandInteraction,
+            project_id: int,
+    ):
+        """
+        Удалить проект из базы данных
+
+        Parameters
+        ----------
+        project_id: Айди проекта
+
+        """
+        await inter.response.defer(ephemeral=True)
+        db_project = await database.get_project(project_id)
+        if db_project is None:
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Проект не найден",
+                ),
+            )
+            return
+        await db_project.delete()
+
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Проект удален",
+            ),
+        )
+
+    @commands.guild_only()
+    @commands.slash_command(name="проекты-список")
+    @commands.default_member_permissions(administrator=True)
+    async def roles_list(self, inter: ApplicationCommandInteraction):
+        """
+        Получить список проектов на сервере
+        """
+        await inter.response.defer(ephemeral=True)
+        projects = await database.get_projects(guild_discord_id=inter.guild.id)
+        embed = disnake.Embed(
+            color=disnake.Color.green(),
+            title=f"Все проекты {inter.guild.name}",
+        ).set_footer(
+            text="Используйте /статистика, чтобы просмотреть статистику по проекту",
+        )
+        if len(projects) == 0:
+            embed.add_field(
+                name="Проекты не найдены",
+                value="Создайте первый через `/проекты-создать`",
+            )
+        else:
+            embed.add_field(
+                name="[Доступность] Название проекта",
+                value="Айди / Карта / Токен \nВебхук",
+            )
+            for project in projects:
+                project: database.Project
+                embed.add_field(
+                    name=f"{project.name} - {'Активен' if project.is_active else 'Неактивен'}  ",
+                    value=f"{project.id} / {formatters.format_bank_card(project.from_card)} / ||{project.plasmo_bearer_token[:-5]}\\*\\*\\*\\*||\n"
+                          f"||{project.webhook_url}||",
+                    inline=False,
+                )
+
+        await inter.edit_original_message(embed=embed)
 
     async def cog_load(self):
         """
