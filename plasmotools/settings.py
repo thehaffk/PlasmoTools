@@ -35,6 +35,7 @@ class Emojis:
     plasmo_tools_logo = "<:PlasmoSync:996079144825794560>"
     enabled = "<:enabled:969672429981016084>"
     disabled = "<:disabled:969672065160474684>"
+    diamond = "<:dia:1004883678326956043>"
 
 
 class DevServer:

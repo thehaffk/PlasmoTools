@@ -73,7 +73,7 @@ class GCATools(commands.Cog):
                                     "администратором Plasmo или разработчиком бота для использования этой функции.",
                         color=disnake.Color.red(),
                     ),
-                    ephemeral=True
+                    ephemeral=True,
                 )
 
             user_id = inter.component.custom_id.split(" ")[-1]
@@ -81,7 +81,8 @@ class GCATools(commands.Cog):
             await inter.response.defer(ephemeral=True)
             try:
                 await plasmo.unban(
-                    disnake.Object(id=user_id), reason=f"Разбан решением БАС / {inter.author.display_name}"
+                    disnake.Object(id=user_id),
+                    reason=f"Разбан решением БАС / {inter.author.display_name}",
                 )
             except disnake.NotFound:
                 await inter.message.edit(components=[])
@@ -91,7 +92,7 @@ class GCATools(commands.Cog):
                         description=f"Не удалось разбанить пользователя: Пользователь не в бане",
                         color=disnake.Color.red(),
                     ),
-                    ephemeral=True
+                    ephemeral=True,
                 )
             except disnake.HTTPException as err:
                 return await inter.send(
@@ -100,7 +101,7 @@ class GCATools(commands.Cog):
                         description=f"Не удалось разбанить пользователя: {err}",
                         color=disnake.Color.red(),
                     ),
-                    ephemeral=True
+                    ephemeral=True,
                 )
             await inter.send(
                 embed=disnake.Embed(
@@ -108,7 +109,7 @@ class GCATools(commands.Cog):
                     description="Игрок разбанен",
                     color=disnake.Color.green(),
                 ),
-                ephemeral=True
+                ephemeral=True,
             )
             await inter.message.edit(components=[])
 

@@ -14,7 +14,10 @@ class InfrastructureReactions(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def on_message_listener(self, message: disnake.Message):
-        if message.guild is None or message.guild.id != settings.infrastructure_guild.discord_id:
+        if (
+                message.guild is None
+                or message.guild.id != settings.infrastructure_guild.discord_id
+        ):
             return
 
         if message.channel.id != 1002511787234689084:

@@ -182,8 +182,8 @@ class PlasmoLogger(commands.Cog):
                         title="Не удалось удалить сообщение",
                         description=f"Не удалось удалить сообщение в канале {message.channel.mention}",
                         color=disnake.Color.red(),
-
-                    ))
+                    )
+                )
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
