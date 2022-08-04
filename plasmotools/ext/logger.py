@@ -112,7 +112,7 @@ class PlasmoLogger(commands.Cog):
         log_embed = disnake.Embed(
             title="☠️ Игрок забанен",
             color=disnake.Color.red(),
-            description=f"[{nickname if nickname else member.display_name}]("
+            description=f"[{nickname if nickname else member.display_name}]"
                         f"(https://rp.plo.su/u/{nickname}) был забанен\n\n"
                         f"**Причина:**\n{reason.strip()}"
                         f"\n\n⚡ by [digital drugs technologies]({settings.LogsServer.invite_url})",
@@ -178,8 +178,12 @@ class PlasmoLogger(commands.Cog):
                 await message.delete(delay=10)
             except disnake.Forbidden:
                 await self.bot.get_channel(settings.DevServer.bot_logs_channel_id).send(
-                    embed=disnake.Em
-                )
+                    embed=disnake.Embed(
+                        title="Не удалось удалить сообщение",
+                        description=f"Не удалось удалить сообщение в канале {message.channel.mention}",
+                        color=disnake.Color.red(),
+
+                    ))
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
