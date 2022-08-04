@@ -36,6 +36,7 @@ class BACSynchronization(commands.Cog):
         ):
             return False
         logger.info("Syncing %s (%s)", member, member.display_name)
+        member = self.bot.get_guild(settings.BACGuild.guild_id).get_member(member.id)
 
         # TODO: Rewrite with plasmo.py
         for _ in range(10):
