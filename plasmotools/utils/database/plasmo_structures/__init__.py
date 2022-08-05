@@ -14,6 +14,8 @@ from plasmotools.utils.database.plasmo_structures.payouts import (
     get_payout_entry,
     get_payout_entries,
     register_payout_entry,
+    set_saved_card,
+    get_saved_card,
 )
 from plasmotools.utils.database.plasmo_structures.projects import (
     Project,
@@ -92,12 +94,16 @@ create table if not exists structure_payouts_history
 );
 """,
     """
-
-create table if not exists payouts_user_info_dg_tmp
+create table if not exists structure_saved_cards
 (
     user_id integer not null,
     card_id integer
-);""",
+);
+""",
+    """
+    create unique index if not exists payouts_user_info_user_id_uindex
+    on structure_saved_cards (user_id);
+    """,
 ]
 
 

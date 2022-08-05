@@ -143,8 +143,6 @@ class AdminCommands(commands.Cog):
             ephemeral=True,
         )
 
-
-
     # TODO: move roles, projects and payouts to separate files
 
 

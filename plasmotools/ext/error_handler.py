@@ -2,7 +2,7 @@ import logging
 
 import disnake
 from disnake.ext import commands
-from disnake.ext.commands.errors import MissingPermissions, MissingRole, NotOwner
+from disnake.ext.commands.errors import MissingPermissions, MissingRole, NotOwner, NoPrivateMessage
 
 from plasmotools import settings
 
@@ -47,6 +47,15 @@ class ErrorHandler(commands.Cog):
                     title="У Вас недостаточно прав.",
                     description="Вам нужно быть "
                                 "администратором Plasmo или разработчиком бота для использования этой функции.",
+                    color=disnake.Color.red(),
+                ),
+                ephemeral=True,
+            )
+        elif isinstance(error, NoPrivateMessage):
+            return await inter.send(
+                embed=disnake.Embed(
+                    title="Команда недоступна.",
+                    description="`This command cannot be used in private messages.`",
                     color=disnake.Color.red(),
                 ),
                 ephemeral=True,

@@ -1,9 +1,10 @@
 import logging
-from typing import Tuple
+from typing import Tuple, Optional
 
 import aiohttp
 from aiohttp import ClientOSError
 
+from plasmotools import settings
 from plasmotools.utils import formatters
 
 logger = logging.getLogger(__name__)
@@ -61,3 +62,21 @@ async def search_cards(token: str, query: str) -> list:
         except ClientOSError:
             logger.warning("Could not search cards: %s", "ClientOSError")
             return []
+
+
+async def get_card_data(card_id: int) -> Optional[dict]:
+    # https://rp.plo.su/api/bank/cards?ids=EB-0000
+    async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}) as session:
+        async with session.get(
+                "https://rp.plo.su/api/bank/cards",
+                params={"ids": formatters.format_bank_card(card_id)},
+        ) as resp:
+            if resp.status != 200 or not (response_json := await resp.json()).get("status", False):
+                logger.warning(
+                    "Could not get card data: %s",
+                    response_json.get("error", {}).get("msg", ""),
+                )
+                return None
+            if len(response_json.get("data", [])) == 0:
+                return None
+            return response_json.get("data", [])[0]

@@ -7,7 +7,7 @@ from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
 from plasmotools import settings
-from plasmotools.utils import formatters, autocompleters
+from plasmotools.utils import formatters, autocompleters, api
 from plasmotools.utils.api import bank
 from plasmotools.utils.api.tokens import get_token_scopes
 from plasmotools.utils.database import plasmo_structures as database
@@ -337,58 +337,87 @@ class Payouts(commands.Cog):
             )
         )
         from_card = db_project.from_card
-        user_cards = sorted(
-            [
-                card
-                for card in await bank.search_cards(
-                token=db_project.plasmo_bearer_token,
-                query=plasmo_user.display_name,
+
+        user_card = await database.get_saved_card(user.id)
+        if user_card is None:
+            user_cards = sorted(
+                [
+                    card
+                    for card in await bank.search_cards(
+                    token=db_project.plasmo_bearer_token,
+                    query=plasmo_user.display_name,
+                )
+                    if card["id"] != from_card
+                       and card["holder_type"] == 0
+                       and card["holder"] == plasmo_user.display_name
+                ],
+                key=lambda card: card["value"],
+                reverse=True,
             )
-                if card["id"] != from_card
-                   and card["holder_type"] == 0
-                   and card["holder"] == plasmo_user.display_name
-            ],
-            key=lambda card: card["value"],
-            reverse=True,
-        )
-        if len(user_cards) == 0:
-            await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="Не удалось найти карту для выплаты, Plasmo Tools уведомит игрока об этом",
-                ),
-            )
+            if len(user_cards) == 0:
+                await inter.edit_original_message(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Ошибка",
+                        description="Не удалось найти карту для выплаты, Plasmo Tools уведомит игрока об этом",
+                    ),
+                )
+                try:
+                    await user.send(
+                        embed=disnake.Embed(
+                            color=disnake.Color.red(),
+                            title="⚠ Plasmo Tools не смог произвести выплату",
+                            description="Не удалось найти карту для выплаты, чтобы в дальнейшем получать выплаты от "
+                                        "структур оформите карту на свой аккаунт или укажите любую карту через "
+                                        "/установить-карту-для-выплат",
+                        )
+                    )
+                except disnake.Forbidden:
+                    await inter.send(
+                        embed=disnake.Embed(
+                            color=disnake.Color.red(),
+                            title="Ошибка",
+                            description=f"У {user.mention} закрыты личные сообщения, вам придется лично попросить игрока "
+                                        f"установить карту через /установить-карту-для-выплат",
+                        ),
+                        ephemeral=True,
+                    )
+                return
+
+            user_card: int = user_cards[0]['id']
             try:
                 await user.send(
                     embed=disnake.Embed(
                         color=disnake.Color.red(),
-                        title="⚠ Plasmo Tools не смог произвести выплату",
-                        description="Не удалось найти карту для выплаты, чтобы в дальнейшем получать выплаты от "
-                                    "структур оформите карту на свой аккаунт или укажите любую карту через "
-                                    "/установить-карту-для-выплат",
+                        title="⚠ Plasmo Tools установил первую найденную карту как основную",
+                        description=f"Вы не установили карту для выплат. Бот установил карту "
+                                    f"**{formatters.format_bank_card(user_card)}** как основную.\n\n"
+                                    f"Воспользуйтесь /указать-карту-для-выплат, если хотите получать выплаты "
+                                    f"на другую карту"
                     )
                 )
             except disnake.Forbidden:
-                await inter.send(
-                    embed=disnake.Embed(
-                        color=disnake.Color.red(),
-                        title="Ошибка",
-                        description=f"У {user.mention} закрыты личные сообщения, вам придется лично попросить игрока "
-                                    f"установить карту через /установить-карту-для-выплат",
-                    ),
-                    ephemeral=True,
-                )
-            return
+                pass
+            await database.set_saved_card(user.id, user_card)
+
         await inter.edit_original_message(
             embed=disnake.Embed(
                 color=disnake.Color.yellow(), description="Перевожу алмазы..."
             )
         )
+        if from_card == user_card:
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Невозможно первести алмазы на эту карту",
+                ),
+            )
+            return
         status, error_message = await bank.transfer(
             token=db_project.plasmo_bearer_token,
             from_card=from_card,
-            to_card=user_cards[0]["id"],
+            to_card=user_card,
             amount=amount,
             message=message,
         )
@@ -397,7 +426,7 @@ class Payouts(commands.Cog):
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Ошибка",
-                    description="API вернуло ошибку:" + error_message,
+                    description="API вернуло ошибку: **" + error_message + "**",
                 ),
             )
             return
@@ -441,7 +470,7 @@ class Payouts(commands.Cog):
             .add_field("С карты", formatters.format_bank_card(from_card), inline=False)
             .add_field(
                 "На карту",
-                formatters.format_bank_card(user_cards[0]["id"]),
+                formatters.format_bank_card(user_card),
                 inline=False,
             )
         )
@@ -451,7 +480,7 @@ class Payouts(commands.Cog):
                 color=disnake.Color.green(),
                 title="Успех",
                 description=f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
-                            f"карту {formatters.format_bank_card(user_cards[0]['id'])}",
+                            f"карту {formatters.format_bank_card(user_card)}",
             ),
         )
         # todo: save failed payments and retry them later
@@ -461,16 +490,84 @@ class Payouts(commands.Cog):
             amount=amount,
             message=message,
             from_card=from_card,
-            to_card=user_cards[0]["id"],
+            to_card=user_card,
             is_payed=True,
         )
         await self.bot.get_channel(settings.DevServer.transactions_channel_id).send(
             embed=disnake.Embed(
                 description=f"{formatters.format_bank_card(from_card)} -> "
                             f"{amount} {settings.Emojis.diamond} -> "
-                            f"{formatters.format_bank_card(user_cards[0]['id'])}\n"
+                            f"{formatters.format_bank_card(user_card)}\n"
                             f" {message}",
             )
+        )
+
+    @commands.slash_command(name="установить-карту-для-выплат")
+    async def set_saved_card(
+            self,
+            inter: disnake.ApplicationCommandInteraction,
+            card: str = commands.Param(
+                autocomplete=autocompleters.search_bank_cards_autocompleter,
+            )):
+        """
+        Установить карту для выплат гос. структур
+
+        Parameters
+        ----------
+        card: Номер карты в формате 9000 или EB-9000. EB-0142 -> 142. EB-3666 -> 3666
+        """
+        await inter.response.defer(ephemeral=True)
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.yellow(), description="Валидирую данные..."
+            ))
+        try:
+            card_id = int(card.replace(" ", "").replace("EB-", "").replace("ЕВ-", ""))
+            if card_id < 0 or card_id > 9999:
+                raise ValueError
+        except ValueError:
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Не удалось распознать номер карты",
+                ),
+            )
+            return
+
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.yellow(), description="Получаю данные о карте..."
+            ))
+
+        api_card = await api.bank.get_card_data(card_id)
+        if api_card is None:
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Не удалось получить данные о карте",
+                ),
+            )
+            return
+
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.yellow(), description="Сохраняю карту в базу данных..."
+            ))
+
+        await database.set_saved_card(
+            user_id=inter.author.id,
+            card_id=card_id,
+        )
+        await inter.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Успех",
+                description="Карта для выплат успешно установлена\n"
+                            f" {formatters.format_bank_card(card_id)} - {api_card['name']}\n"
+                            f"Принадлежит {api_card['holder']}",
+            ),
         )
 
     async def cog_load(self):
