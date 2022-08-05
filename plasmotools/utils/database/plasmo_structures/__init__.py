@@ -64,7 +64,7 @@ create table if not exists structure_roles
     """
 create table if not exists structure_projects
 (
-    project_id                  integer not null
+    id                  integer not null
         constraint structure_projects_pk
             primary key autoincrement,
     name                text    not null,
@@ -79,7 +79,7 @@ create table if not exists structure_projects
 
 create table if not exists structure_payouts_history
 (
-    project_id         integer not null
+    id         integer not null
         constraint structure_payouts_history_pk
             primary key autoincrement,
     project_id integer not null,

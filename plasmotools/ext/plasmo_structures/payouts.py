@@ -153,7 +153,7 @@ class Payouts(commands.Cog):
         Parameters
         ----------
         project_id: Айди проекта
-        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.com/api/webhooks/{project_id}/{token})
+        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.com/api/webhooks/{id}/{token})
         is_active: Доступен ли проект
         name: Название проекта, например "Интерпол" или "Постройка суда"
         from_card: Номер карты, с которой будет производиться выплата
@@ -344,7 +344,7 @@ class Payouts(commands.Cog):
                 token=db_project.plasmo_bearer_token,
                 query=plasmo_user.display_name,
             )
-                if card["project_id"] != from_card
+                if card["id"] != from_card
                    and card["holder_type"] == 0
                    and card["holder"] == plasmo_user.display_name
             ],
@@ -388,7 +388,7 @@ class Payouts(commands.Cog):
         status, error_message = await bank.transfer(
             token=db_project.plasmo_bearer_token,
             from_card=from_card,
-            to_card=user_cards[0]["project_id"],
+            to_card=user_cards[0]["id"],
             amount=amount,
             message=message,
         )
@@ -441,7 +441,7 @@ class Payouts(commands.Cog):
             .add_field("С карты", formatters.format_bank_card(from_card), inline=False)
             .add_field(
                 "На карту",
-                formatters.format_bank_card(user_cards[0]["project_id"]),
+                formatters.format_bank_card(user_cards[0]["id"]),
                 inline=False,
             )
         )
@@ -451,7 +451,7 @@ class Payouts(commands.Cog):
                 color=disnake.Color.green(),
                 title="Успех",
                 description=f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
-                            f"карту {formatters.format_bank_card(user_cards[0]['project_id'])}",
+                            f"карту {formatters.format_bank_card(user_cards[0]['id'])}",
             ),
         )
         # todo: save failed payments and retry them later
@@ -461,8 +461,16 @@ class Payouts(commands.Cog):
             amount=amount,
             message=message,
             from_card=from_card,
-            to_card=user_cards[0]["project_id"],
+            to_card=user_cards[0]["id"],
             is_payed=True,
+        )
+        await self.bot.get_channel(settings.DevServer.transactions_channel_id).send(
+            embed=disnake.Embed(
+                description=f"{formatters.format_bank_card(from_card)} -> "
+                            f"{amount} {settings.Emojis.diamond} -> "
+                            f"{formatters.format_bank_card(user_cards[0]['id'])}\n"
+                            f" {message}",
+            )
         )
 
     async def cog_load(self):
