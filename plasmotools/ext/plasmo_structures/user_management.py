@@ -61,6 +61,197 @@ class UserManagement(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
+    @commands.guild_only()
+    @commands.slash_command(name="роли-список")
+    @commands.default_member_permissions(administrator=True)
+    async def roles_list(self, inter: ApplicationCommandInteraction):
+        """
+        Получить список ролей в сервере
+        """
+        roles = await database.get_roles(inter.guild.id)
+        embed = disnake.Embed(
+            color=disnake.Color.green(),
+            title=f"Все роли {inter.guild.name}",
+        )
+        if len(roles) == 0:
+            embed.add_field(
+                name="Роли не найдены",
+                value="Добавьте через `/роли-добавить`",
+            )
+        else:
+            embed.add_field(
+                name="Название роли",
+                value="[Доступна ли роль] Пинг роли / Айди роли\nВебхук",
+            )
+            for role in roles:
+                embed.add_field(
+                    name=f"{role.name}",
+                    value=f"{settings.Emojis.enabled if role.available else settings.Emojis.disabled} "
+                          f"<@&{role.role_discord_id}> / `{role.role_discord_id}` \n ||{role.webhook_url}||",
+                    inline=False,
+                )
+
+        await inter.send(embed=embed, ephemeral=True)
+
+    @commands.guild_only()
+    @commands.slash_command(name="роли-добавить")
+    @commands.default_member_permissions(administrator=True)
+    async def roles_add(
+            self,
+            inter: ApplicationCommandInteraction,
+            role: disnake.Role,
+            name: str,
+            webhook_url: str,
+            available: bool = True,
+    ):
+        """
+        Добавить роль в базу данных
+
+        Parameters
+        ----------
+        role: Роль
+        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/api/webhooks/...)
+        available: Доступна ли роль для найма и снятия
+        name: Название роли, например "Интерпол"
+
+        """
+        # TODO: Check webhook url with regex
+        guild = await database.get_guild(inter.guild.id)
+        if guild is None:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Сервер не зарегистрирован как офицальная структура.\n"
+                                "Если вы считаете что это ошибка - обратитесь в "
+                                f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                ),
+                ephemeral=True,
+            )
+            return
+
+        if role.id == guild.player_role_id or role.id == guild.head_role_id:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Эта роль не может быть закреплена как нанимаемая\n"
+                                "Если вы считаете что это ошибка - обратитесь в "
+                                f"[поддержку digital drugs technologies]{settings.DevServer.support_invite}",
+                ),
+                ephemeral=True,
+            )
+            return
+        await inter.response.defer(ephemeral=True)
+        db_role = await database.get_role(role.id)
+        if db_role is not None:
+            await db_role.edit(
+                name=name,
+                webhook_url=webhook_url,
+                available=available,
+            )
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.green(),
+                    title="Роль обновлена",
+                    description=f"Роль `{name}` обновлена",
+                ),
+            )
+        else:
+            await database.add_role(
+                guild_discord_id=inter.guild.id,
+                role_discord_id=role.id,
+                name=name,
+                webhook_url=webhook_url,
+                available=available,
+            )
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.green(),
+                    title="Роль создана",
+                    description=f"Роль `{name}` зарегистрирована",
+                ),
+            )
+
+    @commands.guild_only()
+    @commands.slash_command(name="роли-удалить")
+    @commands.default_member_permissions(administrator=True)
+    async def roles_delete(
+            self,
+            inter: ApplicationCommandInteraction,
+            role: disnake.Role,
+    ):
+        """
+        Удалить роль из базы данных
+        """
+        db_role = await database.get_role(role.id)
+        if db_role is None:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Роль не найдена в базе данных",
+                ),
+                ephemeral=True,
+            )
+            return
+        await db_role.delete()
+
+        await inter.send(
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Роль удалена",
+            ),
+            ephemeral=True,
+        )
+
+    @commands.guild_only()
+    @commands.slash_command(name="роли-редактировать")
+    @commands.default_member_permissions(administrator=True)
+    async def roles_edit(
+            self,
+            inter: ApplicationCommandInteraction,
+            role: disnake.Role,
+            name: str = None,
+            webhook_url: str = None,
+            available: bool = None,
+    ):
+        """
+        Редактировать роль в базе данных
+
+        Parameters
+        ----------
+        role: Роль
+        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.com/api/webhooks/{project_id}/{token})
+        available: Доступна ли роль для найма и снятия
+        name: Название роли, например "Интерпол"
+
+        """
+        db_role = await database.get_role(role.id)
+        if db_role is None:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Роль не найдена в базе данных",
+                ),
+                ephemeral=True,
+            )
+            return
+        await db_role.edit(
+            name=name,
+            webhook_url=webhook_url,
+            available=available,
+        )
+
+        await inter.send(
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Роль отредактирована",
+            ),
+            ephemeral=True,
+        )
+
     @commands.slash_command(name="нанять")
     @commands.guild_only()
     @commands.default_member_permissions(manage_roles=True)

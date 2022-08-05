@@ -82,7 +82,7 @@ class PlasmoLogger(commands.Cog):
     @commands.Cog.listener()
     async def on_member_ban(self, guild: disnake.Guild, member: disnake.Member):
         """
-        Monitor bans, calls PlasmoAPI to get reason, nickname and discord user id
+        Monitor bans, calls PlasmoAPI to get reason, nickname and discord user project_id
         """
         if guild.id != settings.PlasmoRPGuild.guild_id:
             return False
@@ -128,7 +128,7 @@ class PlasmoLogger(commands.Cog):
     @commands.Cog.listener()
     async def on_member_unban(self, guild: disnake.Guild, member: disnake.User):
         """
-        Monitor unbans, calls PlasmoAPI to get nickname and discord user id
+        Monitor unbans, calls PlasmoAPI to get nickname and discord user project_id
         """
         if guild.id != settings.PlasmoRPGuild.guild_id:
             return False

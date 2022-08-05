@@ -35,7 +35,7 @@ class BACSynchronization(commands.Cog):
                 or not isinstance(member, disnake.Member)
         ):
             return False
-        logger.info("Syncing %s (%s)", member, member.display_name)
+        logger.debug("Syncing %s (%s)", member, member.display_name)
         member = self.bot.get_guild(settings.BACGuild.guild_id).get_member(member.id)
 
         # TODO: Rewrite with plasmo.py
@@ -95,19 +95,15 @@ class BACSynchronization(commands.Cog):
         )
         banned_role: disnake.Role = gca_guild.get_role(settings.BACGuild.banned_role_id)
         if has_pass:
-            if has_pass_role not in [role.id for role in member.roles]:
-                await member.add_roles(has_pass_role)
-            if without_pass_role in [role.id for role in member.roles]:
-                await member.remove_roles(without_pass_role)
+            await member.add_roles(has_pass_role)
+            await member.remove_roles(without_pass_role)
         else:
-            if without_pass_role not in [role.id for role in member.roles]:
-                await member.add_roles(without_pass_role)
-            if has_pass_role in [role.id for role in member.roles]:
-                await member.remove_roles(has_pass_role)
+            await member.add_roles(without_pass_role)
+            await member.remove_roles(has_pass_role)
 
-        if is_banned and banned_role.id not in [role.id for role in member.roles]:
+        if is_banned:
             await member.add_roles(banned_role)
-        elif banned_role.id in [role.id for role in member.roles]:
+        else:
             await member.remove_roles(banned_role)
 
         return True
@@ -231,7 +227,6 @@ class BACSynchronization(commands.Cog):
         await inter.edit_original_message(
             embed=disnake.Embed(
                 title="✅ Синхронизация завершена",
-                description="Успешно",
                 color=disnake.Color.dark_green(),
             )
         )

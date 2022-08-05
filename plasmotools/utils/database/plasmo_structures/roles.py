@@ -83,9 +83,9 @@ async def get_role(role_discord_id: int) -> Optional[Role]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """SELECT 
-                                name, guild_discord_id, role_discord_id, available, webhook_url
-                                FROM structure_roles WHERE role_discord_id = ?
-                                """,
+                                    name, guild_discord_id, role_discord_id, available, webhook_url
+                                    FROM structure_roles WHERE role_discord_id = ?
+                                    """,
                 (role_discord_id,),
         ) as cursor:
             row = await cursor.fetchone()
@@ -111,8 +111,8 @@ async def add_role(
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """INSERT INTO structure_roles (
-                                name, guild_discord_id, role_discord_id, available, webhook_url
-                            ) VALUES (?, ?, ?, ?, ?)""",
+                                    name, guild_discord_id, role_discord_id, available, webhook_url
+                                ) VALUES (?, ?, ?, ?, ?)""",
                 (name, guild_discord_id, role_discord_id, available, webhook_url),
         ) as cursor:
             await db.commit()
@@ -123,8 +123,8 @@ async def get_roles(guild_discord_id: Optional[int] = None) -> List[Role]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """SELECT 
-                                name, guild_discord_id, role_discord_id, available, webhook_url
-                                FROM structure_roles """
+                                    name, guild_discord_id, role_discord_id, available, webhook_url
+                                    FROM structure_roles """
                 + ("WHERE guild_discord_id = ?" if guild_discord_id is not None else ""),
                 (guild_discord_id,) if guild_discord_id is not None else (),
         ) as cursor:

@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 PATH = settings.DATABASE_PATH
 
 
+# todo: crud interface for saved cards
+
+
 class Project:
     def __init__(
             self,
@@ -90,14 +93,14 @@ class Project:
             await db.commit()
 
 
-async def get_project(id: int) -> Optional[Project]:
+async def get_project(project_id: int) -> Optional[Project]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """SELECT 
-                                    id, name, is_active, guild_discord_id, webhook_url, from_card, plasmo_bearer_token
-                                    FROM structure_projects WHERE id = ?
-                                    """,
-                (id,),
+                                        id, name, is_active, guild_discord_id, webhook_url, from_card, plasmo_bearer_token
+                                        FROM structure_projects WHERE id = ?
+                                        """,
+                (project_id,),
         ) as cursor:
             row = await cursor.fetchone()
             if row is None:
@@ -143,8 +146,8 @@ async def get_projects(guild_discord_id: Optional[int] = None) -> List[Project]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """SELECT 
-                                    id, name, is_active, guild_discord_id, webhook_url, from_card, plasmo_bearer_token
-                                    FROM structure_projects """
+                                        id, name, is_active, guild_discord_id, webhook_url, from_card, plasmo_bearer_token
+                                        FROM structure_projects """
                 + ("WHERE guild_discord_id = ?" if guild_discord_id is not None else ""),
                 (guild_discord_id,) if guild_discord_id is not None else (),
         ) as cursor:

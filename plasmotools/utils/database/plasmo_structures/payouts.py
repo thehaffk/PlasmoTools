@@ -46,7 +46,7 @@ class PayoutEntry:
                         to_card = ?,
                         amount = ?,
                         message = ?
-                WHERE id = ? 
+                WHERE project_id = ? 
                 """,
                 (
                     self.project_id,
@@ -95,7 +95,7 @@ class PayoutEntry:
 
         async with aiosqlite.connect(PATH) as db:
             await db.execute(
-                """DELETE FROM structure_payouts_history WHERE id = ?""",
+                """DELETE FROM structure_payouts_history WHERE project_id = ?""",
                 (self.id,),
             )
             await db.commit()
@@ -105,9 +105,9 @@ async def get_payout_entry(_id: int) -> Optional[PayoutEntry]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """SELECT 
-                            project_id, user_id, is_payed, from_card, to_card, amount, message
-                            FROM structure_payouts_history WHERE id = ?
-                            """,
+                                project_id, user_id, is_payed, from_card, to_card, amount, message
+                                FROM structure_payouts_history WHERE project_id = ?
+                                """,
                 (_id,),
         ) as cursor:
             row = await cursor.fetchone()
@@ -138,8 +138,8 @@ async def register_payout_entry(
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """INSERT INTO structure_payouts_history (
-                            project_id, user_id, is_payed, from_card, to_card, amount, message
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                                project_id, user_id, is_payed, from_card, to_card, amount, message
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (project_id, user_id, int(is_payed), from_card, to_card, amount, message),
         ) as cursor:
             await db.commit()
@@ -150,8 +150,8 @@ async def get_payout_entries(project_id: Optional[int] = None) -> List[PayoutEnt
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """SELECT 
-                            id, project_id, user_id, is_payed, from_card, to_card, amount, message
-                            FROM structure_payouts_history """
+                                project_id, project_id, user_id, is_payed, from_card, to_card, amount, message
+                                FROM structure_payouts_history """
                 + ("WHERE project_id = ?" if project_id is not None else ""),
                 (project_id,) if project_id is not None else (),
         ) as cursor:

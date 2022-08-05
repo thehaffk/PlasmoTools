@@ -26,7 +26,7 @@ class CSEntry:
             frozen: bool,
             term: Optional[int] = None,
     ):
-        self.id = entry_id
+        self.project_id = entry_id
         self.user_discord_id = user_discord_id
         self.original_hours = original_hours
         self.hours_remaining = hours_remaining
@@ -46,7 +46,7 @@ class CSEntry:
                         frozen = ?,
                         term = ?
 
-                WHERE id = ? 
+                WHERE project_id = ?
                 """,
                 (
                     self.user_discord_id,
@@ -55,7 +55,7 @@ class CSEntry:
                     self.date_issued,
                     int(self.frozen),
                     self.term,
-                    self.id,
+                    self.project_id,
                 ),
             )
             await db.commit()
@@ -88,8 +88,8 @@ class CSEntry:
 
         async with aiosqlite.connect(PATH) as db:
             await db.execute(
-                """DELETE FROM structure_payouts_history WHERE id = ?""",
-                (self.id,),
+                """DELETE FROM structure_payouts_history WHERE project_id = ?""",
+                (self.project_id,),
             )
             await db.commit()
 
@@ -99,7 +99,7 @@ async def get_payout_entry(_id: int) -> Optional[PayoutEntry]:
         async with db.execute(
                 """SELECT 
                         project_id, user_id, is_payed, from_card, to_card, amount, message
-                        FROM structure_payouts_history WHERE id = ?
+                        FROM structure_payouts_history WHERE project_id = ?
                         """,
                 (_id,),
         ) as cursor:
@@ -143,7 +143,7 @@ async def get_payout_entries(project_id: Optional[int] = None) -> List[PayoutEnt
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
                 """SELECT
-                        id, project_id, user_id, is_payed, from_card, to_card, amount, message
+                        project_id, project_id, user_id, is_payed, from_card, to_card, amount, message
                         FROM structure_payouts_history """
                 + ("WHERE project_id = ?" if project_id is not None else ""),
                 (project_id,) if project_id is not None else (),
