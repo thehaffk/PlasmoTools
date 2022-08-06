@@ -144,7 +144,6 @@ class AdminCommands(commands.Cog):
         )
 
 
-
 def setup(bot: disnake.ext.commands.Bot):
     """
     Disnake internal setup function

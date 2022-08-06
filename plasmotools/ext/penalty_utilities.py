@@ -33,14 +33,10 @@ class PenaltyUtilities(commands.Cog):
         await self.check_all_penalties()
 
     async def _cancel_penalty(self, penalty: dict):
-        await self.bot.get_channel(
-            settings.DevServer.penalty_logs_channel_id
-        ).send(
+        await self.bot.get_channel(settings.DevServer.penalty_logs_channel_id).send(
             embed=disnake.Embed(
                 title="Automatic penalty cancellation",
-            ).add_field(
-                "penalty data", penalty, inline=False
-            )
+            ).add_field("penalty data", penalty, inline=False)
         )
         await api.bank.cancel_penalty(penalty["id"])
 

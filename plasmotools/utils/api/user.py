@@ -7,7 +7,9 @@ from aiohttp import ClientOSError
 logger = logging.getLogger(__name__)
 
 
-async def get_user_data(nick: str = None, discord_id: int = None, plasmo_id: int = None) -> Optional[dict]:
+async def get_user_data(
+        nick: str = None, discord_id: int = None, plasmo_id: int = None
+) -> Optional[dict]:
     """
     Get user data by nick, discord_id or plasmo_id.
     """
@@ -24,10 +26,11 @@ async def get_user_data(nick: str = None, discord_id: int = None, plasmo_id: int
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                    "https://rp.plo.su/api/user/profile",
-                    params=params
+                    "https://rp.plo.su/api/user/profile", params=params
             ) as resp:
-                if resp.status != 200 or not (response_json := await resp.json()).get("status", False):
+                if resp.status != 200 or not (response_json := await resp.json()).get(
+                        "status", False
+                ):
                     return None
                 return response_json.get("data", {})
     except ClientOSError:

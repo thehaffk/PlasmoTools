@@ -66,12 +66,16 @@ async def search_cards(token: str, query: str) -> list:
 
 async def get_card_data(card_id: int) -> Optional[dict]:
     # https://rp.plo.su/api/bank/cards?ids=EB-0000
-    async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}) as session:
+    async with aiohttp.ClientSession(
+            headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
+    ) as session:
         async with session.get(
                 "https://rp.plo.su/api/bank/cards",
                 params={"ids": formatters.format_bank_card(card_id)},
         ) as resp:
-            if resp.status != 200 or not (response_json := await resp.json()).get("status", False):
+            if resp.status != 200 or not (response_json := await resp.json()).get(
+                    "status", False
+            ):
                 logger.warning(
                     "Could not get card data: %s",
                     response_json.get("error", {}).get("msg", ""),
@@ -84,32 +88,44 @@ async def get_card_data(card_id: int) -> Optional[dict]:
 
 async def get_penalties(tab: str = "active") -> List[dict]:
     try:
-        async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}) as session:
+        async with aiohttp.ClientSession(
+                headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
+        ) as session:
             penalties = []
             offset = 0
             async with session.get(
                     "https://rp.plo.su/api/bank/penalties/helper?",
                     params={"tab": tab, "offset": 0, "count": 100},
             ) as resp:
-                if resp.status != 200 or not (response_json := await resp.json()).get("status", False):
+                if resp.status != 200 or not (response_json := await resp.json()).get(
+                        "status", False
+                ):
                     logger.warning(
                         "Could not get penalties: %s",
                         response_json.get("error", {}).get("msg", ""),
                     )
                     return []
-                penalties += response_json.get("data", {}).get("all", {}).get("list", [])
-            while offset + 100 < response_json.get("data", {}).get("all", {}).get("total", 0):
+                penalties += (
+                    response_json.get("data", {}).get("all", {}).get("list", [])
+                )
+            while offset + 100 < response_json.get("data", {}).get("all", {}).get(
+                    "total", 0
+            ):
                 async with session.get(
                         "https://rp.plo.su/api/bank/penalties/helper?",
                         params={"tab": tab, "offset": offset, "count": 100},
                 ) as resp:
-                    if resp.status != 200 or not (response_json := await resp.json()).get("status", False):
+                    if resp.status != 200 or not (
+                            response_json := await resp.json()
+                    ).get("status", False):
                         logger.warning(
                             "Could not get penalties: %s",
                             response_json.get("error", {}).get("msg", ""),
                         )
                         return []
-                    penalties += response_json.get("data", {}).get("all", {}).get("list", [])
+                    penalties += (
+                        response_json.get("data", {}).get("all", {}).get("list", [])
+                    )
                     offset += 100
             return penalties
     except ClientOSError:
@@ -117,8 +133,12 @@ async def get_penalties(tab: str = "active") -> List[dict]:
         return []
 
 
-async def cancel_penalty(penalty_id: int, token: str = settings.ADMIN_PLASMO_TOKEN) -> Tuple[bool, str]:
-    async with aiohttp.ClientSession(headers={"Authorization": f"Bearer {token}"}) as session:
+async def cancel_penalty(
+        penalty_id: int, token: str = settings.ADMIN_PLASMO_TOKEN
+) -> Tuple[bool, str]:
+    async with aiohttp.ClientSession(
+            headers={"Authorization": f"Bearer {token}"}
+    ) as session:
         async with session.delete(
                 "https://rp.plo.su/api/bank/penalty",
                 json={"penalty": penalty_id},

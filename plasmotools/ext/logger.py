@@ -167,14 +167,13 @@ class PlasmoLogger(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: disnake.Message):
-        if message.guild is None:
-            return False
         if (
-                message.guild.id == 672312131760291842
+                message.guild is not None
+                and message.guild.id == settings.PlasmoRPGuild.guild_id
                 and message.type == disnake.MessageType.thread_created
         ):
             try:
-                await message.delete(delay=10)
+                await message.delete(delay=3)
             except disnake.Forbidden:
                 await self.bot.get_channel(settings.DevServer.bot_logs_channel_id).send(
                     embed=disnake.Embed(
@@ -183,6 +182,32 @@ class PlasmoLogger(commands.Cog):
                         color=disnake.Color.red(),
                     )
                 )
+            return
+
+        if message.channel.id == settings.PlasmoRPGuild.notifications_channel_id \
+                and message.author.name == "Предупреждения":
+            warned_user = message.mentions[0]
+            try:
+                await warned_user.send(
+                    "https://media.discordapp.net/"
+                    "attachments/899202029656895518/971525622297931806/ezgif-7-17469e0166d2.gif"
+                )
+                await warned_user.send(
+                    embed=disnake.Embed(
+                        title="Вам выдали предупреждение на Plasmo RP",
+                        color=disnake.Color.dark_red(),
+                        description=f"Оспорить решение "
+                                    f"модерации или снять варн можно "
+                                    f"только тут - {settings.BACGuild.invite_url}\n\n\n"
+                                    f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
+                    )
+                )
+                await warned_user.send(
+                    content=f"{settings.BACGuild.invite_url}",
+                )
+            except disnake.Forbidden as err:
+                logger.warning(err)
+                return False
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)

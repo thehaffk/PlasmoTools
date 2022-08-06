@@ -383,7 +383,7 @@ class Payouts(commands.Cog):
                     )
                 return
 
-            user_card: int = user_cards[0]['id']
+            user_card: int = user_cards[0]["id"]
             try:
                 await user.send(
                     embed=disnake.Embed(
@@ -392,7 +392,7 @@ class Payouts(commands.Cog):
                         description=f"Вы не установили карту для выплат. Бот установил карту "
                                     f"**{formatters.format_bank_card(user_card)}** как основную.\n\n"
                                     f"Воспользуйтесь /указать-карту-для-выплат, если хотите получать выплаты "
-                                    f"на другую карту"
+                                    f"на другую карту",
                     )
                 )
             except disnake.Forbidden:
@@ -507,7 +507,8 @@ class Payouts(commands.Cog):
             inter: disnake.ApplicationCommandInteraction,
             card: str = commands.Param(
                 autocomplete=autocompleters.search_bank_cards_autocompleter,
-            )):
+            ),
+    ):
         """
         Установить карту для выплат гос. структур
 
@@ -519,7 +520,8 @@ class Payouts(commands.Cog):
         await inter.edit_original_message(
             embed=disnake.Embed(
                 color=disnake.Color.yellow(), description="Валидирую данные..."
-            ))
+            )
+        )
         try:
             card_id = int(card.replace(" ", "").replace("EB-", "").replace("ЕВ-", ""))
             if card_id < 0 or card_id > 9999:
@@ -537,7 +539,8 @@ class Payouts(commands.Cog):
         await inter.edit_original_message(
             embed=disnake.Embed(
                 color=disnake.Color.yellow(), description="Получаю данные о карте..."
-            ))
+            )
+        )
 
         api_card = await api.bank.get_card_data(card_id)
         if api_card is None:
@@ -552,8 +555,10 @@ class Payouts(commands.Cog):
 
         await inter.edit_original_message(
             embed=disnake.Embed(
-                color=disnake.Color.yellow(), description="Сохраняю карту в базу данных..."
-            ))
+                color=disnake.Color.yellow(),
+                description="Сохраняю карту в базу данных...",
+            )
+        )
 
         await database.set_saved_card(
             user_id=inter.author.id,
