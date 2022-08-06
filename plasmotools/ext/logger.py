@@ -184,8 +184,10 @@ class PlasmoLogger(commands.Cog):
                 )
             return
 
-        if message.channel.id == settings.PlasmoRPGuild.notifications_channel_id \
-                and message.author.name == "Предупреждения":
+        if (
+                message.channel.id == settings.PlasmoRPGuild.notifications_channel_id
+                and message.author.name == "Предупреждения"
+        ):
             warned_user = message.mentions[0]
             try:
                 await warned_user.send(
