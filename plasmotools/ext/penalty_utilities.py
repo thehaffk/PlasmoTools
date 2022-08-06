@@ -53,7 +53,6 @@ class PenaltyUtilities(commands.Cog):
         banned_players: List[str] = []
         active_players: List[str] = []
         for penalty in active_penalties + expired_penalties + on_check_penalties:
-            print(penalty, banned_players, active_players)
             if penalty["user"] in active_players:
                 continue
 
