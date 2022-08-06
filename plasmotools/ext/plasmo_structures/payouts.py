@@ -76,7 +76,7 @@ class Payouts(commands.Cog):
         from_card: Номер карты, с которой будет производиться выплата
         plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
         """
-        # todo: автокопмлит для карт
+        # todo: autocomplete for from_card
         guild = await database.get_guild(inter.guild.id)
         if guild is None:
             await inter.send(
@@ -330,7 +330,6 @@ class Payouts(commands.Cog):
                 ),
             )
             return
-        # todo: get saved cards from database
         await inter.edit_original_message(
             embed=disnake.Embed(
                 color=disnake.Color.yellow(), description="Получаю карту для выплаты..."

@@ -13,7 +13,6 @@ from plasmotools import settings
 logger = logging.getLogger(__name__)
 
 
-# TODO: Death logger (????)
 # TODO: fwarns logger
 
 

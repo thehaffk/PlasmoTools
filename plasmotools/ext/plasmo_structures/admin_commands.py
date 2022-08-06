@@ -143,7 +143,6 @@ class AdminCommands(commands.Cog):
             ephemeral=True,
         )
 
-    # TODO: move roles, projects and payouts to separate files
 
 
 def setup(bot: disnake.ext.commands.Bot):

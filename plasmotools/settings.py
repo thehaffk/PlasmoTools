@@ -48,6 +48,7 @@ class DevServer:
     bot_logs_channel_id = 980950597203292190
     errors_channel_id = 996245098067144704
     transactions_channel_id = 1005052807302348871
+    penalty_logs_channel_id = 1005254395635716217
 
     support_invite = "https://discord.gg/Xn7Ya9gv5a"
 

@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 PATH = settings.DATABASE_PATH
 
 
-# todo: crud interface for saved cards
 
 
 class Project:
