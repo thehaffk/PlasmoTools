@@ -14,14 +14,14 @@ PATH = settings.DATABASE_PATH
 
 class Project:
     def __init__(
-            self,
-            project_id: int,
-            name: str,
-            is_active: int | bool,
-            guild_discord_id: int,
-            webhook_url: str,
-            from_card: Optional[int] = None,
-            plasmo_bearer_token: Optional[str] = None,
+        self,
+        project_id: int,
+        name: str,
+        is_active: int | bool,
+        guild_discord_id: int,
+        webhook_url: str,
+        from_card: Optional[int] = None,
+        plasmo_bearer_token: Optional[str] = None,
     ):
         self.id = project_id
         self.name = name
@@ -57,13 +57,13 @@ class Project:
             await db.commit()
 
     async def edit(
-            self,
-            name: Optional[str] = None,
-            is_active: Optional[int] = None,
-            guild_discord_id: Optional[int] = None,
-            webhook_url: Optional[str] = None,
-            from_card: Optional[int] = None,
-            plasmo_bearer_token: Optional[str] = None,
+        self,
+        name: Optional[str] = None,
+        is_active: Optional[int] = None,
+        guild_discord_id: Optional[int] = None,
+        webhook_url: Optional[str] = None,
+        from_card: Optional[int] = None,
+        plasmo_bearer_token: Optional[str] = None,
     ):
         if name is not None:
             self.name = name
@@ -93,11 +93,11 @@ class Project:
 async def get_project(project_id: int) -> Optional[Project]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """SELECT 
+            """SELECT 
                                                     id, name, is_active, guild_discord_id, webhook_url, from_card, plasmo_bearer_token
                                                     FROM structure_projects WHERE id = ?
                                                     """,
-                (project_id,),
+            (project_id,),
         ) as cursor:
             row = await cursor.fetchone()
             if row is None:
@@ -114,12 +114,12 @@ async def get_project(project_id: int) -> Optional[Project]:
 
 
 async def register_project(
-        name: str,
-        is_active: int | bool,
-        guild_discord_id: int,
-        webhook_url: str,
-        from_card: Optional[int] = None,
-        plasmo_bearer_token: Optional[str] = None,
+    name: str,
+    is_active: int | bool,
+    guild_discord_id: int,
+    webhook_url: str,
+    from_card: Optional[int] = None,
+    plasmo_bearer_token: Optional[str] = None,
 ) -> Project:
     async with aiosqlite.connect(PATH) as db:
         cursor = await db.execute(
@@ -142,11 +142,11 @@ async def register_project(
 async def get_projects(guild_discord_id: Optional[int] = None) -> List[Project]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """SELECT 
+            """SELECT 
                                                     id, name, is_active, guild_discord_id, webhook_url, from_card, plasmo_bearer_token
                                                     FROM structure_projects """
-                + ("WHERE guild_discord_id = ?" if guild_discord_id is not None else ""),
-                (guild_discord_id,) if guild_discord_id is not None else (),
+            + ("WHERE guild_discord_id = ?" if guild_discord_id is not None else ""),
+            (guild_discord_id,) if guild_discord_id is not None else (),
         ) as cursor:
             rows = await cursor.fetchall()
             return [

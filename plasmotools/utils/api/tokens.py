@@ -10,8 +10,8 @@ async def get_token_scopes(token: str) -> List[str]:
     """
     async with aiohttp.ClientSession() as session:
         async with session.get(
-                "https://rp.plo.su/api/oauth2/token",
-                headers={"Authorization": f"Bearer {token}"},
+            "https://rp.plo.su/api/oauth2/token",
+            headers={"Authorization": f"Bearer {token}"},
         ) as resp:
             if resp.status != 200:
                 return []

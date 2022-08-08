@@ -14,12 +14,12 @@ PATH = settings.DATABASE_PATH
 
 class Role:
     def __init__(
-            self,
-            name: str,
-            guild_discord_id: int,
-            role_discord_id: int,
-            available: bool | int,
-            webhook_url: str,
+        self,
+        name: str,
+        guild_discord_id: int,
+        role_discord_id: int,
+        available: bool | int,
+        webhook_url: str,
     ):
         self.name = name
         self.guild_discord_id = guild_discord_id
@@ -49,12 +49,12 @@ class Role:
             await db.commit()
 
     async def edit(
-            self,
-            name: Optional[str] = None,
-            guild_discord_id: Optional[int] = None,
-            role_discord_id: Optional[int] = None,
-            available: Optional[bool] = None,
-            webhook_url: Optional[str] = None,
+        self,
+        name: Optional[str] = None,
+        guild_discord_id: Optional[int] = None,
+        role_discord_id: Optional[int] = None,
+        available: Optional[bool] = None,
+        webhook_url: Optional[str] = None,
     ):
         if name is not None:
             self.name = name
@@ -82,11 +82,11 @@ class Role:
 async def get_role(role_discord_id: int) -> Optional[Role]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """SELECT 
+            """SELECT 
                                                 name, guild_discord_id, role_discord_id, available, webhook_url
                                                 FROM structure_roles WHERE role_discord_id = ?
                                                 """,
-                (role_discord_id,),
+            (role_discord_id,),
         ) as cursor:
             row = await cursor.fetchone()
             if row is None:
@@ -101,19 +101,19 @@ async def get_role(role_discord_id: int) -> Optional[Role]:
 
 
 async def add_role(
-        name: str,
-        guild_discord_id: int,
-        role_discord_id: int,
-        available: bool | int,
-        webhook_url: str,
+    name: str,
+    guild_discord_id: int,
+    role_discord_id: int,
+    available: bool | int,
+    webhook_url: str,
 ) -> Role:
     available = bool(available)
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """INSERT INTO structure_roles (
+            """INSERT INTO structure_roles (
                                                 name, guild_discord_id, role_discord_id, available, webhook_url
                                             ) VALUES (?, ?, ?, ?, ?)""",
-                (name, guild_discord_id, role_discord_id, available, webhook_url),
+            (name, guild_discord_id, role_discord_id, available, webhook_url),
         ) as cursor:
             await db.commit()
             return await get_role(role_discord_id)
@@ -122,11 +122,11 @@ async def add_role(
 async def get_roles(guild_discord_id: Optional[int] = None) -> List[Role]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """SELECT 
+            """SELECT 
                                                 name, guild_discord_id, role_discord_id, available, webhook_url
                                                 FROM structure_roles """
-                + ("WHERE guild_discord_id = ?" if guild_discord_id is not None else ""),
-                (guild_discord_id,) if guild_discord_id is not None else (),
+            + ("WHERE guild_discord_id = ?" if guild_discord_id is not None else ""),
+            (guild_discord_id,) if guild_discord_id is not None else (),
         ) as cursor:
             rows = await cursor.fetchall()
             return [

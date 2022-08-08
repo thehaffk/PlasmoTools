@@ -5,6 +5,7 @@ Config file for Plasmo Tools
 import os
 from builtins import bool
 from dataclasses import dataclass
+from typing import List, Dict
 
 from dotenv import load_dotenv
 
@@ -36,6 +37,12 @@ class Emojis:
     enabled = "<:enabled:969672429981016084>"
     disabled = "<:disabled:969672065160474684>"
     diamond = "<:dia:1004883678326956043>"
+    loading = "<a:loading:995519205380198400>"
+    loading2 = "<a:loading2:995519203140456528>"
+    online = "<:online:1006310758415605920>"
+    offline = " <:offline:1006310760898629702>"
+    site_offline = "<:site_offline:1006321494575550514>"
+    site_online = "<:site_online:1006320686693879929>"
 
 
 class DevServer:
@@ -166,3 +173,22 @@ culture_guild = PlasmoStructureGuild(
     public_chat_channel_id=841395461222432848,
 )
 structure_guilds.append(culture_guild)
+
+bots_to_ping: Dict[str, int] = {
+    "Tools": 876907717837594646,
+    "Pepega": 626682514592890900,
+    "Объявления": 860173748313128960,
+    "Sync RP": 944529811362181171,
+    "Sync": 842301877400240140,
+    "Tickets": 890282439593836596,
+    "PT Test": 872182651644170240,
+}
+
+sites_to_ping: List[str] = [
+    "rp.plo.su",
+    "smp.plo.su",
+    "tr.plo.su",
+    "mc.plo.su",
+    "pt.plo.su",
+    "bac.plo.su",
+]

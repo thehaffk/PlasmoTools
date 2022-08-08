@@ -24,14 +24,14 @@ class ErrorHandler(commands.Cog):
 
     @commands.Cog.listener()
     async def on_slash_command_error(
-            self, inter: disnake.ApplicationCommandInteraction, error
+        self, inter: disnake.ApplicationCommandInteraction, error
     ):
         if isinstance(error, MissingRole):
             return await inter.send(
                 embed=disnake.Embed(
                     title="У Вас недостаточно прав.",
                     description="Вам нужно "
-                                f"иметь роль <@&{error.missing_role}> для использования этой команды.",
+                    f"иметь роль <@&{error.missing_role}> для использования этой команды.",
                     color=disnake.Color.red(),
                 ),
                 ephemeral=True,
@@ -41,7 +41,7 @@ class ErrorHandler(commands.Cog):
                 embed=disnake.Embed(
                     title="У Вас недостаточно прав.",
                     description="Вам нужно "
-                                f"иметь пермишен **{error.missing_permissions[0]}** для использования этой команды.",
+                    f"иметь пермишен **{error.missing_permissions[0]}** для использования этой команды.",
                     color=disnake.Color.red(),
                 ),
                 ephemeral=True,
@@ -51,7 +51,7 @@ class ErrorHandler(commands.Cog):
                 embed=disnake.Embed(
                     title="У Вас недостаточно прав.",
                     description="Вам нужно быть "
-                                "администратором Plasmo или разработчиком бота для использования этой функции.",
+                    "администратором Plasmo или разработчиком бота для использования этой функции.",
                     color=disnake.Color.red(),
                 ),
                 ephemeral=True,
@@ -71,7 +71,7 @@ class ErrorHandler(commands.Cog):
                 embed=disnake.Embed(
                     title="Error",
                     description=f"Возникла неожиданная ошибка.\n\n`{error}`"
-                                f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
+                    f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
                     color=disnake.Color.red(),
                 ),
                 ephemeral=True,
@@ -87,6 +87,11 @@ class ErrorHandler(commands.Cog):
                 )
             )
             raise error
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx: disnake.ext.commands.Context, error):
+        if isinstance(error, disnake.ext.commands.errors.CommandNotFound):
+            await ctx.reply("https://imgur.com/tEe8LUQ")
 
 
 def setup(client):

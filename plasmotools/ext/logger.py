@@ -31,8 +31,8 @@ class PlasmoLogger(commands.Cog):
         """
 
         if (
-                after.guild.id != settings.PlasmoRPGuild.guild_id
-                or before.roles == after.roles
+            after.guild.id != settings.PlasmoRPGuild.guild_id
+            or before.roles == after.roles
         ):
             return False
 
@@ -45,8 +45,8 @@ class PlasmoLogger(commands.Cog):
 
         for role in removed_roles:
             if (
-                    role.id not in settings.PlasmoRPGuild.monitored_roles
-                    and role.id != settings.PlasmoRPGuild.player_role_id
+                role.id not in settings.PlasmoRPGuild.monitored_roles
+                and role.id != settings.PlasmoRPGuild.player_role_id
             ):
                 continue
 
@@ -54,8 +54,8 @@ class PlasmoLogger(commands.Cog):
                 title=f"Роль {role.name} снята - {after.display_name}",
                 color=disnake.Color.dark_red(),
                 description=f"{after.mention}("
-                            f"[{after.display_name}](https://rp.plo.su/u/"
-                            f"{after.display_name}))",
+                f"[{after.display_name}](https://rp.plo.su/u/"
+                f"{after.display_name}))",
             )
 
             await log_channel.send(content=f"<@{before.id}>", embed=log_embed)
@@ -68,8 +68,8 @@ class PlasmoLogger(commands.Cog):
                 title=f"Роль {role.name} добавлена - {after.display_name}",
                 color=disnake.Color.dark_green(),
                 description=f"{after.mention}("
-                            f"[{after.display_name}](https://rp.plo.su/u/"
-                            f"{after.display_name}))",
+                f"[{after.display_name}](https://rp.plo.su/u/"
+                f"{after.display_name}))",
             )
 
             msg = await log_channel.send(content=f"<@{before.id}>", embed=log_embed)
@@ -93,7 +93,7 @@ class PlasmoLogger(commands.Cog):
         for tries in range(10):
             async with ClientSession() as session:
                 async with session.get(
-                        url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
+                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
                 ) as response:
                     try:
                         user_data = (await response.json())["data"]
@@ -112,9 +112,9 @@ class PlasmoLogger(commands.Cog):
             title="☠️ Игрок забанен",
             color=disnake.Color.red(),
             description=f"[{nickname if nickname else member.display_name}]"
-                        f"(https://rp.plo.su/u/{nickname}) был забанен\n\n"
-                        f"**Причина:**\n{reason.strip()}"
-                        f"\n\n⚡ by [digital drugs technologies]({settings.LogsServer.invite_url})",
+            f"(https://rp.plo.su/u/{nickname}) был забанен\n\n"
+            f"**Причина:**\n{reason.strip()}"
+            f"\n\n⚡ by [digital drugs technologies]({settings.LogsServer.invite_url})",
         )
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
             settings.LogsServer.ban_logs_channel_id
@@ -136,7 +136,7 @@ class PlasmoLogger(commands.Cog):
         for tries in range(10):
             async with ClientSession() as session:
                 async with session.get(
-                        url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
+                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
                 ) as response:
                     try:
                         user_data = (await response.json())["data"]
@@ -154,8 +154,8 @@ class PlasmoLogger(commands.Cog):
             title="🔓 Игрок разбанен",
             color=disnake.Color.green(),
             description=f"[{nickname if nickname else member.name}]"
-                        f"(https://rp.plo.su/u/{nickname}) был разбанен"
-                        f"\n\n⚡ by [digital drugs]({settings.LogsServer.invite_url})",
+            f"(https://rp.plo.su/u/{nickname}) был разбанен"
+            f"\n\n⚡ by [digital drugs]({settings.LogsServer.invite_url})",
         )
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
             settings.LogsServer.ban_logs_channel_id
@@ -168,9 +168,9 @@ class PlasmoLogger(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: disnake.Message):
         if (
-                message.guild is not None
-                and message.guild.id == settings.PlasmoRPGuild.guild_id
-                and message.type == disnake.MessageType.thread_created
+            message.guild is not None
+            and message.guild.id == settings.PlasmoRPGuild.guild_id
+            and message.type == disnake.MessageType.thread_created
         ):
             try:
                 await message.delete(delay=3)
@@ -185,8 +185,8 @@ class PlasmoLogger(commands.Cog):
             return
 
         if (
-                message.channel.id == settings.PlasmoRPGuild.notifications_channel_id
-                and message.author.name == "Предупреждения"
+            message.channel.id == settings.PlasmoRPGuild.notifications_channel_id
+            and message.author.name == "Предупреждения"
         ):
             warned_user = message.mentions[0]
             try:
@@ -199,9 +199,9 @@ class PlasmoLogger(commands.Cog):
                         title="Вам выдали предупреждение на Plasmo RP",
                         color=disnake.Color.dark_red(),
                         description=f"Оспорить решение "
-                                    f"модерации или снять варн можно "
-                                    f"только тут - {settings.BACGuild.invite_url}\n\n\n"
-                                    f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
+                        f"модерации или снять варн можно "
+                        f"только тут - {settings.BACGuild.invite_url}\n\n\n"
+                        f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
                     )
                 )
                 await warned_user.send(

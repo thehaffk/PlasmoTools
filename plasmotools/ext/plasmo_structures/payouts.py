@@ -37,8 +37,8 @@ class Payouts(commands.Cog):
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description="Сервер не зарегистрирован как офицальная структура.\n"
-                                "Если вы считаете что это ошибка - обратитесь в "
-                                f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                    "Если вы считаете что это ошибка - обратитесь в "
+                    f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
                 ephemeral=True,
             )
@@ -47,10 +47,10 @@ class Payouts(commands.Cog):
             embed=disnake.Embed(
                 color=disnake.Color.green(),
                 description="Проекты в Plasmo Tools - это упрощение системы выплат. Создайте проект через "
-                            "/проекты-создать чтобы получить доступ к /выплата\n\n"
-                            f"**plasmo_token**: Чтобы получить токен плазмо - "
-                            f"откройте тикет в [дискорде DDT]({settings.DevServer.support_invite}). (Как только мне "
-                            f"будет не лень я сделаю адекватное автоматическое получение токена)",
+                "/проекты-создать чтобы получить доступ к /выплата\n\n"
+                f"**plasmo_token**: Чтобы получить токен плазмо - "
+                f"откройте тикет в [дискорде DDT]({settings.DevServer.support_invite}). (Как только мне "
+                f"будет не лень я сделаю адекватное автоматическое получение токена)",
             ),
             ephemeral=True,
         )
@@ -59,12 +59,12 @@ class Payouts(commands.Cog):
     @commands.slash_command(name="проекты-создать")
     @commands.default_member_permissions(administrator=True)
     async def projects_create(
-            self,
-            inter: ApplicationCommandInteraction,
-            name: str,
-            webhook_url: str,
-            plasmo_bearer_token: str,
-            from_card: int = commands.Param(gt=0, lt=10000),
+        self,
+        inter: ApplicationCommandInteraction,
+        name: str,
+        webhook_url: str,
+        plasmo_bearer_token: str,
+        from_card: int = commands.Param(gt=0, lt=10000),
     ):
         """
         Зарегистрировать проект
@@ -84,8 +84,8 @@ class Payouts(commands.Cog):
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description="Сервер не зарегистрирован как офицальная структура.\n"
-                                "Если вы считаете что это ошибка - обратитесь в "
-                                f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                    "Если вы считаете что это ошибка - обратитесь в "
+                    f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
                 ephemeral=True,
             )
@@ -104,7 +104,7 @@ class Payouts(commands.Cog):
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description="Указан неправильный токен. ||Missing bank:manage / bank:transfer scopes||\n"
-                                f"Получите новый в [поддержке DDT]({settings.DevServer.support_invite})",
+                    f"Получите новый в [поддержке DDT]({settings.DevServer.support_invite})",
                 ),
             )
             return
@@ -127,10 +127,10 @@ class Payouts(commands.Cog):
                 color=disnake.Color.green(),
                 title="Проект успешно зарегистрирован",
                 description=f"Проект: {name}\n"
-                            f"Вебхук: {webhook_url}\n"
-                            f"Карта: {from_card}\n"
-                            f"Токен: ||{plasmo_bearer_token[:-5]}\\*\\*\\*\\*||\n"
-                            f"ID: {db_project.id}",
+                f"Вебхук: {webhook_url}\n"
+                f"Карта: {from_card}\n"
+                f"Токен: ||{plasmo_bearer_token[:-5]}\\*\\*\\*\\*||\n"
+                f"ID: {db_project.id}",
             ),
         )
 
@@ -138,14 +138,14 @@ class Payouts(commands.Cog):
     @commands.slash_command(name="проекты-редактировать")
     @commands.default_member_permissions(administrator=True)
     async def projects_edit(
-            self,
-            inter: ApplicationCommandInteraction,
-            project_id: int,
-            name: Optional[str] = None,
-            webhook_url: Optional[str] = None,
-            is_active: Optional[bool] = None,
-            from_card: Optional[int] = commands.Param(default=None),
-            plasmo_bearer_token: Optional[str] = None,
+        self,
+        inter: ApplicationCommandInteraction,
+        project_id: int,
+        name: Optional[str] = None,
+        webhook_url: Optional[str] = None,
+        is_active: Optional[bool] = None,
+        from_card: Optional[int] = commands.Param(default=None),
+        plasmo_bearer_token: Optional[str] = None,
     ):
         """
         Редактировать проект в базе данных
@@ -191,9 +191,9 @@ class Payouts(commands.Cog):
     @commands.slash_command(name="проекты-удалить")
     @commands.default_member_permissions(administrator=True)
     async def projects_delete(
-            self,
-            inter: ApplicationCommandInteraction,
-            project_id: int,
+        self,
+        inter: ApplicationCommandInteraction,
+        project_id: int,
     ):
         """
         Удалить проект из базы данных
@@ -253,7 +253,7 @@ class Payouts(commands.Cog):
                 embed.add_field(
                     name=f"{project.name} - {'Активен' if project.is_active else 'Неактивен'}  ",
                     value=f"{project.id} / {formatters.format_bank_card(project.from_card)} / ||{project.plasmo_bearer_token[:-5]}\\*\\*\\*\\*||\n"
-                          f"||{project.webhook_url}||",
+                    f"||{project.webhook_url}||",
                     inline=False,
                 )
 
@@ -263,14 +263,14 @@ class Payouts(commands.Cog):
     @commands.slash_command(name="выплата")
     @commands.default_member_permissions(administrator=True)
     async def payout_command(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            amount: int,
-            project: str = commands.Param(
-                autocomplete=autocompleters.payouts_projects_autocompleter
-            ),
-            message: str = "",
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        amount: int,
+        project: str = commands.Param(
+            autocomplete=autocompleters.payouts_projects_autocompleter
+        ),
+        message: str = "",
     ):
         """
         Выплатить игроку алмазы
@@ -303,8 +303,8 @@ class Payouts(commands.Cog):
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description="Сервер не зарегистрирован как офицальная структура.\n"
-                                "Если вы считаете что это ошибка - обратитесь в "
-                                f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                    "Если вы считаете что это ошибка - обратитесь в "
+                    f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
             )
             return
@@ -317,10 +317,10 @@ class Payouts(commands.Cog):
             user.id
         )
         if (
-                user.bot
-                or plasmo_user is None
-                or plasmo_user.guild.get_role(settings.PlasmoRPGuild.player_role_id)
-                not in plasmo_user.roles
+            user.bot
+            or plasmo_user is None
+            or plasmo_user.guild.get_role(settings.PlasmoRPGuild.player_role_id)
+            not in plasmo_user.roles
         ):
             await inter.edit_original_message(
                 embed=disnake.Embed(
@@ -343,12 +343,12 @@ class Payouts(commands.Cog):
                 [
                     card
                     for card in await bank.search_cards(
-                    token=db_project.plasmo_bearer_token,
-                    query=plasmo_user.display_name,
-                )
+                        token=db_project.plasmo_bearer_token,
+                        query=plasmo_user.display_name,
+                    )
                     if card["id"] != from_card
-                       and card["holder_type"] == 0
-                       and card["holder"] == plasmo_user.display_name
+                    and card["holder_type"] == 0
+                    and card["holder"] == plasmo_user.display_name
                 ],
                 key=lambda card: card["value"],
                 reverse=True,
@@ -367,8 +367,8 @@ class Payouts(commands.Cog):
                             color=disnake.Color.red(),
                             title="⚠ Plasmo Tools не смог произвести выплату",
                             description="Не удалось найти карту для выплаты, чтобы в дальнейшем получать выплаты от "
-                                        "структур оформите карту на свой аккаунт или укажите любую карту через "
-                                        "/установить-карту-для-выплат",
+                            "структур оформите карту на свой аккаунт или укажите любую карту через "
+                            "/установить-карту-для-выплат",
                         )
                     )
                 except disnake.Forbidden:
@@ -377,7 +377,7 @@ class Payouts(commands.Cog):
                             color=disnake.Color.red(),
                             title="Ошибка",
                             description=f"У {user.mention} закрыты личные сообщения, вам придется лично попросить игрока "
-                                        f"установить карту через /установить-карту-для-выплат",
+                            f"установить карту через /установить-карту-для-выплат",
                         ),
                         ephemeral=True,
                     )
@@ -390,9 +390,9 @@ class Payouts(commands.Cog):
                         color=disnake.Color.red(),
                         title="⚠ Plasmo Tools установил первую найденную карту как основную",
                         description=f"Вы не установили карту для выплат. Бот установил карту "
-                                    f"**{formatters.format_bank_card(user_card)}** как основную.\n\n"
-                                    f"Воспользуйтесь /указать-карту-для-выплат, если хотите получать выплаты "
-                                    f"на другую карту",
+                        f"**{formatters.format_bank_card(user_card)}** как основную.\n\n"
+                        f"Воспользуйтесь /указать-карту-для-выплат, если хотите получать выплаты "
+                        f"на другую карту",
                     )
                 )
             except disnake.Forbidden:
@@ -479,7 +479,7 @@ class Payouts(commands.Cog):
                 color=disnake.Color.green(),
                 title="Успех",
                 description=f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
-                            f"карту {formatters.format_bank_card(user_card)}",
+                f"карту {formatters.format_bank_card(user_card)}",
             ),
         )
         # todo: save failed payments and retry them later
@@ -495,19 +495,19 @@ class Payouts(commands.Cog):
         await self.bot.get_channel(settings.DevServer.transactions_channel_id).send(
             embed=disnake.Embed(
                 description=f"{formatters.format_bank_card(from_card)} -> "
-                            f"{amount} {settings.Emojis.diamond} -> "
-                            f"{formatters.format_bank_card(user_card)}\n"
-                            f" {message}",
+                f"{amount} {settings.Emojis.diamond} -> "
+                f"{formatters.format_bank_card(user_card)}\n"
+                f" {message}",
             )
         )
 
     @commands.slash_command(name="установить-карту-для-выплат")
     async def set_saved_card(
-            self,
-            inter: disnake.ApplicationCommandInteraction,
-            card: str = commands.Param(
-                autocomplete=autocompleters.search_bank_cards_autocompleter,
-            ),
+        self,
+        inter: disnake.ApplicationCommandInteraction,
+        card: str = commands.Param(
+            autocomplete=autocompleters.search_bank_cards_autocompleter,
+        ),
     ):
         """
         Установить карту для выплат гос. структур
@@ -569,8 +569,8 @@ class Payouts(commands.Cog):
                 color=disnake.Color.green(),
                 title="Успех",
                 description="Карта для выплат успешно установлена\n"
-                            f" {formatters.format_bank_card(card_id)} - {api_card['name']}\n"
-                            f"Принадлежит {api_card['holder']}",
+                f" {formatters.format_bank_card(card_id)} - {api_card['name']}\n"
+                f"Принадлежит {api_card['holder']}",
             ),
         )
 

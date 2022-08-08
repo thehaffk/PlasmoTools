@@ -4,6 +4,7 @@ Cog-file for synchronization nicknames and roles at BAC discord guild
 import asyncio
 import logging
 
+import aiohttp.client_exceptions
 import disnake
 from aiohttp import ClientSession
 from disnake import HTTPException
@@ -30,9 +31,9 @@ class BACSynchronization(commands.Cog):
         :return: bool - success or failed
         """
         if (
-                member not in self.bot.get_guild(settings.BACGuild.guild_id).members
-                or member.bot
-                or not isinstance(member, disnake.Member)
+            member not in self.bot.get_guild(settings.BACGuild.guild_id).members
+            or member.bot
+            or not isinstance(member, disnake.Member)
         ):
             return False
         logger.debug("Syncing %s (%s)", member, member.display_name)
@@ -42,10 +43,13 @@ class BACSynchronization(commands.Cog):
         for _ in range(10):
             async with ClientSession() as session:
                 async with session.get(
-                        url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}",
+                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}",
                 ) as response:
-
-                    response_json = await response.json()
+                    try:
+                        response_json = await response.json()
+                    except aiohttp.client_exceptions.ContentTypeError as e:
+                        logger.warning("Could not get data from PRP API %s", e)
+                        return False
 
                     if response.status != 200:
                         logger.warning(
@@ -135,9 +139,9 @@ class BACSynchronization(commands.Cog):
                     title="Вас забанили на Plasmo RP",
                     color=disnake.Color.dark_red(),
                     description=f"Узнать причину бана, оспорить решение "
-                                f"администрации или разбаниться можно "
-                                f"только тут - {settings.BACGuild.invite_url}\n\n\n"
-                                f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
+                    f"администрации или разбаниться можно "
+                    f"только тут - {settings.BACGuild.invite_url}\n\n\n"
+                    f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
                 )
             )
             await member.send(
@@ -151,7 +155,7 @@ class BACSynchronization(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_unban(
-            self, guild: disnake.Guild, member: disnake.Member
+        self, guild: disnake.Guild, member: disnake.Member
     ) -> bool:
         """
         Called on discord event when user is unbanned, sends user DM to join PRP guild
@@ -167,8 +171,8 @@ class BACSynchronization(commands.Cog):
                     title="Вас разбанили на Plasmo RP",
                     color=disnake.Color.green(),
                     description=f"Держите инвайт и не забывайте соблюдать "
-                                f"правила сервера {settings.PlasmoRPGuild.invite_url}\n\n\n"
-                                f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
+                    f"правила сервера {settings.PlasmoRPGuild.invite_url}\n\n\n"
+                    f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
                 )
             )
             await member.send(
@@ -236,7 +240,7 @@ class BACSynchronization(commands.Cog):
     )
     @commands.has_permissions(manage_roles=True)
     async def sync_user(
-            self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
+        self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
     ):
         # Docstring is in russian because disnake automatically puts in command description
 
@@ -273,7 +277,7 @@ class BACSynchronization(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def sync_button(
-            self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
+        self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
     ):
         """
         Button that appears when you click on a member in Discord

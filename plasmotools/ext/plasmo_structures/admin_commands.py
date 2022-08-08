@@ -21,13 +21,13 @@ class AdminCommands(commands.Cog):
     @commands.slash_command()
     @commands.default_member_permissions(administrator=True)
     async def register_guild(
-            self,
-            inter: ApplicationCommandInteraction,
-            alias: str,
-            player_role: disnake.Role,
-            head_role: disnake.Role,
-            public_chat: disnake.TextChannel,
-            logs_channel: disnake.TextChannel,
+        self,
+        inter: ApplicationCommandInteraction,
+        alias: str,
+        player_role: disnake.Role,
+        head_role: disnake.Role,
+        public_chat: disnake.TextChannel,
+        logs_channel: disnake.TextChannel,
     ):
         """
         Регистрация/редактирование сервера в базе данных
@@ -102,7 +102,7 @@ class AdminCommands(commands.Cog):
                 color=disnake.Color.green(),
                 title="Успех",
                 description=f"Сервер {inter.guild.name} и все привязанные к нему проекты и роли "
-                            f"удалены из БД **PlasmoTools.**",
+                f"удалены из БД **PlasmoTools.**",
             ),
             ephemeral=True,
         )

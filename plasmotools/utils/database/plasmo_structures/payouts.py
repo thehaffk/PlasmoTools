@@ -14,15 +14,15 @@ PATH = settings.DATABASE_PATH
 
 class PayoutEntry:
     def __init__(
-            self,
-            entry_id: int,
-            project_id: int,
-            user_id: int,
-            is_payed: bool | int,
-            from_card: int,
-            to_card: int,
-            amount: int,
-            message: str,
+        self,
+        entry_id: int,
+        project_id: int,
+        user_id: int,
+        is_payed: bool | int,
+        from_card: int,
+        to_card: int,
+        amount: int,
+        message: str,
     ):
         is_payed = bool(is_payed)
         self.id = entry_id
@@ -62,15 +62,15 @@ class PayoutEntry:
             await db.commit()
 
     async def edit(
-            self,
-            entry_id: Optional[int] = None,
-            project_id: Optional[int] = None,
-            user_id: Optional[int] = None,
-            is_payed: Optional[bool] = None,
-            from_card: Optional[int] = None,
-            to_card: Optional[int] = None,
-            amount: Optional[int] = None,
-            message: Optional[str] = None,
+        self,
+        entry_id: Optional[int] = None,
+        project_id: Optional[int] = None,
+        user_id: Optional[int] = None,
+        is_payed: Optional[bool] = None,
+        from_card: Optional[int] = None,
+        to_card: Optional[int] = None,
+        amount: Optional[int] = None,
+        message: Optional[str] = None,
     ):
         if entry_id is not None:
             self.id = entry_id
@@ -104,11 +104,11 @@ class PayoutEntry:
 async def get_payout_entry(_id: int) -> Optional[PayoutEntry]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """SELECT 
+            """SELECT 
                                             project_id, user_id, is_payed, from_card, to_card, amount, message
                                             FROM structure_payouts_history WHERE project_id = ?
                                             """,
-                (_id,),
+            (_id,),
         ) as cursor:
             row = await cursor.fetchone()
             if row is None:
@@ -126,21 +126,21 @@ async def get_payout_entry(_id: int) -> Optional[PayoutEntry]:
 
 
 async def register_payout_entry(
-        project_id: int,
-        user_id: int,
-        is_payed: bool | int,
-        from_card: int,
-        to_card: int,
-        amount: int,
-        message: str,
+    project_id: int,
+    user_id: int,
+    is_payed: bool | int,
+    from_card: int,
+    to_card: int,
+    amount: int,
+    message: str,
 ) -> PayoutEntry:
     is_payed = bool(is_payed)
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """INSERT INTO structure_payouts_history (
+            """INSERT INTO structure_payouts_history (
                                             project_id, user_id, is_payed, from_card, to_card, amount, message
                                         ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (project_id, user_id, int(is_payed), from_card, to_card, amount, message),
+            (project_id, user_id, int(is_payed), from_card, to_card, amount, message),
         ) as cursor:
             await db.commit()
             return await get_payout_entry(cursor.lastrowid)
@@ -149,11 +149,11 @@ async def register_payout_entry(
 async def get_payout_entries(project_id: Optional[int] = None) -> List[PayoutEntry]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """SELECT 
+            """SELECT 
                                             project_id, project_id, user_id, is_payed, from_card, to_card, amount, message
                                             FROM structure_payouts_history """
-                + ("WHERE project_id = ?" if project_id is not None else ""),
-                (project_id,) if project_id is not None else (),
+            + ("WHERE project_id = ?" if project_id is not None else ""),
+            (project_id,) if project_id is not None else (),
         ) as cursor:
             rows = await cursor.fetchall()
             return [
@@ -174,9 +174,9 @@ async def get_payout_entries(project_id: Optional[int] = None) -> List[PayoutEnt
 async def set_saved_card(user_id: int, card_id: Optional[int] = None):
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """ INSERT INTO structure_saved_cards (user_id, card_id) VALUES (?, ?) 
+            """ INSERT INTO structure_saved_cards (user_id, card_id) VALUES (?, ?) 
                             ON CONFLICT(user_id) DO UPDATE SET card_id = ? """,
-                (user_id, card_id, card_id),
+            (user_id, card_id, card_id),
         ) as cursor:
             await db.commit()
 
@@ -184,8 +184,8 @@ async def set_saved_card(user_id: int, card_id: Optional[int] = None):
 async def get_saved_card(user_id: int) -> Optional[int]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """SELECT card_id FROM structure_saved_cards WHERE user_id = ?""",
-                (user_id,),
+            """SELECT card_id FROM structure_saved_cards WHERE user_id = ?""",
+            (user_id,),
         ) as cursor:
             row = await cursor.fetchone()
             if row is None:

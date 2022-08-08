@@ -21,13 +21,13 @@ class GCATools(commands.Cog):
         self.bot = bot
 
     async def log_for_admins(
-            self,
-            user: disnake.Member,
-            result: str,
-            clear_inventory: bool,
-            additions: str,
-            reset_pass: bool,
-            conditions: str,
+        self,
+        user: disnake.Member,
+        result: str,
+        clear_inventory: bool,
+        additions: str,
+        reset_pass: bool,
+        conditions: str,
     ):
         """
         Logs data about all gca decisions for admins
@@ -70,7 +70,7 @@ class GCATools(commands.Cog):
                     embed=disnake.Embed(
                         title="У Вас недостаточно прав.",
                         description="Вам нужно быть "
-                                    "администратором Plasmo или разработчиком бота для использования этой функции.",
+                        "администратором Plasmo или разработчиком бота для использования этой функции.",
                         color=disnake.Color.red(),
                     ),
                     ephemeral=True,
@@ -128,11 +128,11 @@ class GCATools(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def request_declined(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            tripetto_id: str,
-            reason: str,
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        tripetto_id: str,
+        reason: str,
     ):
         """
         Заявка отклонена
@@ -170,23 +170,23 @@ class GCATools(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def request_accepted(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            tripetto_id: str,
-            result: str = commands.Param(
-                autocomplete=lambda *args: [
-                    "Разбан",
-                    "Красный варн снимается",
-                    "Два красных варна снимаются",
-                    "Разбан, красный варн снимается",
-                    "Разбан, два красных варна снимаются",
-                ]
-            ),
-            conditions: str = "",
-            clear_inventory: bool = False,
-            reset_pass: bool = False,
-            additions: str = "",
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        tripetto_id: str,
+        result: str = commands.Param(
+            autocomplete=lambda *args: [
+                "Разбан",
+                "Красный варн снимается",
+                "Два красных варна снимаются",
+                "Разбан, красный варн снимается",
+                "Разбан, два красных варна снимаются",
+            ]
+        ),
+        conditions: str = "",
+        clear_inventory: bool = False,
+        reset_pass: bool = False,
+        additions: str = "",
     ):
         """
         Заявка одобрена
@@ -241,10 +241,10 @@ class GCATools(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def request_approved(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            tripetto_id: str,
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        tripetto_id: str,
     ):
         """
         Заявка будет рассмотрена в суде
@@ -298,11 +298,11 @@ class GCATools(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def court_declined(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            tripetto_id: str,
-            addition: str = "Вы сможете позже подать заявку на следующий апелляционный суд",
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        tripetto_id: str,
+        addition: str = "Вы сможете позже подать заявку на следующий апелляционный суд",
     ):
         """
         Заявка рассмотрена в суде
@@ -352,23 +352,23 @@ class GCATools(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def court_accepted(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            tripetto_id: str,
-            result: str = commands.Param(
-                autocomplete=lambda *args: [
-                    "Разбан",
-                    "Красный варн снимается",
-                    "Два красных варна снимаются",
-                    "Разбан, красный варн снимается",
-                    "Разбан, два красных варна снимаются",
-                ]
-            ),
-            conditions: str = "",
-            clear_inventory: bool = False,
-            reset_pass: bool = False,
-            additions: str = "",
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        tripetto_id: str,
+        result: str = commands.Param(
+            autocomplete=lambda *args: [
+                "Разбан",
+                "Красный варн снимается",
+                "Два красных варна снимаются",
+                "Разбан, красный варн снимается",
+                "Разбан, два красных варна снимаются",
+            ]
+        ),
+        conditions: str = "",
+        clear_inventory: bool = False,
+        reset_pass: bool = False,
+        additions: str = "",
     ):
         """
         Заявка рассмотрена в суде
@@ -444,23 +444,23 @@ class GCATools(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def committee_accepted(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            tripetto_id: str,
-            result: str = commands.Param(
-                autocomplete=lambda *args: [
-                    "Разбан",
-                    "Красный варн снимается",
-                    "Два красных варна снимаются",
-                    "Разбан, красный варн снимается",
-                    "Разбан, два красных варна снимаются",
-                ]
-            ),
-            conditions: str = "",
-            clear_inventory: bool = False,
-            reset_pass: bool = False,
-            additions: str = "",
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        tripetto_id: str,
+        result: str = commands.Param(
+            autocomplete=lambda *args: [
+                "Разбан",
+                "Красный варн снимается",
+                "Два красных варна снимаются",
+                "Разбан, красный варн снимается",
+                "Разбан, два красных варна снимаются",
+            ]
+        ),
+        conditions: str = "",
+        clear_inventory: bool = False,
+        reset_pass: bool = False,
+        additions: str = "",
     ):
         """
         Заявка одобрена комитетом
@@ -519,11 +519,11 @@ class GCATools(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def committee_declined(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            tripetto_id: str,
-            addition: str = "Вы сможете позже подать заявку на следующий апелляционный суд",
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        tripetto_id: str,
+        addition: str = "Вы сможете позже подать заявку на следующий апелляционный суд",
     ):
         """
         Заявка рассмотрена комитетом
@@ -573,10 +573,10 @@ class GCATools(commands.Cog):
         guild_ids=[settings.BACGuild.guild_id],
     )
     async def commitee_approved(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            tripetto_id: str,
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        tripetto_id: str,
     ):
         """
         Заявка будет рассмотрена на комитете

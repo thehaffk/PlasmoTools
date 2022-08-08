@@ -84,24 +84,24 @@ class PlasmoSync(commands.Bot):
                 self.user.id
             ).guild_permissions
             if not all(
-                    [
-                        plasmo_guild_permissions.ban_members,
-                        plasmo_guild_permissions.view_audit_log,
-                        plasmo_guild_permissions.manage_events,
-                        plasmo_guild_permissions.send_messages,
-                        plasmo_guild_permissions.add_reactions,
-                        plasmo_guild_permissions.manage_messages,
-                        plasmo_guild_permissions.read_message_history,
-                    ]
+                [
+                    plasmo_guild_permissions.ban_members,
+                    plasmo_guild_permissions.view_audit_log,
+                    plasmo_guild_permissions.manage_events,
+                    plasmo_guild_permissions.send_messages,
+                    plasmo_guild_permissions.add_reactions,
+                    plasmo_guild_permissions.manage_messages,
+                    plasmo_guild_permissions.read_message_history,
+                ]
             ):
                 await log_channel.send(
                     embed=disnake.Embed(
                         title="Недостаточно прав на Plasmo RP",
                         color=disnake.Color.dark_red(),
                         description="Обязательные для дальнейшей работы Plasmo Tools права отсутствуют, "
-                                    "передобавьте бота по [ссылке]"
-                                    "(https://discord.com/api/oauth2/authorize"
-                                    "?client_id=876907717837594646&permissions=420943834308&scope=bot%20applications.commands)",
+                        "передобавьте бота по [ссылке]"
+                        "(https://discord.com/api/oauth2/authorize"
+                        "?client_id=876907717837594646&permissions=420943834308&scope=bot%20applications.commands)",
                     )
                 )
 
@@ -111,11 +111,11 @@ class PlasmoSync(commands.Bot):
                     title="Plasmo RP - невозможно подключиться",
                     color=disnake.Color.dark_red(),
                     description="Plasmo Tools отсутствует, добавьте его по [ссылке]"
-                                "(https://discord.com/api/oauth2/authorize"
-                                "?client_id=876907717837594646&permissions=422017617092&scope=bot%20applications.commands)",
+                    "(https://discord.com/api/oauth2/authorize"
+                    "?client_id=876907717837594646&permissions=422017617092&scope=bot%20applications.commands)",
                 ).set_thumbnail(
                     url="https://media.discordapp.net/attachments/"
-                        "980950597203292190/980952408811253840/-_.png"
+                    "980950597203292190/980952408811253840/-_.png"
                 )
             )
 
@@ -127,11 +127,11 @@ class PlasmoSync(commands.Bot):
                         title=f"{structure_guild.alias} - невозможно подключиться",
                         color=disnake.Color.dark_red(),
                         description="Plasmo Tools отсутствует, добавьте его по [ссылке]"
-                                    "(https://discord.com/api/oauth2/authorize"
-                                    "?client_id=876907717837594646&permissions=8&scope=bot%20applications.commands)",
+                        "(https://discord.com/api/oauth2/authorize"
+                        "?client_id=876907717837594646&permissions=8&scope=bot%20applications.commands)",
                     ).set_thumbnail(
                         url="https://media.discordapp.net/attachments/"
-                            "980950597203292190/980952408811253840/-_.png"
+                        "980950597203292190/980952408811253840/-_.png"
                     )
                 )
                 continue
@@ -151,8 +151,8 @@ class PlasmoSync(commands.Bot):
                         title=f"Недостаточно прав на {guild}",
                         color=disnake.Color.dark_red(),
                         description="Обязательные для дальнейшей работы Plasmo Tools права отсутствуют, "
-                                    "передобавьте бота по [ссылке]"
-                                    "(https://discord.com/api/oauth2/authorize"
-                                    "?client_id=876907717837594646&permissions=8&scope=bot%20applications.commands)",
+                        "передобавьте бота по [ссылке]"
+                        "(https://discord.com/api/oauth2/authorize"
+                        "?client_id=876907717837594646&permissions=8&scope=bot%20applications.commands)",
                     )
                 )

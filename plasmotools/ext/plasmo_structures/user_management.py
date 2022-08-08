@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 async def check_role(
-        inter, guild: Optional[database.Guild], role: Optional[database.Role]
+    inter, guild: Optional[database.Guild], role: Optional[database.Role]
 ) -> bool:
     if guild is None:
         await inter.send(
@@ -25,8 +25,8 @@ async def check_role(
                 color=disnake.Color.red(),
                 title="Ошибка",
                 description="Сервер не зарегистрирован как офицальная структура.\n"
-                            f"Если вы считаете что произошла ошибка - "
-                            f"обратитесь в [поддержку DDT]({settings.DevServer.support_invite})",
+                f"Если вы считаете что произошла ошибка - "
+                f"обратитесь в [поддержку DDT]({settings.DevServer.support_invite})",
             ),
             ephemeral=True,
         )
@@ -87,7 +87,7 @@ class UserManagement(commands.Cog):
                 embed.add_field(
                     name=f"{role.name}",
                     value=f"{settings.Emojis.enabled if role.available else settings.Emojis.disabled} "
-                          f"<@&{role.role_discord_id}> / `{role.role_discord_id}` \n ||{role.webhook_url}||",
+                    f"<@&{role.role_discord_id}> / `{role.role_discord_id}` \n ||{role.webhook_url}||",
                     inline=False,
                 )
 
@@ -97,12 +97,12 @@ class UserManagement(commands.Cog):
     @commands.slash_command(name="роли-добавить")
     @commands.default_member_permissions(administrator=True)
     async def roles_add(
-            self,
-            inter: ApplicationCommandInteraction,
-            role: disnake.Role,
-            name: str,
-            webhook_url: str,
-            available: bool = True,
+        self,
+        inter: ApplicationCommandInteraction,
+        role: disnake.Role,
+        name: str,
+        webhook_url: str,
+        available: bool = True,
     ):
         """
         Добавить роль в базу данных
@@ -123,8 +123,8 @@ class UserManagement(commands.Cog):
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description="Сервер не зарегистрирован как офицальная структура.\n"
-                                "Если вы считаете что это ошибка - обратитесь в "
-                                f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                    "Если вы считаете что это ошибка - обратитесь в "
+                    f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
                 ephemeral=True,
             )
@@ -136,8 +136,8 @@ class UserManagement(commands.Cog):
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description="Эта роль не может быть закреплена как нанимаемая\n"
-                                "Если вы считаете что это ошибка - обратитесь в "
-                                f"[поддержку digital drugs technologies]{settings.DevServer.support_invite}",
+                    "Если вы считаете что это ошибка - обратитесь в "
+                    f"[поддержку digital drugs technologies]{settings.DevServer.support_invite}",
                 ),
                 ephemeral=True,
             )
@@ -177,9 +177,9 @@ class UserManagement(commands.Cog):
     @commands.slash_command(name="роли-удалить")
     @commands.default_member_permissions(administrator=True)
     async def roles_delete(
-            self,
-            inter: ApplicationCommandInteraction,
-            role: disnake.Role,
+        self,
+        inter: ApplicationCommandInteraction,
+        role: disnake.Role,
     ):
         """
         Удалить роль из базы данных
@@ -209,12 +209,12 @@ class UserManagement(commands.Cog):
     @commands.slash_command(name="роли-редактировать")
     @commands.default_member_permissions(administrator=True)
     async def roles_edit(
-            self,
-            inter: ApplicationCommandInteraction,
-            role: disnake.Role,
-            name: str = None,
-            webhook_url: str = None,
-            available: bool = None,
+        self,
+        inter: ApplicationCommandInteraction,
+        role: disnake.Role,
+        name: str = None,
+        webhook_url: str = None,
+        available: bool = None,
     ):
         """
         Редактировать роль в базе данных
@@ -256,13 +256,13 @@ class UserManagement(commands.Cog):
     @commands.guild_only()
     @commands.default_member_permissions(manage_roles=True)
     async def hire_user_command(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            role: str = commands.Param(
-                autocomplete=role_autocompleter,
-            ),
-            comment: Optional[str] = None,
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        role: str = commands.Param(
+            autocomplete=role_autocompleter,
+        ),
+        comment: Optional[str] = None,
     ):
         """
         Нанять пользователя в структуру.
@@ -290,9 +290,9 @@ class UserManagement(commands.Cog):
             raise RuntimeError("Plasmo RP guild not found")
         plasmo_user = plasmo_guild.get_member(user.id)
         if (
-                user.bot
-                or inter.guild.get_role(guild.player_role_id) not in user.roles
-                or plasmo_user is None
+            user.bot
+            or inter.guild.get_role(guild.player_role_id) not in user.roles
+            or plasmo_user is None
         ):
             return await inter.send(
                 embed=disnake.Embed(
@@ -328,7 +328,7 @@ class UserManagement(commands.Cog):
             await user.add_roles(
                 inter.guild.get_role(db_role.role_discord_id),
                 reason=f"Нанят в структуру "
-                       f"[by {inter.author.display_name} / {inter.author}]",
+                f"[by {inter.author.display_name} / {inter.author}]",
             )
         except disnake.Forbidden:
             return await inter.send(
@@ -376,11 +376,11 @@ class UserManagement(commands.Cog):
     @commands.guild_only()
     @commands.default_member_permissions(manage_roles=True)
     async def fire_user_command(
-            self,
-            inter: ApplicationCommandInteraction,
-            user: disnake.Member,
-            role: str = commands.Param(autocomplete=role_autocompleter),
-            reason: Optional[str] = None,
+        self,
+        inter: ApplicationCommandInteraction,
+        user: disnake.Member,
+        role: str = commands.Param(autocomplete=role_autocompleter),
+        reason: Optional[str] = None,
     ):
         """
         Уволить пользователя из структуры.
@@ -409,9 +409,9 @@ class UserManagement(commands.Cog):
             raise RuntimeError("Plasmo RP guild not found")
         plasmo_user = plasmo_guild.get_member(user.id)
         if (
-                user.bot
-                or inter.guild.get_role(guild.player_role_id) not in user.roles
-                or plasmo_user is None
+            user.bot
+            or inter.guild.get_role(guild.player_role_id) not in user.roles
+            or plasmo_user is None
         ):
             return await inter.send(
                 embed=disnake.Embed(
@@ -447,7 +447,7 @@ class UserManagement(commands.Cog):
             await user.remove_roles(
                 inter.guild.get_role(db_role.role_discord_id),
                 reason=f"Уволен с должнrости "
-                       f"[by {inter.author.display_name} / {inter.author}]",
+                f"[by {inter.author.display_name} / {inter.author}]",
             )
         except disnake.Forbidden:
             return await inter.send(

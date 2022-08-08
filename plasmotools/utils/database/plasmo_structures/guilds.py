@@ -12,13 +12,13 @@ PATH = settings.DATABASE_PATH
 
 class Guild:
     def __init__(
-            self,
-            discord_id: int,
-            alias: str,
-            head_role_id: int,
-            player_role_id: int,
-            public_chat_channel_id: int,
-            logs_channel_id: int,
+        self,
+        discord_id: int,
+        alias: str,
+        head_role_id: int,
+        player_role_id: int,
+        public_chat_channel_id: int,
+        logs_channel_id: int,
     ):
         self.id = discord_id
         self.alias = alias
@@ -56,12 +56,12 @@ class Guild:
             await db.commit()
 
     async def edit(
-            self,
-            alias: Optional[str] = None,
-            head_role_id: Optional[int] = None,
-            player_role_id: Optional[int] = None,
-            public_chat_channel_id: Optional[int] = None,
-            logs_channel_id: Optional[int] = None,
+        self,
+        alias: Optional[str] = None,
+        head_role_id: Optional[int] = None,
+        player_role_id: Optional[int] = None,
+        public_chat_channel_id: Optional[int] = None,
+        logs_channel_id: Optional[int] = None,
     ):
         if alias is not None:
             self.alias = alias
@@ -89,11 +89,11 @@ class Guild:
 async def get_guild(discord_id: int) -> Optional[Guild]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """SELECT 
+            """SELECT 
                                         discord_id, alias, player_role_id, head_role_id, public_chat_channel_id, logs_channel_id
                                         FROM structure_guilds WHERE discord_id = ?
                                         """,
-                (discord_id,),
+            (discord_id,),
         ) as cursor:
             row = await cursor.fetchone()
             if row is None:
@@ -109,12 +109,12 @@ async def get_guild(discord_id: int) -> Optional[Guild]:
 
 
 async def register_guild(
-        discord_id: int,
-        alias: str,
-        player_role_id: int,
-        head_role_id: int,
-        public_chat_channel_id: int,
-        logs_channel_id: int,
+    discord_id: int,
+    alias: str,
+    player_role_id: int,
+    head_role_id: int,
+    public_chat_channel_id: int,
+    logs_channel_id: int,
 ) -> Guild:
     guild = Guild(
         discord_id=discord_id,
@@ -131,7 +131,7 @@ async def register_guild(
 async def get_all_guilds():
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """SELECT 
+            """SELECT 
                                         discord_id
                                         FROM structure_guilds
                                         """,

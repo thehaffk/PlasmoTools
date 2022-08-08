@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 async def search_bank_cards_autocompleter(
-        inter: disnake.ApplicationCommandInteraction, value: str
+    inter: disnake.ApplicationCommandInteraction, value: str
 ) -> dict[str, str]:
     """
     Returns a list of the cards for given query
@@ -19,24 +19,24 @@ async def search_bank_cards_autocompleter(
         return {"🔎 Запрос должен быть длиннее 2-ух символов ": "NOTFOUND"}
 
     async with ClientSession(
-            headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
+        headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
     ) as session:
         async with session.get(
-                "https://rp.plo.su/api/bank/search/cards",
-                params={"value": value},
+            "https://rp.plo.su/api/bank/search/cards",
+            params={"value": value},
         ) as response:
             if (
-                    response.status == 200
-                    and (response_json := await response.json())["status"]
+                response.status == 200
+                and (response_json := await response.json())["status"]
             ):
                 cards = {
                     (
-                            "💳 "
-                            + formatters.format_bank_card(card["id"])
-                            + " - "
-                            + card["holder"]
-                            + " - "
-                            + card["name"]
+                        "💳 "
+                        + formatters.format_bank_card(card["id"])
+                        + " - "
+                        + card["holder"]
+                        + " - "
+                        + card["name"]
                     ): str(card["id"])
                     for card in response_json["data"]
                 }
