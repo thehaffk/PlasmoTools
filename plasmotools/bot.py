@@ -24,6 +24,7 @@ class PlasmoSync(commands.Bot):
         _intents.members = True
         _intents.bans = True
         _intents.messages = True
+        _intents.message_content = True
         _intents.guilds = True
         _intents.guild_messages = True
 
