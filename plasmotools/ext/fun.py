@@ -2,7 +2,7 @@
 Cog-file for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
 """
 import logging
-from random import choice
+from random import choice, randint
 
 import disnake
 from disnake.ext import tasks, commands
@@ -53,7 +53,8 @@ class Fun(commands.Cog):
                 pass
             return
         if "комар " in message.content.lower() or message.content.lower().endswith("комар"):
-            await message.channel.send(content=choice(komaru_gifs))
+            if randint(0, 3) == 1:
+                await message.channel.send(content=choice(komaru_gifs))
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
