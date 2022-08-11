@@ -131,7 +131,6 @@ class GCATools(commands.Cog):
         self,
         inter: ApplicationCommandInteraction,
         user: disnake.Member,
-        tripetto_id: str,
         reason: str,
     ):
         """
@@ -140,7 +139,6 @@ class GCATools(commands.Cog):
         Parameters
         ----------
         user: Игрок
-        tripetto_id: ID заявки
         reason: Причина отклонения
         inter: ApplicationCommandInteraction object
 
@@ -158,7 +156,7 @@ class GCATools(commands.Cog):
                 color=disnake.Color.red(),
                 description=reason,
             ).set_footer(
-                text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+                text=f"{inter.author.display_name} ㆍ Plasmo Tools",
                 icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
             ),
         )
@@ -173,7 +171,6 @@ class GCATools(commands.Cog):
         self,
         inter: ApplicationCommandInteraction,
         user: disnake.Member,
-        tripetto_id: str,
         result: str = commands.Param(
             autocomplete=lambda *args: [
                 "Разбан",
@@ -194,7 +191,6 @@ class GCATools(commands.Cog):
         Parameters
         ----------
         user: Игрок
-        tripetto_id: ID заявки
         result: Тип рассмотренной заявки
         conditions: Условия
         clear_inventory: Очистить инвентарь
@@ -211,7 +207,7 @@ class GCATools(commands.Cog):
             color=disnake.Color.dark_green(),
             description=f"Положительно - **{result}{(', проходка обнуляется' if reset_pass else '')}**\n\n{additions}",
         ).set_footer(
-            text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+            text=f"{inter.author.display_name} ㆍ Plasmo Tools",
             icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
         )
 
@@ -244,7 +240,6 @@ class GCATools(commands.Cog):
         self,
         inter: ApplicationCommandInteraction,
         user: disnake.Member,
-        tripetto_id: str,
     ):
         """
         Заявка будет рассмотрена в суде
@@ -252,7 +247,6 @@ class GCATools(commands.Cog):
         Parameters
         ----------
         user: Игрок
-        tripetto_id: ID заявки
         inter: ApplicationCommandInteraction object
 
 
@@ -272,7 +266,7 @@ class GCATools(commands.Cog):
                 title="🟨 Заявка будет рассмотрена в суде",
                 color=disnake.Color.yellow(),
             ).set_footer(
-                text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+                text=f"{inter.author.display_name} ㆍ Plasmo Tools",
                 icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
             ),
         )
@@ -301,7 +295,6 @@ class GCATools(commands.Cog):
         self,
         inter: ApplicationCommandInteraction,
         user: disnake.Member,
-        tripetto_id: str,
         addition: str = "Вы сможете позже подать заявку на следующий апелляционный суд",
     ):
         """
@@ -310,7 +303,6 @@ class GCATools(commands.Cog):
         Parameters
         ----------
         user: Игрок
-        tripetto_id: ID заявки
         addition: Примечание для игрока
         inter: ApplicationCommandInteraction object
 
@@ -322,7 +314,7 @@ class GCATools(commands.Cog):
             color=disnake.Color.red(),
             description="Результат - **Отрицательно**",
         ).set_footer(
-            text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+            text=f"{inter.author.display_name} ㆍ Plasmo Tools",
             icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
         )
 
@@ -355,7 +347,6 @@ class GCATools(commands.Cog):
         self,
         inter: ApplicationCommandInteraction,
         user: disnake.Member,
-        tripetto_id: str,
         result: str = commands.Param(
             autocomplete=lambda *args: [
                 "Разбан",
@@ -376,7 +367,6 @@ class GCATools(commands.Cog):
         Parameters
         ----------
         user: Игрок
-        tripetto_id: ID заявки
         result: Тип рассмотренной заявки
         conditions: Условия
         clear_inventory: Очистить инвентарь
@@ -394,7 +384,7 @@ class GCATools(commands.Cog):
                 result, (f", проходка обнуляется" if reset_pass else ""), additions
             ),
         ).set_footer(
-            text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+            text=f"{inter.author.display_name} ㆍ Plasmo Tools",
             icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
         )
 
@@ -447,7 +437,6 @@ class GCATools(commands.Cog):
         self,
         inter: ApplicationCommandInteraction,
         user: disnake.Member,
-        tripetto_id: str,
         result: str = commands.Param(
             autocomplete=lambda *args: [
                 "Разбан",
@@ -468,7 +457,6 @@ class GCATools(commands.Cog):
         Parameters
         ----------
         user: Игрок
-        tripetto_id: ID заявки
         result: Тип рассмотренной заявки
         conditions: Условия
         clear_inventory: Очистить инвентарь
@@ -485,7 +473,7 @@ class GCATools(commands.Cog):
             color=disnake.Color.dark_green(),
             description=f"Положительно - **{result}{(', проходка обнуляется' if reset_pass else '')}**\n\n{additions}",
         ).set_footer(
-            text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+            text=f"{inter.author.display_name} ㆍ Plasmo Tools",
             icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
         )
 
@@ -522,7 +510,6 @@ class GCATools(commands.Cog):
         self,
         inter: ApplicationCommandInteraction,
         user: disnake.Member,
-        tripetto_id: str,
         addition: str = "Вы сможете позже подать заявку на следующий апелляционный суд",
     ):
         """
@@ -531,7 +518,6 @@ class GCATools(commands.Cog):
         Parameters
         ----------
         user: Игрок
-        tripetto_id: ID заявки
         addition: Примечание для игрока
         inter: ApplicationCommandInteraction object
 
@@ -543,7 +529,7 @@ class GCATools(commands.Cog):
             color=disnake.Color.red(),
             description="Результат - **Отрицательно**",
         ).set_footer(
-            text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+            text=f"{inter.author.display_name} ㆍ Plasmo Tools",
             icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
         )
 
@@ -576,7 +562,6 @@ class GCATools(commands.Cog):
         self,
         inter: ApplicationCommandInteraction,
         user: disnake.Member,
-        tripetto_id: str,
     ):
         """
         Заявка будет рассмотрена на комитете
@@ -584,7 +569,6 @@ class GCATools(commands.Cog):
         Parameters
         ----------
         user: Игрок
-        tripetto_id: ID заявки
         inter: ApplicationCommandInteraction object
 
 
@@ -604,7 +588,7 @@ class GCATools(commands.Cog):
                 title="🟨 Заявка будет рассмотрена комитетом",
                 color=disnake.Color.yellow(),
             ).set_footer(
-                text=f"{inter.author.display_name} ㆍ ID: {tripetto_id}",
+                text=f"{inter.author.display_name} ㆍ Plasmo Tools",
                 icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
             ),
         )
