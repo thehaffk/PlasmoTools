@@ -6,9 +6,6 @@ import logging
 import disnake
 from disnake.ext import tasks, commands
 
-from plasmotools import settings
-from plasmotools.utils import api
-
 logger = logging.getLogger(__name__)
 
 
@@ -20,7 +17,7 @@ class StatusPage(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-    @commands.command(name="status")
+    '''   @commands.command(name="status")
     async def status(self, ctx: disnake.ext.commands.Context):
         """
         Check all penalties and cancel them if user is banned
@@ -125,7 +122,7 @@ class StatusPage(commands.Cog):
             await message.edit(embed=status_embed)
 
         await message.edit(embed=status_embed, delete_after=60)
-
+    '''
     async def cog_load(self):
         logger.info("%s Ready", __name__)
 

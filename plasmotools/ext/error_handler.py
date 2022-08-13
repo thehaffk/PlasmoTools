@@ -1,4 +1,5 @@
 import logging
+from random import randint
 
 import disnake
 from disnake.ext import commands
@@ -91,7 +92,10 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: disnake.ext.commands.Context, error):
         if isinstance(error, disnake.ext.commands.errors.CommandNotFound):
-            await ctx.reply("https://imgur.com/tEe8LUQ")
+            if randint(1, 10) == 1:
+                await ctx.reply("https://imgur.com/tEe8LUQ")
+            else:
+                await ctx.message.add_reaction("😬")
 
 
 def setup(client):

@@ -53,7 +53,7 @@ class Fun(commands.Cog):
                 pass
             return
         if "комар " in message.content.lower() or message.content.lower().endswith("комар"):
-            if randint(0, 3) == 1:
+            if randint(1, 10) == 1:
                 await message.channel.send(content=choice(komaru_gifs))
 
     async def cog_load(self):
