@@ -27,6 +27,8 @@ class PlasmoSync(commands.Bot):
         _intents.message_content = True
         _intents.guilds = True
         _intents.guild_messages = True
+        _intents.guild_scheduled_events = True
+
 
         return cls(
             owner_ids=[
