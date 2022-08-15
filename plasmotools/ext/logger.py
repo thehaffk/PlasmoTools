@@ -211,6 +211,59 @@ class PlasmoLogger(commands.Cog):
                 logger.warning(err)
                 return False
 
+    @commands.Cog.listener()
+    async def on_message_delete(self, message: disnake.Message):
+        if message.guild is None or message.guild.id not in [
+            guild.discord_id for guild in settings.structure_guilds
+        ] + [settings.PlasmoRPGuild.guild_id]:
+            return False
+        if message.author.id == self.bot.user.id:
+            return
+
+        logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
+        await logs_channel.send(
+            embed=disnake.Embed(
+                description=f"Guild: **{message.guild}**  \n\n{message.author.mention} deleted message in {message.channel.mention}",
+                color=disnake.Color.red(),
+            )
+            .add_field(
+                name="Raw message",
+                value=f"```{message.content}```",
+            )
+            .set_footer(
+                text=f"Message ID: {message.id} / Author ID: {message.author.id} / Guild ID : {message.guild.id}"
+            )
+        )
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before: disnake.Message, after: disnake.Message):
+        if before.guild is None or before.guild.id not in [
+            guild.discord_id for guild in settings.structure_guilds
+        ] + [settings.PlasmoRPGuild.guild_id]:
+            return False
+        if before.author.id == self.bot.user.id:
+            return
+        logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
+        await logs_channel.send(
+            embed=disnake.Embed(
+                description=f"Guild: **{before.guild}**  \n\n{before.author.mention} edited "
+                f"[message]({after.jump_url}) in {before.channel.mention}",
+                color=disnake.Color.yellow(),
+            )
+            .add_field(
+                name="Raw old message",
+                value=f"```{before.content}```",
+                inline=False,
+            )
+            .add_field(
+                name="Raw new message",
+                value=f"```{after.content}```",
+            )
+            .set_footer(
+                text=f"Message ID: {before.id} / Author ID: {before.author.id} / Guild ID : {before.guild.id}"
+            )
+        )
+
     async def cog_load(self):
         logger.info("%s Ready", __name__)
 

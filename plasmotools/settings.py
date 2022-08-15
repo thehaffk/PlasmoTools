@@ -30,6 +30,7 @@ class LogsServer:
     force_warns_logs_channel_id = 961760968315133972
     xray_logs_channel_id = 961694829316833360
     admin_commands_channel_id = 961751903488852068
+    messages_channel_id = 1008822105200132106
 
 
 class Emojis:
@@ -87,6 +88,7 @@ class PlasmoRPGuild:
     notifications_channel_id = 754644298720477264
     game_channel_id = 753619083227824319
     anticheat_logs_channel_id = 959332068993679400
+    server_logs_channel_id = 1008814971926364300
 
 
 class BACGuild:  # TODO: Rename BAC(Big Appeal Court) to GCA(Grand Court of Appeal)
