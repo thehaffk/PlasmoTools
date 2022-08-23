@@ -123,6 +123,7 @@ class StatusPage(commands.Cog):
 
         await message.edit(embed=status_embed, delete_after=60)
     '''
+
     async def cog_load(self):
         logger.info("%s Ready", __name__)
 
