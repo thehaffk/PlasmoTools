@@ -1,6 +1,3 @@
-"""
-Cog-file for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
-"""
 import logging
 from random import choice, randint
 
@@ -34,23 +31,21 @@ komaru_gifs = [
 
 
 class Fun(commands.Cog):
-    """
-    Cog for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
-    """
 
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
+
     @commands.is_owner()
-    @commands.slash_command(name="msg")
-    async def msg(self, inter: disnake.ApplicationCommandInteraction, text: str):
+    @commands.slash_command(name="join")
+    async def join(self, inter, channel_id: str):
         """
-        Send message to channel
+        Join channel
         """
-        await inter.send("ok", ephemeral=True)
-        await inter.channel.send(text)
+        ds_channel = self.bot.get_channel(int(channel_id))
+        await ds_channel.connect()
 
-
+        await inter.send("Маму брал", ephemeral=True)
 
     @commands.Cog.listener()
     async def on_message(self, message: disnake.Message):
@@ -68,7 +63,7 @@ class Fun(commands.Cog):
                 pass
             return
         if "комар " in message.content.lower() or message.content.lower().endswith(
-            "комар"
+                "комар"
         ):
             if randint(1, 10) == 1:
                 await message.channel.send(content=choice(komaru_gifs))

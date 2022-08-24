@@ -4,6 +4,7 @@ import disnake
 from disnake.ext import tasks, commands
 
 from plasmotools import settings
+from plasmotools.utils.database import compulsory_service
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,13 @@ class CompolsoryService(commands.Cog):
             ephemeral=True,
         )
         await self.check_all_entries()
+
+    async def _generate_profile_embed(self, user: disnake.Member):
+        """
+        Generate profile embed for user
+        """
+        ...
+        cs_entries = await compulsory_service.get_cs_entries(user_id=user.id)
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)

@@ -49,7 +49,7 @@ class PenaltyUtilities(commands.Cog):
             if penalty["user"] in active_players:
                 continue
 
-            if penalty["user"] in banned_players or penalty["user"] == "kto":
+            if penalty["user"] in banned_players or penalty["user"] == "watchdog":
                 await self._cancel_penalty(penalty)
                 continue
 

@@ -76,6 +76,8 @@ class PlasmoRPGuild:
     interpol_role_id = 751723033357451335
     banker_role_id = 826367015014498314
     player_role_id = 746628733452025866
+    keeper_role_id = 1003276423747874896
+    ne_komar_role_id = 956884028533919774
     monitored_roles = [
         admin_role_id,
         president_role_id,
@@ -83,6 +85,7 @@ class PlasmoRPGuild:
         mko_helper_role_id,
         interpol_role_id,
         banker_role_id,
+        keeper_role_id,
     ]
 
     notifications_channel_id = 754644298720477264
