@@ -81,6 +81,8 @@ class Utils(commands.Cog):
 
             if member_api_profile is None:
                 continue
+            if member_api_profile.get("roles", None) is None:
+                continue
             for role in settings.api_roles:
                 has_guild_role = (
                                      local_role := plasmo_guild.get_role(settings.api_roles[role])
