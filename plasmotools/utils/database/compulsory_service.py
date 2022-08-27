@@ -10,7 +10,7 @@ from plasmotools import settings
 logger = logging.getLogger(__name__)
 
 PATH = settings.DATABASE_PATH
-#
+
 
 
 queries = [

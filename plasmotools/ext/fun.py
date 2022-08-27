@@ -35,7 +35,6 @@ class Fun(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-
     @commands.is_owner()
     @commands.slash_command(name="join")
     async def join(self, inter, channel_id: str):

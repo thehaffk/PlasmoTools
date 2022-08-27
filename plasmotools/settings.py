@@ -78,6 +78,9 @@ class PlasmoRPGuild:
     player_role_id = 746628733452025866
     keeper_role_id = 1003276423747874896
     ne_komar_role_id = 956884028533919774
+    fusion_role_id = 751722994170331136
+
+
     monitored_roles = [
         admin_role_id,
         president_role_id,
@@ -92,6 +95,20 @@ class PlasmoRPGuild:
     game_channel_id = 753619083227824319
     anticheat_logs_channel_id = 959332068993679400
     server_logs_channel_id = 1008814971926364300
+    logs_channel_id = 959332068993679400
+
+
+api_roles = {
+    "admin": PlasmoRPGuild.admin_role_id,
+    "president": PlasmoRPGuild.president_role_id,
+    "supa_helper": PlasmoRPGuild.mko_head_role_id,
+    "soviet-helper": PlasmoRPGuild.mko_helper_role_id,
+    "helper": PlasmoRPGuild.interpol_role_id,
+    "banker": PlasmoRPGuild.banker_role_id,
+    "keeper": PlasmoRPGuild.keeper_role_id,
+    "player": PlasmoRPGuild.player_role_id,
+    "support": PlasmoRPGuild.fusion_role_id,
+}
 
 
 class BACGuild:  # TODO: Rename BAC(Big Appeal Court) to GCA(Grand Court of Appeal)
