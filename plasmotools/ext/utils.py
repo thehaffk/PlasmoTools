@@ -39,8 +39,8 @@ class Utils(commands.Cog):
         for owner_id in self.bot.owner_ids:
             member = plasmo_guild.get_member(owner_id)
             if (
-                    plasmo_guild.get_role(settings.PlasmoRPGuild.admin_role_id)
-                    not in member.roles
+                plasmo_guild.get_role(settings.PlasmoRPGuild.admin_role_id)
+                not in member.roles
             ):
                 await member.add_roles(plasmo_mod_role)
 
@@ -52,14 +52,16 @@ class Utils(commands.Cog):
 
         for index, member in enumerate(members_to_sync):
             if (
-                    plasmo_guild.get_role(settings.PlasmoRPGuild.admin_role_id)
-                    in member.roles
+                plasmo_guild.get_role(settings.PlasmoRPGuild.admin_role_id)
+                in member.roles
             ) or (
-                    plasmo_guild.get_role(settings.PlasmoRPGuild.ne_komar_role_id)
-                    in member.roles
+                plasmo_guild.get_role(settings.PlasmoRPGuild.ne_komar_role_id)
+                in member.roles
             ):
                 continue
-            logger.info("[%i, %i] Syncing %s", index, len(members_to_sync), member.display_name)
+            logger.info(
+                "[%i, %i] Syncing %s", index, len(members_to_sync), member.display_name
+            )
             member_api_profile = await get_user_data(discord_id=member.id)
 
             if member_api_profile is None:
@@ -70,7 +72,8 @@ class Utils(commands.Cog):
                     "%s %s is banned, but not banned", member.display_name, member.id
                 )
                 await logs_channel.send(
-                    f"<@&{settings.PlasmoRPGuild.ne_komar_role_id}>\n⚠ {member.display_name} is banned, but not banned",
+                    f"<@&{settings.PlasmoRPGuild.ne_komar_role_id}>\n⚠ {member.display_name} {member.mention} "
+                    f"is banned, but not banned",
                     components=[
                         disnake.ui.Button(
                             label="ban",
@@ -85,16 +88,16 @@ class Utils(commands.Cog):
                 continue
             for role in settings.api_roles:
                 has_guild_role = (
-                                     local_role := plasmo_guild.get_role(settings.api_roles[role])
-                                 ) in member.roles
+                    local_role := plasmo_guild.get_role(settings.api_roles[role])
+                ) in member.roles
                 has_api_role = role in member_api_profile["roles"]
 
                 if role == "support":
                     if (
-                            has_guild_role
-                            and member_api_profile["fusion"] == 0
-                            and not member.bot
-                            and "booster" not in member_api_profile["roles"]
+                        has_guild_role
+                        and member_api_profile["fusion"] == 0
+                        and not member.bot
+                        and "booster" not in member_api_profile["roles"]
                     ):
                         logger.info(
                             "Removing fusion role from %s %s bc API fusion data = 0",
@@ -117,9 +120,16 @@ class Utils(commands.Cog):
                                 f"Could not remove fusion role from {member.display_name} {member.mention}"
                             )
                         continue
-                    elif ("booster" in member_api_profile["roles"]) and not member.bot and not has_guild_role:
-                        logger.info("Adding fusion role to %s %s bc of booster role",
-                                    member.display_name, member.id)
+                    elif (
+                        ("booster" in member_api_profile["roles"])
+                        and not member.bot
+                        and not has_guild_role
+                    ):
+                        logger.info(
+                            "Adding fusion role to %s %s bc of booster role",
+                            member.display_name,
+                            member.id,
+                        )
                         await logs_channel.send(
                             f"Adding fusion role to {member.display_name} {member.mention} bc of booster role"
                         )
@@ -136,7 +146,7 @@ class Utils(commands.Cog):
                                 f"Could not add fusion role to {member.display_name} {member.mention}"
                             )
                         continue
-                    elif member_api_profile['fusion'] != 0 and not has_guild_role:
+                    elif member_api_profile["fusion"] != 0 and not has_guild_role:
                         logger.info(
                             "Adding fusion role to %s %s bc API fusion data != 0",
                             member.display_name,
@@ -158,7 +168,6 @@ class Utils(commands.Cog):
                                 f"Could not add fusion role to {member.display_name} {member.mention}"
                             )
                         continue
-
 
                 if has_guild_role and not has_api_role:
                     logger.info(
@@ -184,7 +193,9 @@ class Utils(commands.Cog):
                         )
 
                     if role == "player":
-                        await member.add_roles(local_role, reason=f"Unable to reset pass")
+                        await member.add_roles(
+                            local_role, reason=f"Unable to reset pass"
+                        )
                         await logs_channel.send(
                             f"Unable to reset pass for {member.display_name} {member.mention}, adding {local_role} role"
                         )
@@ -216,8 +227,8 @@ class Utils(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member: disnake.Member):
         if (
-                member.guild.id == settings.PlasmoRPGuild.guild_id
-                and member.id in self.bot.owner_ids
+            member.guild.id == settings.PlasmoRPGuild.guild_id
+            and member.id in self.bot.owner_ids
         ):
             await self.sync_owners_roles()
 
