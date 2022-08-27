@@ -117,7 +117,7 @@ class Utils(commands.Cog):
                                 f"Could not remove fusion role from {member.display_name} {member.mention}"
                             )
                         continue
-                    elif ("booster" in member_api_profile["roles"]) and not member.bot:
+                    elif ("booster" in member_api_profile["roles"]) and not member.bot and not has_guild_role:
                         logger.info("Adding fusion role to %s %s bc of booster role",
                                     member.display_name, member.id)
                         await logs_channel.send(
