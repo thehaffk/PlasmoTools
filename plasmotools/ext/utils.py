@@ -45,12 +45,8 @@ class Utils(commands.Cog):
                 await member.add_roles(plasmo_mod_role)
 
     async def sync_global_roles(self):
-        print("sync_global_roles")
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
-        plasmo_player_role = plasmo_guild.get_role(
-            settings.PlasmoRPGuild.player_role_id
-        )
-        members_to_sync = plasmo_player_role.members
+        members_to_sync = plasmo_guild.members
 
         logs_channel = plasmo_guild.get_channel(settings.PlasmoRPGuild.logs_channel_id)
 
