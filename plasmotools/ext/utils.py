@@ -91,33 +91,76 @@ class Utils(commands.Cog):
                                  ) in member.roles
                 has_api_role = role in member_api_profile["roles"]
 
-                if (
-                        role == "support"
-                        and has_api_role
-                        and member_api_profile["fusion"] == 0
-                        and not member.bot
-                ):
-                    logger.info(
-                        "Removing fusion role from %s %s bc API fusion data = 0",
-                        member.display_name,
-                        member.id,
-                    )
-                    await logs_channel.send(
-                        f"Removing fusion role from {member.display_name} {member.mention}"
-                    )
-                    try:
-                        await member.remove_roles(local_role, reason=f"API SYNC")
-                    except disnake.Forbidden:
+                if role == "support":
+                    if (
+                            has_guild_role
+                            and member_api_profile["fusion"] == 0
+                            and not member.bot
+                            and "booster" not in member_api_profile["roles"]
+                    ):
                         logger.info(
-                            "Could not add %s to %s %s [has_guild_role = False, has_api_role = True]",
-                            role,
+                            "Removing fusion role from %s %s bc API fusion data = 0",
                             member.display_name,
                             member.id,
                         )
                         await logs_channel.send(
-                            f"Could not remove fusion from {member.display_name} {member.mention}"
+                            f"Removing fusion role from {member.display_name} {member.mention}"
                         )
-                    continue
+                        try:
+                            await member.remove_roles(local_role, reason=f"API SYNC")
+                        except disnake.Forbidden:
+                            logger.info(
+                                "Could not add %s to %s %s [has_guild_role = False, has_api_role = True]",
+                                role,
+                                member.display_name,
+                                member.id,
+                            )
+                            await logs_channel.send(
+                                f"Could not remove fusion role from {member.display_name} {member.mention}"
+                            )
+                        continue
+                    elif ("booster" in member_api_profile["roles"]) and not member.bot:
+                        logger.info("Adding fusion role to %s %s bc of booster role",
+                                    member.display_name, member.id)
+                        await logs_channel.send(
+                            f"Adding fusion role to {member.display_name} {member.mention} bc of booster role"
+                        )
+                        try:
+                            await member.add_roles(local_role, reason=f"API SYNC")
+                        except disnake.Forbidden:
+                            logger.info(
+                                "Could not add %s to %s %s",
+                                role,
+                                member.display_name,
+                                member.id,
+                            )
+                            await logs_channel.send(
+                                f"Could not add fusion role to {member.display_name} {member.mention}"
+                            )
+                        continue
+                    elif member_api_profile['fusion'] != 0 and not has_guild_role:
+                        logger.info(
+                            "Adding fusion role to %s %s bc API fusion data != 0",
+                            member.display_name,
+                            member.id,
+                        )
+                        await logs_channel.send(
+                            f"Adding fusion role to {member.display_name} {member.mention} bc API fusion data != 0"
+                        )
+                        try:
+                            await member.add_roles(local_role, reason=f"API SYNC")
+                        except disnake.Forbidden:
+                            logger.info(
+                                "Could not add %s to %s %s",
+                                role,
+                                member.display_name,
+                                member.id,
+                            )
+                            await logs_channel.send(
+                                f"Could not add fusion role to {member.display_name} {member.mention}"
+                            )
+                        continue
+
 
                 if has_guild_role and not has_api_role:
                     logger.info(
@@ -141,6 +184,13 @@ class Utils(commands.Cog):
                         await logs_channel.send(
                             f"Could not remove {local_role} from {member.display_name} {member.mention}"
                         )
+
+                    if role == "player":
+                        await member.add_roles(local_role, reason=f"Unable to reset pass")
+                        await logs_channel.send(
+                            f"Unable to reset pass for {member.display_name} {member.mention}, adding {local_role} role"
+                        )
+                        continue
 
                 if not has_guild_role and has_api_role:
                     logger.info(
