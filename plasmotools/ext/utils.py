@@ -62,6 +62,9 @@ class Utils(commands.Cog):
             logger.info("[%i, %i] Syncing %s", index, len(members_to_sync), member.display_name)
             member_api_profile = await get_user_data(discord_id=member.id)
 
+            if member_api_profile is None:
+                continue
+
             if member_api_profile.get("banned", False):
                 logger.info(
                     "%s %s is banned, but not banned", member.display_name, member.id
@@ -77,9 +80,6 @@ class Utils(commands.Cog):
                         )
                     ],
                 )
-                continue
-
-            if member_api_profile is None:
                 continue
             if member_api_profile.get("roles", None) is None:
                 continue
