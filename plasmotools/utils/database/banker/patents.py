@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import logging
+from typing import List, Optional
+
+import aiosqlite
 
 from plasmotools import settings
 
@@ -8,46 +11,52 @@ logger = logging.getLogger(__name__)
 
 PATH = settings.DATABASE_PATH
 
-'''
-class Project:
+
+class Patent:
     def __init__(
         self,
-        project_id: int,
+        patent_id: int,
         name: str,
-        is_active: int | bool,
-        guild_discord_id: int,
-        webhook_url: str,
-        from_card: Optional[int] = None,
-        plasmo_bearer_token: Optional[str] = None,
+        owner_discord_ids: List[int],
+        banker_discord_id: int,
+        moderator_discord_id: int,
+        is_art: bool,
+        decision: int = 0,
+        map_ids: Optional[List[int]] = None,
     ):
-        self.id = project_id
+        self.id = patent_id
         self.name = name
-        self.is_active = bool(is_active)
-        self.guild_discord_id = guild_discord_id
-        self.webhook_url = webhook_url
-        self.from_card = from_card
-        self.plasmo_bearer_token = plasmo_bearer_token
+        self.owner_discord_ids = owner_discord_ids
+        self.banker_discord_id = banker_discord_id
+        self.moderator_discord_id = moderator_discord_id
+        self.is_art = is_art
+        self.decision = decision
+        if map_ids is None:
+            map_ids = []
+        self.map_ids = map_ids
 
     async def push(self):
         async with aiosqlite.connect(PATH) as db:
             await db.execute(
                 """
-                UPDATE structure_projects SET 
-                        name = ?,
-                        is_active = ?,
-                        guild_discord_id = ?,
-                        webhook_url = ?,
-                        from_card = ?,
-                        plasmo_bearer_token = ?
+                UPDATE patents SET 
+                name = ?,
+                owner_ids = ?,
+                banker_id = ?,
+                moderator_id = ?,
+                is_art = ?,
+                decision = ?,
+                map_ids = ?
                 WHERE id = ? 
                 """,
                 (
                     self.name,
-                    int(self.is_active),
-                    self.guild_discord_id,
-                    self.webhook_url,
-                    self.from_card,
-                    self.plasmo_bearer_token,
+                    ", ".join(map(str, self.owner_discord_ids)),
+                    self.banker_discord_id,
+                    self.moderator_discord_id,
+                    int(self.is_art),
+                    self.decision,
+                    ", ".join(map(str, self.map_ids)),
                     self.id,
                 ),
             )
@@ -56,24 +65,27 @@ class Project:
     async def edit(
         self,
         name: Optional[str] = None,
-        is_active: Optional[int] = None,
-        guild_discord_id: Optional[int] = None,
-        webhook_url: Optional[str] = None,
-        from_card: Optional[int] = None,
-        plasmo_bearer_token: Optional[str] = None,
+        owner_discord_ids: Optional[List[int]] = None,
+        banker_discord_id: Optional[int] = None,
+        moderator_discord_id: Optional[int] = None,
+        is_art: Optional[bool] = None,
+        decision: Optional[int] = None,
+        map_ids: Optional[List[int]] = None,
     ):
         if name is not None:
             self.name = name
-        if is_active is not None:
-            self.is_active = bool(is_active)
-        if guild_discord_id is not None:
-            self.guild_discord_id = guild_discord_id
-        if webhook_url is not None:
-            self.webhook_url = webhook_url
-        if from_card is not None:
-            self.from_card = from_card
-        if plasmo_bearer_token is not None:
-            self.plasmo_bearer_token = plasmo_bearer_token
+        if owner_discord_ids is not None:
+            self.owner_discord_ids = owner_discord_ids
+        if banker_discord_id is not None:
+            self.banker_discord_id = banker_discord_id
+        if moderator_discord_id is not None:
+            self.moderator_discord_id = moderator_discord_id
+        if is_art is not None:
+            self.is_art = is_art
+        if decision is not None:
+            self.decision = decision
+        if map_ids is not None:
+            self.map_ids = map_ids
 
         await self.push()
 
@@ -81,81 +93,86 @@ class Project:
 
         async with aiosqlite.connect(PATH) as db:
             await db.execute(
-                """DELETE FROM structure_projects WHERE id = ?""",
+                """DELETE FROM patents WHERE id = ?""",
                 (self.id,),
             )
             await db.commit()
 
 
-async def get_project(project_id: int) -> Optional[Project]:
+async def create_patent(
+    name: str,
+    owner_discord_ids: List[int],
+    banker_discord_id: int,
+    moderator_discord_id: int,
+    is_art: bool,
+    decision: int = 0,
+    map_ids: Optional[List[int]] = None,
+) -> Patent:
+    if map_ids is None:
+        map_ids = []
+    async with aiosqlite.connect(PATH) as db:
+        cursor = await db.execute(
+            """INSERT INTO patents 
+            (name, owner_ids, banker_id, moderator_id, is_art, decision, map_ids) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (
+                name,
+                ", ".join(map(str, owner_discord_ids)),
+                banker_discord_id,
+                moderator_discord_id,
+                int(is_art),
+                decision,
+                ", ".join(map(str, map_ids)),
+            ),
+        )
+        await db.commit()
+        return await get_patent(cursor.lastrowid)
+
+
+async def get_patent(patent_id: int) -> Optional[Patent]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
             """SELECT 
-                                                    id, name, is_active, guild_discord_id, webhook_url, from_card, plasmo_bearer_token
-                                                    FROM structure_projects WHERE id = ?
-                                                    """,
-            (project_id,),
+            id, name, owner_ids, banker_id, moderator_id, is_art, decision, map_ids
+            FROM patents WHERE id = ?
+            """,
+            (patent_id,),
         ) as cursor:
             row = await cursor.fetchone()
             if row is None:
                 return None
-            return Project(
-                project_id=row[0],
+            return Patent(
+                patent_id=row[0],
                 name=row[1],
-                is_active=row[2],
-                guild_discord_id=row[3],
-                webhook_url=row[4],
-                from_card=row[5],
-                plasmo_bearer_token=row[6],
+                owner_discord_ids=list(map(int, row[2].split(", "))),
+                banker_discord_id=row[3],
+                moderator_discord_id=row[4],
+                is_art=row[5],
+                decision=row[6],
+                map_ids=list(map(int, row[7].split(", "))),
             )
 
 
-async def register_project(
-    name: str,
-    is_active: int | bool,
-    guild_discord_id: int,
-    webhook_url: str,
-    from_card: Optional[int] = None,
-    plasmo_bearer_token: Optional[str] = None,
-) -> Project:
-    async with aiosqlite.connect(PATH) as db:
-        cursor = await db.execute(
-            """INSERT INTO structure_projects
-             (name, is_active, guild_discord_id, webhook_url, from_card, plasmo_bearer_token)
-            VALUES (?, ?, ?, ?, ?, ?)""",
-            (
-                name,
-                int(is_active),
-                guild_discord_id,
-                webhook_url,
-                from_card,
-                plasmo_bearer_token,
-            ),
-        )
-        await db.commit()
-        return await get_project(cursor.lastrowid)
-
-
-async def get_projects(guild_discord_id: Optional[int] = None) -> List[Project]:
+async def get_projects(decision: Optional[int] = None) -> List[Patent]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
             """SELECT 
-                                                    id, name, is_active, guild_discord_id, webhook_url, from_card, plasmo_bearer_token
-                                                    FROM structure_projects """
-            + ("WHERE guild_discord_id = ?" if guild_discord_id is not None else ""),
-            (guild_discord_id,) if guild_discord_id is not None else (),
+                id, name, owner_ids, banker_id, moderator_id, is_art, decision, map_ids
+                 FROM patents """
+            + ("WHERE description = ?" if decision is not None else ""),
+            (decision,) if decision is not None else (),
         ) as cursor:
             rows = await cursor.fetchall()
             return [
-                Project(
-                    project_id=row[0],
+                Patent(
+                    patent_id=row[0],
                     name=row[1],
-                    is_active=row[2],
-                    guild_discord_id=row[3],
-                    webhook_url=row[4],
-                    from_card=row[5],
-                    plasmo_bearer_token=row[6],
+                    owner_discord_ids=list(map(int, row[2].split(", "))),
+                    banker_discord_id=row[3],
+                    moderator_discord_id=row[4],
+                    is_art=row[5],
+                    decision=row[6],
+                    map_ids=list(map(int, row[7].split(", "))),
                 )
                 for row in rows
             ]
-'''
