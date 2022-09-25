@@ -96,7 +96,27 @@ class ErrorHandler(commands.Cog):
                 await ctx.reply("https://imgur.com/tEe8LUQ")
             else:
                 await ctx.message.add_reaction("😬")
-
+        else:
+            logger.error(error)
+            await ctx.send(
+                embed=disnake.Embed(
+                    title="Error",
+                    description=f"Возникла неожиданная ошибка.\n\n`{error}`"
+                                f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
+                    color=disnake.Color.red(),
+                ),
+            )
+            await self.bot.get_channel(settings.DevServer.errors_channel_id).send(
+                embed=disnake.Embed(
+                    title="⚠⚠⚠",
+                    description=f"Возникла неожиданная ошибка.\n\n`{str(error)[:900]}`",
+                    color=disnake.Color.brand_green(),
+                ).add_field(
+                    name="inter data",
+                    value=f"{ctx.__dict__}"[:1000],
+                )
+            )
+            raise error
 
 def setup(client):
     client.add_cog(ErrorHandler(client))

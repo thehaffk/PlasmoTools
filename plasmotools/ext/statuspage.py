@@ -1,6 +1,3 @@
-"""
-Cog-file for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
-"""
 import logging
 
 import disnake
@@ -10,9 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 class StatusPage(commands.Cog):
-    """
-    Cog for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
-    """
 
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
@@ -123,6 +117,7 @@ class StatusPage(commands.Cog):
 
         await message.edit(embed=status_embed, delete_after=60)
     '''
+
     async def cog_load(self):
         logger.info("%s Ready", __name__)
 

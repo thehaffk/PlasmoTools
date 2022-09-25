@@ -1,6 +1,3 @@
-"""
-Cog-file for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
-"""
 import logging
 from typing import List
 
@@ -14,10 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class PenaltyUtilities(commands.Cog):
-    """
-    Cog for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
-    """
-
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
@@ -56,7 +49,7 @@ class PenaltyUtilities(commands.Cog):
             if penalty["user"] in active_players:
                 continue
 
-            if penalty["user"] in banned_players or penalty["user"] == "kto":
+            if penalty["user"] in banned_players or penalty["user"] == "watchdog":
                 await self._cancel_penalty(penalty)
                 continue
 

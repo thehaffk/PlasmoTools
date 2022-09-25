@@ -1,6 +1,3 @@
-"""
-Cog-file for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
-"""
 import logging
 from random import choice, randint
 
@@ -29,30 +26,44 @@ komaru_gifs = [
     "https://imgur.com/1wty42Q",
     "https://imgur.com/azs4YV8",
     "https://imgur.com/SdDkRJA",
-    "https://imgur.com/JdDlCPm"
-
+    "https://imgur.com/JdDlCPm",
 ]
 
 
 class Fun(commands.Cog):
-    """
-    Cog for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
-    """
 
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
+
+    @commands.is_owner()
+    @commands.slash_command(name="join")
+    async def join(self, inter, channel_id: str):
+        """
+        Join channel
+        """
+        ds_channel = self.bot.get_channel(int(channel_id))
+        await ds_channel.connect()
+
+        await inter.send("Маму брал", ephemeral=True)
 
     @commands.Cog.listener()
     async def on_message(self, message: disnake.Message):
         if message.content == self.bot.user.mention:
             try:
-                await message.reply(
-                    "https://tenor.com/view/discord-komaru-gif-26032653"
-                )
+                if message.author.id in self.bot.owner_ids:
+                    await message.add_reaction("✅")
+                elif randint(1, 10) == 1:
+                    await message.reply(
+                        "https://tenor.com/view/discord-komaru-gif-26032653"
+                    )
+                else:
+                    await message.add_reaction("😡")
             except disnake.Forbidden:
                 pass
             return
-        if "комар " in message.content.lower() or message.content.lower().endswith("комар"):
+        if "комар " in message.content.lower() or message.content.lower().endswith(
+                "комар"
+        ):
             if randint(1, 10) == 1:
                 await message.channel.send(content=choice(komaru_gifs))
 

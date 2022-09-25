@@ -31,8 +31,8 @@ class PlasmoLogger(commands.Cog):
         """
 
         if (
-                after.guild.id != settings.PlasmoRPGuild.guild_id
-                or before.roles == after.roles
+            after.guild.id != settings.PlasmoRPGuild.guild_id
+            or before.roles == after.roles
         ):
             return False
 
@@ -45,8 +45,8 @@ class PlasmoLogger(commands.Cog):
 
         for role in removed_roles:
             if (
-                    role.id not in settings.PlasmoRPGuild.monitored_roles
-                    and role.id != settings.PlasmoRPGuild.player_role_id
+                role.id not in settings.PlasmoRPGuild.monitored_roles
+                and role.id != settings.PlasmoRPGuild.player_role_id
             ):
                 continue
 
@@ -54,8 +54,8 @@ class PlasmoLogger(commands.Cog):
                 title=f"Роль {role.name} снята - {after.display_name}",
                 color=disnake.Color.dark_red(),
                 description=f"{after.mention}("
-                            f"[{after.display_name}](https://rp.plo.su/u/"
-                            f"{after.display_name}))",
+                f"[{after.display_name}](https://rp.plo.su/u/"
+                f"{after.display_name}))",
             )
 
             await log_channel.send(content=f"<@{before.id}>", embed=log_embed)
@@ -68,8 +68,8 @@ class PlasmoLogger(commands.Cog):
                 title=f"Роль {role.name} добавлена - {after.display_name}",
                 color=disnake.Color.dark_green(),
                 description=f"{after.mention}("
-                            f"[{after.display_name}](https://rp.plo.su/u/"
-                            f"{after.display_name}))",
+                f"[{after.display_name}](https://rp.plo.su/u/"
+                f"{after.display_name}))",
             )
 
             msg = await log_channel.send(content=f"<@{before.id}>", embed=log_embed)
@@ -93,7 +93,7 @@ class PlasmoLogger(commands.Cog):
         for tries in range(10):
             async with ClientSession() as session:
                 async with session.get(
-                        url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
+                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
                 ) as response:
                     try:
                         user_data = (await response.json())["data"]
@@ -112,9 +112,9 @@ class PlasmoLogger(commands.Cog):
             title="☠️ Игрок забанен",
             color=disnake.Color.red(),
             description=f"[{nickname if nickname else member.display_name}]"
-                        f"(https://rp.plo.su/u/{nickname}) был забанен\n\n"
-                        f"**Причина:**\n{reason.strip()}"
-                        f"\n\n⚡ by [digital drugs technologies]({settings.LogsServer.invite_url})",
+            f"(https://rp.plo.su/u/{nickname}) был забанен\n\n"
+            f"**Причина:**\n{reason.strip()}"
+            f"\n\n⚡ by [digital drugs technologies]({settings.LogsServer.invite_url})",
         )
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
             settings.LogsServer.ban_logs_channel_id
@@ -136,7 +136,7 @@ class PlasmoLogger(commands.Cog):
         for tries in range(10):
             async with ClientSession() as session:
                 async with session.get(
-                        url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
+                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
                 ) as response:
                     try:
                         user_data = (await response.json())["data"]
@@ -154,8 +154,8 @@ class PlasmoLogger(commands.Cog):
             title="🔓 Игрок разбанен",
             color=disnake.Color.green(),
             description=f"[{nickname if nickname else member.name}]"
-                        f"(https://rp.plo.su/u/{nickname}) был разбанен"
-                        f"\n\n⚡ by [digital drugs]({settings.LogsServer.invite_url})",
+            f"(https://rp.plo.su/u/{nickname}) был разбанен"
+            f"\n\n⚡ by [digital drugs]({settings.LogsServer.invite_url})",
         )
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
             settings.LogsServer.ban_logs_channel_id
@@ -168,9 +168,9 @@ class PlasmoLogger(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: disnake.Message):
         if (
-                message.guild is not None
-                and message.guild.id == settings.PlasmoRPGuild.guild_id
-                and message.type == disnake.MessageType.thread_created
+            message.guild is not None
+            and message.guild.id == settings.PlasmoRPGuild.guild_id
+            and message.type == disnake.MessageType.thread_created
         ):
             try:
                 await message.delete(delay=3)
@@ -185,8 +185,8 @@ class PlasmoLogger(commands.Cog):
             return
 
         if (
-                message.channel.id == settings.PlasmoRPGuild.notifications_channel_id
-                and message.author.name == "Предупреждения"
+            message.channel.id == settings.PlasmoRPGuild.notifications_channel_id
+            and message.author.name == "Предупреждения"
         ):
             warned_user = message.mentions[0]
             try:
@@ -199,9 +199,9 @@ class PlasmoLogger(commands.Cog):
                         title="Вам выдали предупреждение на Plasmo RP",
                         color=disnake.Color.dark_red(),
                         description=f"Оспорить решение "
-                                    f"модерации или снять варн можно "
-                                    f"только тут - {settings.BACGuild.invite_url}\n\n\n"
-                                    f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
+                        f"модерации или снять варн можно "
+                        f"только тут - {settings.BACGuild.invite_url}\n\n\n"
+                        f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
                     )
                 )
                 await warned_user.send(
@@ -213,39 +213,49 @@ class PlasmoLogger(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: disnake.Message):
-        if message.author.bot or message.guild is None or message.guild.id not in [
-            guild.discord_id for guild in settings.structure_guilds
-        ] + [settings.PlasmoRPGuild.guild_id]:
+        if (
+            message.author.bot
+            or message.guild is None
+            or message.guild.id
+            not in [guild.discord_id for guild in settings.structure_guilds]
+            + [settings.PlasmoRPGuild.guild_id]
+        ):
             return False
         if message.author.id == self.bot.user.id:
             return
 
         logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
-        embed = disnake.Embed(
-            description=f"Guild: **{message.guild}**\n\n"
-                        f"{message.author.mention} deleted message in {message.channel.mention}",
-            color=disnake.Color.red(),
-        ).add_field(
-            name="Raw message",
-            value=f"```{message.content}```" if message.content else "empty",
-        ).set_footer(
-            text=f"Message ID: {message.id} / Author ID: {message.author.id} / Guild ID : {message.guild.id}"
+        embed = (
+            disnake.Embed(
+                description=f"Guild: **{message.guild}**\n\n"
+                f"{message.author.mention} deleted message in {message.channel.mention}",
+                color=disnake.Color.red(),
+            )
+            .add_field(
+                name="Raw message",
+                value=f"```{message.content}```" if message.content else "empty",
+            )
+            .set_footer(
+                text=f"Message ID: {message.id} / Author ID: {message.author.id} / Guild ID : {message.guild.id}"
+            )
         )
         if message.attachments:
             embed.set_image(url=message.attachments[0].url)
             embed.add_field(
                 name="Attachments",
-                value="\n".join(
-                    [attachment.url for attachment in message.attachments]
-                ),
+                value="\n".join([attachment.url for attachment in message.attachments]),
             )
         await logs_channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: disnake.Message, after: disnake.Message):
-        if before.author.bot or before.guild is None or before.guild.id not in [
-            guild.discord_id for guild in settings.structure_guilds
-        ] + [settings.PlasmoRPGuild.guild_id]:
+        if (
+            before.author.bot
+            or before.guild is None
+            or before.guild.id
+            not in [guild.discord_id for guild in settings.structure_guilds]
+            + [settings.PlasmoRPGuild.guild_id]
+        ):
             return False
         if before.author.id == self.bot.user.id:
             return
@@ -253,25 +263,30 @@ class PlasmoLogger(commands.Cog):
             return False
 
         logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
-        embed = disnake.Embed(
-            description=f"Guild: **{before.guild}**  \n\n{before.author.mention} edited "
-                        f"[message]({after.jump_url}) in {before.channel.mention}",
-            color=disnake.Color.yellow(),
-        ).add_field(
-            name="Raw old message",
-            value=f"```{before.content}```" if before.content else "empty",
-            inline=False,
-        ).add_field(
-            name="Raw new message",
-            value=f"```{after.content}```" if after.content else "empty",
-        ).set_footer(
-            text=f"Message ID: {before.id} / Author ID: {before.author.id} / Guild ID : {before.guild.id}"
+        embed = (
+            disnake.Embed(
+                description=f"Guild: **{before.guild}**  \n\n{before.author.mention} edited "
+                f"[message]({after.jump_url}) in {before.channel.mention}",
+                color=disnake.Color.yellow(),
+            )
+            .add_field(
+                name="Raw old message",
+                value=f"```{before.content}```" if before.content else "empty",
+                inline=False,
+            )
+            .add_field(
+                name="Raw new message",
+                value=f"```{after.content}```" if after.content else "empty",
+            )
+            .set_footer(
+                text=f"Message ID: {before.id} / Author ID: {before.author.id} / Guild ID : {before.guild.id}"
+            )
         )
         if before.attachments != after.attachments:
             embed.add_field(
                 name="Attachments",
                 value=f"{[attachment.url for attachment in before.attachments]}\n\n"
-                      f"{[attachment.url for attachment in after.attachments]}",
+                f"{[attachment.url for attachment in after.attachments]}",
             )
         await logs_channel.send(embed=embed)
 
