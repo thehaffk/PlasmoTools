@@ -55,11 +55,6 @@ class Utils(commands.Cog):
         await inter.channel.send(text)
 
     @commands.is_owner()
-    @commands.command(name="sync_owner_roles")
-    async def sync_roles_command(self, ctx):
-        await self.sync_owners_roles()
-
-    @commands.is_owner()
     @commands.command(name="sync_global_roles")
     async def sync_roles_command(self, ctx):
         await self.sync_global_roles()
@@ -68,18 +63,6 @@ class Utils(commands.Cog):
     async def profile_user_command(self, inter: ApplicationCommandInteraction, user: disnake.Member):
         await inter.response.defer(ephemeral=True)
         await inter.edit_original_message(embeds=(await generate_profile_embeds(user)))
-
-    async def sync_owners_roles(self):
-        plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
-        plasmo_mod_role = plasmo_guild.get_role(settings.PlasmoRPGuild.ne_komar_role_id)
-        bot_member = plasmo_guild.get_member(self.bot.user.id)
-        for owner_id in self.bot.owner_ids:
-            member = plasmo_guild.get_member(owner_id)
-            if (
-                plasmo_guild.get_role(settings.PlasmoRPGuild.admin_role_id)
-                not in member.roles
-            ):
-                await member.add_roles(plasmo_mod_role)
 
     async def sync_global_roles(self):
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
