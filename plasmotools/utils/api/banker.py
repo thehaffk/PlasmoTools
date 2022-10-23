@@ -19,16 +19,16 @@ async def _get_banker_transactions(days, to: int = 0) -> List[dict]:
     logger.debug("Running _get_banker_transactions with days=%i, to=%i", days, to)
     try:
         async with aiohttp.ClientSession(
-                headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
+            headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
         ) as session:
             transactions = []
             async with session.get(
-                    "https://rp.plo.su/api/bank/banker/transactions",
-                    params={"to": to, "count": 100},
+                "https://rp.plo.su/api/bank/banker/transactions",
+                params={"to": to, "count": 100},
             ) as resp:
                 response_json = {}
                 if resp.status != 200 or not (response_json := await resp.json()).get(
-                        "status", False
+                    "status", False
                 ):
                     logger.warning(
                         "Could not get transactions: %s",
@@ -40,6 +40,11 @@ async def _get_banker_transactions(days, to: int = 0) -> List[dict]:
                     return []
                 for transaction in unfiltred_transactions:
                     if transaction.get("date", 0) < (time.time() - days * 60 * 60 * 24):
+                        print(
+                            transaction,
+                            transaction.get("date", 0),
+                            time.time() - days * 60 * 60 * 24,
+                        )
                         return transactions
                     transactions.append(transaction)
 

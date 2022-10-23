@@ -4,7 +4,6 @@ import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import tasks, commands
 
-from plasmotools import settings
 from plasmotools.utils.api.user import get_user_data
 
 logger = logging.getLogger(__name__)
@@ -23,10 +22,11 @@ async def generate_profile_embeds(member: disnake.Member) -> [disnake.Embed]:
                 color=disnake.Color.red(),
             )
         ]
-    main_embed = disnake.Embed(
-        title=f"{member.display_name}'s Plasmo Profile",
-        color=disnake.Color.dark_purple(),
-        description=f"""
+    main_embed = (
+        disnake.Embed(
+            title=f"{member.display_name}'s Plasmo Profile",
+            color=disnake.Color.dark_purple(),
+            description=f"""
         `Nickname`: {member_api_profile.get('nick', '**-**')}
         `Plasmo ID`: {member_api_profile.get('id', '**-**')}
         `Discord ID`: {member_api_profile.get('discord_id', '**-**')}
@@ -37,10 +37,14 @@ async def generate_profile_embeds(member: disnake.Member) -> [disnake.Embed]:
         `Access`: {member_api_profile.get('has_access', '**-**')}
         `In guild?`: {member_api_profile.get('in_guild', '**-**')}
         `Fusion`: {member_api_profile.get('fusion', '**-**')}
-        """
-    )\
-        .set_footer(text="Тестовая версия, скоро сделаю редизайн")\
-        .set_thumbnail(url="https://rp.plo.su/avatar/" + member_api_profile.get('nick', 'PlasmoTools'))
+        """,
+        )
+        .set_footer(text="BETA VERSION")
+        .set_thumbnail(
+            url="https://rp.plo.su/avatar/"
+            + member_api_profile.get("nick", "PlasmoTools")
+        )
+    )
     return [main_embed]
 
 
@@ -49,208 +53,20 @@ class Utils(commands.Cog):
         self.bot = bot
 
     @commands.is_owner()
-    @commands.slash_command(name="say")
+    @commands.slash_command(name="say", dm_permission=False)
     async def msg(self, inter: disnake.ApplicationCommandInteraction, text: str):
         await inter.send("ok", ephemeral=True)
         await inter.channel.send(text)
 
-    @commands.is_owner()
-    @commands.command(name="sync_global_roles")
-    async def sync_roles_command(self, ctx):
-        await self.sync_global_roles()
-
-    @commands.user_command(name="Get API Data", default_member_permissions=disnake.Permissions(send_messages=True))
-    async def profile_user_command(self, inter: ApplicationCommandInteraction, user: disnake.Member):
+    @commands.user_command(
+        name="Get API Data",
+        default_member_permissions=disnake.Permissions(send_messages=True),
+    )
+    async def profile_user_command(
+        self, inter: ApplicationCommandInteraction, user: disnake.Member
+    ):
         await inter.response.defer(ephemeral=True)
         await inter.edit_original_message(embeds=(await generate_profile_embeds(user)))
-
-    async def sync_global_roles(self):
-        plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
-        members_to_sync = plasmo_guild.members
-
-        logs_channel = plasmo_guild.get_channel(settings.PlasmoRPGuild.logs_channel_id)
-
-        for index, member in enumerate(members_to_sync):
-            if (
-                plasmo_guild.get_role(settings.PlasmoRPGuild.admin_role_id)
-                in member.roles
-            ) or (
-                plasmo_guild.get_role(settings.PlasmoRPGuild.ne_komar_role_id)
-                in member.roles
-            ):
-                continue
-            logger.info(
-                "[%i, %i] Syncing %s", index, len(members_to_sync), member.display_name
-            )
-            member_api_profile = await get_user_data(discord_id=member.id)
-
-            if member_api_profile is None:
-                continue
-
-            if member_api_profile.get("banned", False):
-                logger.info(
-                    "%s %s is banned, but not banned", member.display_name, member.id
-                )
-                await logs_channel.send(
-                    f"<@&{settings.PlasmoRPGuild.ne_komar_role_id}>\n⚠ {member.display_name} {member.mention} "
-                    f"is banned, but not banned",
-                    components=[
-                        disnake.ui.Button(
-                            label="ban",
-                            emoji="☠",
-                            style=disnake.ButtonStyle.red,
-                            custom_id=f"ban {member.id}",
-                        )
-                    ],
-                )
-                continue
-            if member_api_profile.get("roles", None) is None:
-                continue
-            for role in settings.api_roles:
-                has_guild_role = (
-                    local_role := plasmo_guild.get_role(settings.api_roles[role])
-                ) in member.roles
-                has_api_role = role in member_api_profile["roles"]
-
-                if role == "support":
-                    if (
-                        has_guild_role
-                        and member_api_profile["fusion"] == 0
-                        and not member.bot
-                        and "booster" not in member_api_profile["roles"]
-                    ):
-                        logger.info(
-                            "Removing fusion role from %s %s bc API fusion data = 0",
-                            member.display_name,
-                            member.id,
-                        )
-                        await logs_channel.send(
-                            f"Removing fusion role from {member.display_name} {member.mention}"
-                        )
-                        try:
-                            await member.remove_roles(local_role, reason=f"API SYNC")
-                        except disnake.Forbidden:
-                            logger.info(
-                                "Could not add %s to %s %s [has_guild_role = False, has_api_role = True]",
-                                role,
-                                member.display_name,
-                                member.id,
-                            )
-                            await logs_channel.send(
-                                f"Could not remove fusion role from {member.display_name} {member.mention}"
-                            )
-                        continue
-                    elif (
-                        ("booster" in member_api_profile["roles"])
-                        and not member.bot
-                        and not has_guild_role
-                    ):
-                        logger.info(
-                            "Adding fusion role to %s %s bc of booster role",
-                            member.display_name,
-                            member.id,
-                        )
-                        await logs_channel.send(
-                            f"Adding fusion role to {member.display_name} {member.mention} bc of booster role"
-                        )
-                        try:
-                            await member.add_roles(local_role, reason=f"API SYNC")
-                        except disnake.Forbidden:
-                            logger.info(
-                                "Could not add %s to %s %s",
-                                role,
-                                member.display_name,
-                                member.id,
-                            )
-                            await logs_channel.send(
-                                f"Could not add fusion role to {member.display_name} {member.mention}"
-                            )
-                        continue
-                    elif member_api_profile["fusion"] != 0 and not has_guild_role:
-                        logger.info(
-                            "Adding fusion role to %s %s bc API fusion data != 0",
-                            member.display_name,
-                            member.id,
-                        )
-                        await logs_channel.send(
-                            f"Adding fusion role to {member.display_name} {member.mention} bc API fusion data != 0"
-                        )
-                        try:
-                            await member.add_roles(local_role, reason=f"API SYNC")
-                        except disnake.Forbidden:
-                            logger.info(
-                                "Could not add %s to %s %s",
-                                role,
-                                member.display_name,
-                                member.id,
-                            )
-                            await logs_channel.send(
-                                f"Could not add fusion role to {member.display_name} {member.mention}"
-                            )
-                        continue
-
-                if has_guild_role and not has_api_role:
-                    logger.info(
-                        "Removing %s from %s %s [has_guild_role = True, has_api_role = False]",
-                        role,
-                        member.display_name,
-                        member.id,
-                    )
-                    await logs_channel.send(
-                        f"Removing {role} from {member.display_name} {member.mention}"
-                    )
-                    try:
-                        await member.remove_roles(local_role)
-                    except disnake.Forbidden:
-                        logger.info(
-                            "Could not remove %s from %s %s [has_guild_role = True, has_api_role = False]",
-                            role,
-                            member.display_name,
-                            member.id,
-                        )
-                        await logs_channel.send(
-                            f"Could not remove {local_role} from {member.display_name} {member.mention}"
-                        )
-
-                    if role == "player":
-                        await member.add_roles(
-                            local_role, reason=f"Unable to reset pass"
-                        )
-                        await logs_channel.send(
-                            f"Unable to reset pass for {member.display_name} {member.mention}, adding {local_role} role"
-                        )
-                        continue
-
-                if not has_guild_role and has_api_role:
-                    logger.info(
-                        "Adding %s to %s %s [has_guild_role = False, has_api_role = True]",
-                        role,
-                        member.display_name,
-                        member.id,
-                    )
-                    await logs_channel.send(
-                        f"Adding {local_role} to {member.display_name} {member.mention}"
-                    )
-                    try:
-                        await member.add_roles(local_role, reason=f"API SYNC")
-                    except disnake.Forbidden:
-                        logger.info(
-                            "Could not add %s to %s %s [has_guild_role = False, has_api_role = True]",
-                            role,
-                            member.display_name,
-                            member.id,
-                        )
-                        await logs_channel.send(
-                            f"Could not add {local_role} to {member.display_name} {member.mention}"
-                        )
-
-    @commands.Cog.listener()
-    async def on_member_join(self, member: disnake.Member):
-        if (
-            member.guild.id == settings.PlasmoRPGuild.guild_id
-            and member.id in self.bot.owner_ids
-        ):
-            await self.sync_owners_roles()
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
