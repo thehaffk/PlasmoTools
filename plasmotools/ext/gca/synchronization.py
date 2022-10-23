@@ -193,7 +193,9 @@ class BACSynchronization(commands.Cog):
         return await self.sync(member)
 
     @commands.slash_command(
-        name="everyone-sync", guild_ids=[settings.BACGuild.guild_id]
+        name="everyone-sync",
+        guild_ids=[settings.BACGuild.guild_id],
+        dm_permission=False,
     )
     @commands.has_permissions(manage_roles=True)
     async def everyone_sync(self, inter: disnake.ApplicationCommandInteraction):
@@ -236,7 +238,7 @@ class BACSynchronization(commands.Cog):
         )
 
     @commands.slash_command(
-        name="sync", guild_ids=[settings.BACGuild.guild_id], auto_sync=False
+        name="sync", guild_ids=[settings.BACGuild.guild_id], dm_permission=False
     )
     @commands.has_permissions(manage_roles=True)
     async def sync_user(

@@ -68,7 +68,7 @@ class ErrorHandler(commands.Cog):
             )
         else:
             logger.error(error)
-            await inter.send(
+            await inter.followup.send_messages(
                 embed=disnake.Embed(
                     title="Error",
                     description=f"Возникла неожиданная ошибка.\n\n`{error}`"
@@ -102,7 +102,7 @@ class ErrorHandler(commands.Cog):
                 embed=disnake.Embed(
                     title="Error",
                     description=f"Возникла неожиданная ошибка.\n\n`{error}`"
-                                f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
+                    f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
                     color=disnake.Color.red(),
                 ),
             )
@@ -117,6 +117,7 @@ class ErrorHandler(commands.Cog):
                 )
             )
             raise error
+
 
 def setup(client):
     client.add_cog(ErrorHandler(client))

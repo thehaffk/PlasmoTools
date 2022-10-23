@@ -25,7 +25,7 @@ class Payouts(commands.Cog):
     # TODO:  payouts statistics
 
     @commands.guild_only()
-    @commands.slash_command(name="проекты")
+    @commands.slash_command(name="проекты", dm_permission=False)
     async def projects(self, inter: ApplicationCommandInteraction):
         """
         Помощь по проектам и выплатам
@@ -56,7 +56,7 @@ class Payouts(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.slash_command(name="проекты-создать")
+    @commands.slash_command(name="проекты-создать", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     async def projects_create(
         self,
@@ -135,7 +135,7 @@ class Payouts(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.slash_command(name="проекты-редактировать")
+    @commands.slash_command(name="проекты-редактировать", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     async def projects_edit(
         self,
@@ -188,7 +188,7 @@ class Payouts(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.slash_command(name="проекты-удалить")
+    @commands.slash_command(name="проекты-удалить", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     async def projects_delete(
         self,
@@ -224,7 +224,7 @@ class Payouts(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.slash_command(name="проекты-список")
+    @commands.slash_command(name="проекты-список", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     async def roles_list(self, inter: ApplicationCommandInteraction):
         """
@@ -260,7 +260,7 @@ class Payouts(commands.Cog):
         await inter.edit_original_message(embed=embed)
 
     @commands.guild_only()
-    @commands.slash_command(name="выплата")
+    @commands.slash_command(name="выплата", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     async def payout_command(
         self,

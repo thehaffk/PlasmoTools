@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 class StatusPage(commands.Cog):
-
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 

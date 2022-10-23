@@ -62,7 +62,7 @@ class UserManagement(commands.Cog):
         self.bot = bot
 
     @commands.guild_only()
-    @commands.slash_command(name="роли-список")
+    @commands.slash_command(name="роли-список", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     async def roles_list(self, inter: ApplicationCommandInteraction):
         """
@@ -94,7 +94,7 @@ class UserManagement(commands.Cog):
         await inter.send(embed=embed, ephemeral=True)
 
     @commands.guild_only()
-    @commands.slash_command(name="роли-добавить")
+    @commands.slash_command(name="роли-добавить", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     async def roles_add(
         self,
@@ -174,7 +174,7 @@ class UserManagement(commands.Cog):
             )
 
     @commands.guild_only()
-    @commands.slash_command(name="роли-удалить")
+    @commands.slash_command(name="роли-удалить", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     async def roles_delete(
         self,
@@ -206,7 +206,7 @@ class UserManagement(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.slash_command(name="роли-редактировать")
+    @commands.slash_command(name="роли-редактировать", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     async def roles_edit(
         self,
@@ -252,7 +252,7 @@ class UserManagement(commands.Cog):
             ephemeral=True,
         )
 
-    @commands.slash_command(name="нанять")
+    @commands.slash_command(name="нанять", dm_permission=False)
     @commands.guild_only()
     @commands.default_member_permissions(manage_roles=True)
     async def hire_user_command(
@@ -265,13 +265,14 @@ class UserManagement(commands.Cog):
         comment: Optional[str] = None,
     ):
         """
-        Нанять пользователя в структуру.
+        Hire user.
 
         Parameters
         ----------
-        comment: Комментарий к нанятию
-        user: Игрок
-        role: Роль [⚠ Выбирайте из списка]
+        user: Player
+        role: Role [⚠ Choose from autocomplete!]
+        comment: Comment for hiring
+
         """
         try:
             guild, db_role = await database.get_guild(
@@ -297,8 +298,8 @@ class UserManagement(commands.Cog):
             return await inter.send(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="Вы не можете нанять этого пользователя.",
+                    title="Error",
+                    description="You cannot hire this user.",
                 ),
                 ephemeral=True,
             )
@@ -306,8 +307,8 @@ class UserManagement(commands.Cog):
             return await inter.send(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
-                    title="Ошибка",
-                    description=f"У пользователя уже есть роль <@&{db_role.role_discord_id}>.",
+                    title="Error",
+                    description=f"This user already has <@&{db_role.role_discord_id}> role.",
                 ),
                 ephemeral=True,
             )
@@ -327,15 +328,14 @@ class UserManagement(commands.Cog):
         try:
             await user.add_roles(
                 inter.guild.get_role(db_role.role_discord_id),
-                reason=f"Нанят в структуру "
-                f"[by {inter.author.display_name} / {inter.author}]",
+                reason=f"Hired " f"[by {inter.author.display_name} / {inter.author}]",
             )
         except disnake.Forbidden:
             return await inter.send(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="Не удалось нанять пользователя. У бота нет прав выдавать эту роль.",
+                    title="Error",
+                    description="Unable to fire this user. Bot has no permissions to add this role.",
                 ),
                 ephemeral=True,
             )
@@ -350,29 +350,29 @@ class UserManagement(commands.Cog):
             except disnake.errors.NotFound:
                 await user.remove_roles(
                     inter.guild.get_role(db_role.role_discord_id),
-                    reason=f"Произошла ошибка при логировании нанятия",
+                    reason=f"Unexpected error",
                 )
                 return await inter.edit_original_message(
                     embed=disnake.Embed(
                         color=disnake.Color.red(),
-                        title="Ошибка",
-                        description="Не удалось получить доступ к вебхуку.",
+                        title="Error",
+                        description="Unable to access webhook.",
                     ),
                 )
 
         await self.bot.get_channel(guild.logs_channel_id).send(
-            embed=embed.add_field("Вызвано пользователем", inter.author.mention)
+            embed=embed.add_field("Called by", inter.author.mention)
         )
 
         await inter.edit_original_message(
             embed=disnake.Embed(
                 color=disnake.Color.green(),
-                title="Успех",
-                description="Пользователь был успешно нанят.",
+                title="Done",
+                description="User was successfully hired.",
             ),
         )
 
-    @commands.slash_command(name="уволить")
+    @commands.slash_command(name="уволить", dm_permission=False)
     @commands.guild_only()
     @commands.default_member_permissions(manage_roles=True)
     async def fire_user_command(
@@ -383,13 +383,13 @@ class UserManagement(commands.Cog):
         reason: Optional[str] = None,
     ):
         """
-        Уволить пользователя из структуры.
+        Fire user.
 
         Parameters
         ----------
-        reason: Причина
-        user: Игрок
-        role: Роль [⚠ Выбирайте из списка]
+        reason: Reason
+        user: Player
+        role: Role [⚠ Choose from autocomplete!]
         """
         try:
             guild, db_role = await database.get_guild(
@@ -416,8 +416,8 @@ class UserManagement(commands.Cog):
             return await inter.send(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="Вы не можете снять этого пользователя.",
+                    title="Error",
+                    description="You cant fire this user.",
                 ),
                 ephemeral=True,
             )
@@ -425,8 +425,8 @@ class UserManagement(commands.Cog):
             return await inter.send(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
-                    title="Ошибка",
-                    description=f"У пользователя нет роли <@&{db_role.role_discord_id}>.",
+                    title="Error",
+                    description=f"User does not have <@&{db_role.role_discord_id}> role.",
                 ),
                 ephemeral=True,
             )
@@ -446,15 +446,14 @@ class UserManagement(commands.Cog):
         try:
             await user.remove_roles(
                 inter.guild.get_role(db_role.role_discord_id),
-                reason=f"Уволен с должнrости "
-                f"[by {inter.author.display_name} / {inter.author}]",
+                reason=f"Fired " f"[by {inter.author.display_name} / {inter.author}]",
             )
         except disnake.Forbidden:
             return await inter.send(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="Не удалось снять пользователя. У бота нет прав снимать эту роль.",
+                    title="Error",
+                    description="Unable to fire this user. Bot has no permissions to remove this role.",
                 ),
                 ephemeral=True,
             )
@@ -468,25 +467,25 @@ class UserManagement(commands.Cog):
             except disnake.errors.NotFound:
                 await user.add_roles(
                     inter.guild.get_role(db_role.role_discord_id),
-                    reason=f"Произошла ошибка при логировании увольнения",
+                    reason=f"Unexpected error",
                 )
                 return await inter.edit_original_message(
                     embed=disnake.Embed(
                         color=disnake.Color.red(),
-                        title="Ошибка",
-                        description="Не удалось получить доступ к вебхуку.",
+                        title="Error",
+                        description="Unable to access webhook.",
                     ),
                 )
 
         await self.bot.get_channel(guild.logs_channel_id).send(
-            embed=embed.add_field("Вызвано пользователем", inter.author.mention)
+            embed=embed.add_field("Called by", inter.author.mention)
         )
 
         await inter.edit_original_message(
             embed=disnake.Embed(
                 color=disnake.Color.green(),
-                title="Успех",
-                description="Пользователь был успешно снят.",
+                title="Done",
+                description="The user was successfully fired.",
             ),
         )
 
