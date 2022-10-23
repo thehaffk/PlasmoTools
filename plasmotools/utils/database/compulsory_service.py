@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 PATH = settings.DATABASE_PATH
 
 
-
 queries = [
     """
 create table if not exists compulsory_service

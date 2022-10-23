@@ -9,7 +9,7 @@ from plasmotools.utils.database import compulsory_service
 logger = logging.getLogger(__name__)
 
 
-class CompolsoryService(commands.Cog):
+class CompulsoryService(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
@@ -20,7 +20,7 @@ class CompolsoryService(commands.Cog):
     @tasks.loop(hours=12)
     async def check_all_entries(self):
         """
-        Check all penalties and cancel them if user is banned
+        Check all CS entries and cancel them if user is banned
         """
         logger.info("Running check_all_entries")
         ...
@@ -35,7 +35,7 @@ class CompolsoryService(commands.Cog):
         """
         await inter.send(
             embed=disnake.Embed(
-                description="Running manual penalty check...",
+                description="Running compulsory service check...",
                 color=disnake.Color.green(),
             ),
             ephemeral=True,
@@ -57,4 +57,4 @@ def setup(client):
     """
     Internal disnake setup function
     """
-    client.add_cog(CompolsoryService(client))
+    client.add_cog(CompulsoryService(client))
