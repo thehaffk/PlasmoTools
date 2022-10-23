@@ -12,7 +12,7 @@ PATH = settings.DATABASE_PATH
 
 queries = [
     """
-create table if not exists table_name
+create table if not exists patents
 (
     id           integer not null
         constraint table_name_pk
@@ -22,11 +22,12 @@ create table if not exists table_name
     banker_id    integer not null,
     moderator_id integer,
     is_art       int     default 0,
+    map_ids       text,
     decision     integer default 0
 );""",
     """
 create unique index if not exists table_name_id_uindex
-    on table_name (id);
+    on patents (id);
     """,
 ]
 

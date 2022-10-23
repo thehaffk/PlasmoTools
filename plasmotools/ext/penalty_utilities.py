@@ -49,7 +49,7 @@ class PenaltyUtilities(commands.Cog):
             if penalty["user"] in active_players:
                 continue
 
-            if penalty["user"] in banned_players or penalty["user"] == "watchdog":
+            if penalty["user"] in banned_players or penalty["user"] == "PlasmoTools":
                 await self._cancel_penalty(penalty)
                 continue
 
@@ -68,6 +68,7 @@ class PenaltyUtilities(commands.Cog):
     @commands.slash_command(
         name="manual-penalty-check",
         guild_ids=[settings.DevServer.guild_id, settings.LogsServer.guild_id],
+        dm_permission=False,
     )
     async def manual_penalty_check(self, inter: disnake.ApplicationCommandInteraction):
         """

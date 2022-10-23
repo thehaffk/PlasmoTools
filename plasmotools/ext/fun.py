@@ -31,20 +31,8 @@ komaru_gifs = [
 
 
 class Fun(commands.Cog):
-
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
-
-    @commands.is_owner()
-    @commands.slash_command(name="join")
-    async def join(self, inter, channel_id: str):
-        """
-        Join channel
-        """
-        ds_channel = self.bot.get_channel(int(channel_id))
-        await ds_channel.connect()
-
-        await inter.send("Маму брал", ephemeral=True)
 
     @commands.Cog.listener()
     async def on_message(self, message: disnake.Message):
@@ -61,9 +49,7 @@ class Fun(commands.Cog):
             except disnake.Forbidden:
                 pass
             return
-        if "комар " in message.content.lower() or message.content.lower().endswith(
-                "комар"
-        ):
+        if " комар " in (" " + message.content + " ").lower():
             if randint(1, 10) == 1:
                 await message.channel.send(content=choice(komaru_gifs))
 

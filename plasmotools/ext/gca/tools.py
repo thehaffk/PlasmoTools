@@ -114,8 +114,7 @@ class GCATools(commands.Cog):
             await inter.message.edit(components=[])
 
     @commands.slash_command(
-        name="заявка",
-        guild_ids=[settings.BACGuild.guild_id],
+        name="заявка", guild_ids=[settings.BACGuild.guild_id], dm_permission=False
     )
     async def request_placeholder(self, inter: ApplicationCommandInteraction):
         """
@@ -278,8 +277,7 @@ class GCATools(commands.Cog):
         )
 
     @commands.slash_command(
-        name="суд",
-        guild_ids=[settings.BACGuild.guild_id],
+        name="суд", guild_ids=[settings.BACGuild.guild_id], dm_permission=False
     )
     async def court_placeholder(self, inter: ApplicationCommandInteraction):
         """
@@ -420,8 +418,7 @@ class GCATools(commands.Cog):
         )
 
     @commands.slash_command(
-        name="комитет",
-        guild_ids=[settings.BACGuild.guild_id],
+        name="комитет", guild_ids=[settings.BACGuild.guild_id], dm_permission=False
     )
     async def committee_placeholder(self, inter: ApplicationCommandInteraction):
         """
