@@ -25,16 +25,28 @@ async def generate_bankers_stats_embeds(days=7) -> List[disnake.Embed]:
     bankers = sorted(bankers.items(), key=lambda x: x[1], reverse=True)
     bankers_top = ""
     for index, _banker in enumerate(bankers):
-        bankers_top += f"**{index + 1}**. {_banker[0]} - {_banker[1]} transaction{'s' if _banker[1] % 10 != 1 else ''}\n"
-    if len(bankers_top) > 1024:
+        bankers_top += f"**{index + 1}**. {_banker[0]} - " \
+                       f"{_banker[1]} transaction{'s' if _banker[1] % 10 != 1 else ''}\n"
+    if len(bankers_top) > 1024:  # TODO: fix this
         logger.debug(bankers_top)
         bankers_top = bankers_top[:1024]
+        main_statistics_embed.set_footer(text="Bankers top is too long, only first 1024 characters are shown")
     main_statistics_embed.add_field(name="Bankers top", value=bankers_top, inline=False)
     return [main_statistics_embed]
 
 
-async def generate_banker_stats_embeds(days=7) -> List[disnake.Embed]:
-    return [disnake.Embed(title="5")]
+async def generate_banker_stats_embeds(
+    user: disnake.Member, days: int = 7
+) -> List[disnake.Embed]:
+    banker_stats_embed = disnake.Embed(
+        title=f"Banker statistics for {user} for last {days} days",
+        color=disnake.Color.green(),
+    )
+    transactions = await banker.get_banker_transactions(days)
+    transactions = [transaction for transaction in transactions if transaction["banker"] == user.display_name]
+    print(transactions)
+
+    return [banker_stats_embed]
 
 
 class BankerStats(commands.Cog):
@@ -54,7 +66,16 @@ class BankerStats(commands.Cog):
         self,
         inter: disnake.ApplicationCommandInteraction,
         days: int = commands.Param(gt=0, lt=366, default=7),
+        user: disnake.Member = None,
     ):
+        """
+        Get bankers statistics
+
+        Parameters
+        ----------
+        days: количество дней, за которые нужно получить статистику
+        user: пользователь, статистику которого нужно получить
+        """
         await inter.send(
             embed=disnake.Embed(
                 color=disnake.Color.green(),
@@ -63,7 +84,10 @@ class BankerStats(commands.Cog):
             ),
             ephemeral=True,
         )
-        embeds = await generate_bankers_stats_embeds(days)
+        if user is None:
+            embeds = await generate_bankers_stats_embeds(days)
+        else:
+            embeds = await generate_banker_stats_embeds(user, days)
         await inter.edit_original_message(embeds=embeds)
 
 

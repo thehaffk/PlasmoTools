@@ -40,11 +40,6 @@ async def _get_banker_transactions(days, to: int = 0) -> List[dict]:
                     return []
                 for transaction in unfiltred_transactions:
                     if transaction.get("date", 0) < (time.time() - days * 60 * 60 * 24):
-                        print(
-                            transaction,
-                            transaction.get("date", 0),
-                            time.time() - days * 60 * 60 * 24,
-                        )
                         return transactions
                     transactions.append(transaction)
 
