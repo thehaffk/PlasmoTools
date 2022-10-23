@@ -328,7 +328,7 @@ class UserManagement(commands.Cog):
         try:
             await user.add_roles(
                 inter.guild.get_role(db_role.role_discord_id),
-                reason=f"Hired " f"[by {inter.author.display_name} / {inter.author}]",
+                reason=f"Hired " f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]",
             )
         except disnake.Forbidden:
             return await inter.send(
@@ -446,7 +446,7 @@ class UserManagement(commands.Cog):
         try:
             await user.remove_roles(
                 inter.guild.get_role(db_role.role_discord_id),
-                reason=f"Fired " f"[by {inter.author.display_name} / {inter.author}]",
+                reason=f"Fired " f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]",
             )
         except disnake.Forbidden:
             return await inter.send(
