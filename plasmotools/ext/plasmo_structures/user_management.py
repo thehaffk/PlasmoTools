@@ -348,7 +348,6 @@ class UserManagement(commands.Cog):
             )
 
         if not settings.DEBUG:
-            embed = None  # todo: fix
             async with aiohttp.ClientSession() as session:
                 webhook = disnake.Webhook.from_url(db_role.webhook_url, session=session)
                 try:
@@ -475,7 +474,6 @@ class UserManagement(commands.Cog):
             )
 
         if not settings.DEBUG:
-            embed = None  # todo: fix
             async with aiohttp.ClientSession() as session:
                 webhook = disnake.Webhook.from_url(db_role.webhook_url, session=session)
                 try:
