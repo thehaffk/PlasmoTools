@@ -5,7 +5,6 @@ Config file for Plasmo Tools
 import os
 from builtins import bool
 from dataclasses import dataclass
-from typing import List, Dict
 
 from dotenv import load_dotenv
 
@@ -25,12 +24,8 @@ class LogsServer:
 
     ban_logs_channel_id = 935571311936278599
     role_logs_channel_id = 935571360393068614
-    anticheat_logs_channel_id = 960908663814492180
-    death_logs_channel_id = 961632179304165396
-    force_warns_logs_channel_id = 961760968315133972
-    xray_logs_channel_id = 961694829316833360
-    admin_commands_channel_id = 961751903488852068
     messages_channel_id = 1008822105200132106
+    rrs_logs_channel_id = 1033768782801420340
 
 
 class Emojis:
@@ -197,21 +192,3 @@ culture_guild = PlasmoStructureGuild(
 )
 structure_guilds.append(culture_guild)
 
-bots_to_ping: Dict[str, int] = {
-    "Tools": 876907717837594646,
-    "Pepega": 626682514592890900,
-    "Объявления": 860173748313128960,
-    "Sync RP": 944529811362181171,
-    "Sync": 842301877400240140,
-    "Tickets": 890282439593836596,
-    "PT Test": 872182651644170240,
-}
-
-sites_to_ping: List[str] = [
-    "rp.plo.su",
-    "smp.plo.su",
-    "tr.plo.su",
-    "mc.plo.su",
-    "pt.plo.su",
-    "bac.plo.su",
-]
