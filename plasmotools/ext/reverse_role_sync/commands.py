@@ -22,7 +22,7 @@ class RRSCommands(commands.Cog):
         Get list of registered RRS entries
         """
         entries = await rrs_database.get_rrs_roles()
-        roles_text = ""
+        roles_text = "id - disabled - sgid - srid - prid:\n"
         for entry in entries:
             roles_text += f"{entry.id} - {entry.disabled} - SGID {entry.structure_guild_id} " \
                           f"- SRID {entry.structure_role_id} - PRID {entry.plasmo_role_id}\n"
@@ -34,9 +34,9 @@ class RRSCommands(commands.Cog):
     async def register_rrs_entry(
             self,
             inter: ApplicationCommandInteraction,
-            sgid: int,
-            srid: int,
-            prid: int,
+            sgid: str,
+            srid: str,
+            prid: str,
             disabled: bool = False,
     ):
         """
@@ -49,7 +49,7 @@ class RRSCommands(commands.Cog):
         prid: plasmo role id
         disabled: is disabled
         """
-        guild = await guilds_database.get_guild(srid)
+        guild = await guilds_database.get_guild(int(sgid))
         if guild is None:
             await inter.send(
                 embed=disnake.Embed(
@@ -64,9 +64,9 @@ class RRSCommands(commands.Cog):
             return
 
         entry = await rrs_database.register_rrs_role(
-            structure_guild_id=sgid,
-            structure_role_id=srid,
-            plasmo_role_id=prid,
+            structure_guild_id=int(sgid),
+            structure_role_id=int(srid),
+            plasmo_role_id=int(prid),
             disabled=disabled,
         )
         await inter.send(f"{entry.id} - registered", ephemeral=True)
@@ -102,9 +102,9 @@ class RRSCommands(commands.Cog):
             inter: ApplicationCommandInteraction,
             entry_id: int,
             disabled: bool = None,
-            structure_guild_id: int = None,
-            structure_role_id: int = None,
-            plasmo_role_id: int = None,
+            structure_guild_id: str = None,
+            structure_role_id: str = None,
+            plasmo_role_id: str = None,
 
     ):
         """
@@ -125,9 +125,9 @@ class RRSCommands(commands.Cog):
 
         await entry.edit(
             disabled=disabled,
-            structure_guild_id=structure_guild_id,
-            structure_role_id=structure_role_id,
-            plasmo_role_id=plasmo_role_id,
+            structure_guild_id=int(structure_guild_id) if structure_guild_id else None,
+            structure_role_id=int(structure_role_id) if structure_role_id else None,
+            plasmo_role_id=int(plasmo_role_id) if plasmo_role_id else None,
         )
         await inter.send(f"{entry.id} - edited", ephemeral=True)
 
