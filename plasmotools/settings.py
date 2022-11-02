@@ -86,7 +86,7 @@ class PlasmoRPGuild:
         interpol_role_id,
         banker_role_id,
         keeper_role_id,
-        helper_role_id
+        helper_role_id,
     ]
 
     notifications_channel_id = 754644298720477264
