@@ -82,17 +82,17 @@ class PlasmoLogger(commands.Cog):
         """
         Monitor bans, calls PlasmoAPI to get reason, nickname and discord user project_id
         """
-        if guild.id != settings.PlasmoRPGuild.guild_id:
+        if not (guild is None and settings.DEBUG) and guild.id != settings.PlasmoRPGuild.guild_id:
             return False
 
         # TODO: Rewrite with plasmo.py
 
-        await asyncio.sleep(10)
+        await asyncio.sleep(10)  # Wait for plasmo API to update
 
         for tries in range(10):
             async with ClientSession() as session:
                 async with session.get(
-                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
+                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=stats,teams",
                 ) as response:
                     try:
                         user_data = (await response.json())["data"]
@@ -104,22 +104,40 @@ class PlasmoLogger(commands.Cog):
                         logger.warning("Could not get data from PRP API: %s", user_data)
             break
 
-        reason: str = user_data.get("ban_reason", "Не указана")
-        nickname: str = user_data.get("nick", "Неизвестен")
-
-        log_embed = disnake.Embed(
-            title="☠️ Игрок забанен",
-            color=disnake.Color.red(),
-            description=f"[{nickname if nickname else member.display_name}]"
-            f"(https://rp.plo.su/u/{nickname}) был забанен\n\n"
-            f"**Причина:**\n{reason.strip()}"
-            f"\n\n⚡ by [digital drugs technologies]({settings.LogsServer.invite_url})",
-        )
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
             settings.LogsServer.ban_logs_channel_id
         )
+
+        reason: str = user_data.get("ban_reason", "Не указана")
+        nickname: str = user_data.get("nick", None)
+        if nickname is None:
+            return await log_channel.send(
+                f"{member.mention} got banned"
+            )
+
+        ban_time: int = user_data.get("ban_time", 0)
+        user_stats: dict = user_data.get("stats", {})
+
+        log_embed = disnake.Embed(
+            title=f"⚡ {nickname} получил бан",
+            color=disnake.Color.dark_red(),
+            description=f"""
+            Причина: **{reason.strip()}**
+            {'> Примечание: rows - это количество строк(логов) в базе данных. Т.е. - количество выкопанных блоков' 
+            if 'rows' in reason else ''}
+            Профиль [Plasmo](https://rp.plo.su/u/{nickname}) | {member.mention}
+            
+            {('Получил бан: <t:' + str(ban_time) + ':R>') if ban_time > 0 else ''}
+            Наиграно за текущий сезон: {user_stats.get('all', 0) / 3600:.2f} ч.
+            Состоит в общинах: {', '.join([('[' + team['name'] + '](https://rp.plo.su/t/' + team['url'] + ')') 
+                                           for team in user_data.get('teams', [])])}
+            
+            Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
+                        """,
+        ).set_thumbnail(url="https://rp.plo.su/avatar/" + nickname)
+
         msg: disnake.Message = await log_channel.send(
-            content=member.mention, embed=log_embed
+            embed=log_embed
         )
         await msg.publish()
 
@@ -288,6 +306,7 @@ class PlasmoLogger(commands.Cog):
                 f"{[attachment.url for attachment in after.attachments]}",
             )
         await logs_channel.send(embed=embed)
+
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)

@@ -29,7 +29,8 @@ class LogsServer:
 
 
 class Emojis:
-    plasmo_tools_logo = "<:PlasmoSync:996079144825794560>"
+    plasmo_sync_logo = "<:PlasmoSync:996079144825794560>"
+    plasmo_tools = "<:PlasmoTools:1037338470277988373>"
     enabled = "<:enabled:969672429981016084>"
     disabled = "<:disabled:969672065160474684>"
     diamond = "<:dia:1004883678326956043>"
@@ -39,6 +40,7 @@ class Emojis:
     offline = " <:offline:1006310760898629702>"
     site_offline = "<:site_offline:1006321494575550514>"
     site_online = "<:site_online:1006320686693879929>"
+
 
 
 class DevServer:
