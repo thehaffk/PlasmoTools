@@ -13,8 +13,7 @@ from plasmotools import settings
 logger = logging.getLogger(__name__)
 
 
-# TODO: fwarns logger
-
+# todo: check audit log for bans, unbans, role changes
 
 class PlasmoLogger(commands.Cog):
     """

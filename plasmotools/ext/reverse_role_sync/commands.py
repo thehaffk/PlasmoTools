@@ -76,16 +76,16 @@ class RRSCommands(commands.Cog):
     async def delete_rrs_entry(
             self,
             inter: ApplicationCommandInteraction,
-            id: int,
+            entry_id: int,
     ):
         """
         Delete RRS entry
 
         Parameters
         ----------
-        id: entry id
+        entry_id: entry id
         """
-        entry = await rrs_database.get_rrs_role(id)
+        entry = await rrs_database.get_rrs_role(entry_id)
         if entry is None:
             await inter.send("Entry not found", ephemeral=True)
             return
