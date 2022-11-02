@@ -252,12 +252,234 @@ class Payouts(commands.Cog):
                 project: database.Project
                 embed.add_field(
                     name=f"{project.name} - {'Активен' if project.is_active else 'Неактивен'}  ",
-                    value=f"{project.id} / {formatters.format_bank_card(project.from_card)} / ||{project.plasmo_bearer_token[:-5]}\\*\\*\\*\\*||\n"
+                    value=f"{project.id} / {formatters.format_bank_card(project.from_card)} / "
+                          f"||{project.plasmo_bearer_token[:-5]}\\*\\*\\*\\*||\n"
                     f"||{project.webhook_url}||",
                     inline=False,
                 )
 
         await inter.edit_original_message(embed=embed)
+
+    async def payout(
+        self,
+        interaction: disnake.Interaction,
+        user: disnake.Member,
+        amount: int,
+        project: database.Project,
+        message: str,
+    ) -> bool:
+        guild = await database.get_guild(interaction.guild.id)
+        if guild is None:
+            await interaction.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Сервер не зарегистрирован как офицальная структура.\n"
+                    "Если вы считаете что это ошибка - обратитесь в "
+                    f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                ),
+            )
+            return False
+        await interaction.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.yellow(), description="Проверяю игрока..."
+            )
+        )
+
+        if not settings.DEBUG:
+            plasmo_user = self.bot.get_guild(settings.PlasmoRPGuild.guild_id).get_member(
+                user.id
+            )
+
+            if (
+                user.bot
+                or plasmo_user is None
+                or plasmo_user.guild.get_role(settings.PlasmoRPGuild.player_role_id)
+                not in plasmo_user.roles
+            ):
+                await interaction.edit_original_message(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Ошибка",
+                        description="Невозможно выплатить этому пользователю",
+                    ),
+                )
+                return False
+            await interaction.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.yellow(), description="Получаю карту для выплаты..."
+                )
+            )
+        else:
+            plasmo_user = user
+        from_card = project.from_card
+
+        user_card = await database.get_saved_card(user.id)
+        if user_card is None:
+            user_cards = sorted(
+                [
+                    card
+                    for card in await bank.search_cards(
+                        token=project.plasmo_bearer_token,
+                        query=plasmo_user.display_name,
+                    )
+                    if card["id"] != from_card
+                    and card["holder_type"] == 0
+                    and card["holder"] == plasmo_user.display_name
+                ],
+                key=lambda card: card["value"],
+                reverse=True,
+            )
+
+            if len(user_cards) == 0:
+                await interaction.edit_original_message(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Ошибка",
+                        description="Не удалось найти карту для выплаты, Plasmo Tools уведомит игрока об этом",
+                    ),
+                )
+                try:
+                    await user.send(
+                        embed=disnake.Embed(
+                            color=disnake.Color.red(),
+                            title="⚠ Plasmo Tools не смог произвести выплату",
+                            description="Не удалось найти карту для выплаты, чтобы в дальнейшем получать выплаты от "
+                            "структур оформите карту на свой аккаунт или укажите любую карту через "
+                            "/установить-карту-для-выплат",
+                        )
+                    )
+                except disnake.Forbidden:
+                    await interaction.send(
+                        embed=disnake.Embed(
+                            color=disnake.Color.red(),
+                            title="Ошибка",
+                            description=f"У {user.mention} закрыты личные сообщения,"
+                                        f" вам придется лично попросить игрока "
+                            f"установить карту через /установить-карту-для-выплат",
+                        ),
+                        ephemeral=True,
+                    )
+                return False
+
+            user_card: int = user_cards[0]["id"]
+            try:
+                await user.send(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="⚠ У вас не установлена карта для выплат",
+                        description=f"Вы не установили карту для выплат. Бот установил карту "
+                        f"**{formatters.format_bank_card(user_card)}** как основную.\n\n"
+                        f"Воспользуйтесь **/установить-карту-для-выплат**, если хотите получать выплаты "
+                        f"на другую карту",
+                    )
+                )
+            except disnake.Forbidden:
+                pass
+            await database.set_saved_card(user.id, user_card)
+
+        await interaction.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.yellow(), description="Перевожу алмазы..."
+            )
+        )
+        if from_card == user_card:
+            await interaction.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Невозможно первести алмазы на эту карту",
+                ),
+            )
+            return False
+        status, error_message = await bank.transfer(
+            token=project.plasmo_bearer_token,
+            from_card=from_card,
+            to_card=user_card,
+            amount=amount,
+            message=message,
+        )
+        if not status:
+            await interaction.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="API вернуло ошибку: **" + error_message + "**",
+                ),
+            )
+            return False
+        await interaction.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.yellow(),
+                description="Отправляю оповещение о выплате...",
+            )
+        )
+
+        embed = disnake.Embed(
+            color=disnake.Color.green(),
+            description=f"{user.mention} получает выплату в размере **{amount}** алм. ",
+        ).set_author(
+            name=plasmo_user.display_name,
+            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name,
+        )
+        if message != "":
+            embed.add_field(name="Комментарий", value=message)
+
+        async with ClientSession() as session:
+            webhook = disnake.Webhook.from_url(project.webhook_url, session=session)
+            try:
+                await webhook.send(
+                    content=user.mention,
+                    embed=embed,
+                )
+            except disnake.errors.NotFound:
+
+                await interaction.edit_original_message(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Ошибка",
+                        description="Не удалось получить доступ к вебхуку. Оплата прошла, но игрок не был оповещен",
+                    ),
+                )
+
+        await self.bot.get_channel(guild.logs_channel_id).send(
+            embed=embed.add_field("Выплатил", interaction.author.mention, inline=False)
+            .add_field("Проект", project.name, inline=False)
+            .add_field("С карты", formatters.format_bank_card(from_card), inline=False)
+            .add_field(
+                "На карту",
+                formatters.format_bank_card(user_card),
+                inline=False,
+            )
+        )
+
+        await interaction.edit_original_message(
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Успех",
+                description=f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
+                f"карту {formatters.format_bank_card(user_card)}",
+            ),
+        )
+        # todo: save failed payments and retry them later
+        await database.register_payout_entry(
+            project_id=project.id,
+            user_id=user.id,
+            amount=amount,
+            message=message,
+            from_card=from_card,
+            to_card=user_card,
+            is_payed=True,
+        )
+        await self.bot.get_channel(settings.DevServer.transactions_channel_id).send(
+            embed=disnake.Embed(
+                description=f"{formatters.format_bank_card(from_card)} -> "
+                f"{amount} {settings.Emojis.diamond} -> "
+                f"{formatters.format_bank_card(user_card)}\n"
+                f" {message}",
+            )
+        )
+        return True
 
     @commands.guild_only()
     @commands.slash_command(name="выплата", dm_permission=False)
@@ -296,210 +518,7 @@ class Payouts(commands.Cog):
                 ),
             )
             return
-        guild = await database.get_guild(inter.guild.id)
-        if guild is None:
-            await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="Сервер не зарегистрирован как офицальная структура.\n"
-                    "Если вы считаете что это ошибка - обратитесь в "
-                    f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
-                ),
-            )
-            return
-        await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.yellow(), description="Проверяю игрока..."
-            )
-        )
-        plasmo_user = self.bot.get_guild(settings.PlasmoRPGuild.guild_id).get_member(
-            user.id
-        )
-        if (
-            user.bot
-            or plasmo_user is None
-            or plasmo_user.guild.get_role(settings.PlasmoRPGuild.player_role_id)
-            not in plasmo_user.roles
-        ):
-            await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="Невозможно выплатить этому пользователю",
-                ),
-            )
-            return
-        await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.yellow(), description="Получаю карту для выплаты..."
-            )
-        )
-        from_card = db_project.from_card
-
-        user_card = await database.get_saved_card(user.id)
-        if user_card is None:
-            user_cards = sorted(
-                [
-                    card
-                    for card in await bank.search_cards(
-                        token=db_project.plasmo_bearer_token,
-                        query=plasmo_user.display_name,
-                    )
-                    if card["id"] != from_card
-                    and card["holder_type"] == 0
-                    and card["holder"] == plasmo_user.display_name
-                ],
-                key=lambda card: card["value"],
-                reverse=True,
-            )
-            if len(user_cards) == 0:
-                await inter.edit_original_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.red(),
-                        title="Ошибка",
-                        description="Не удалось найти карту для выплаты, Plasmo Tools уведомит игрока об этом",
-                    ),
-                )
-                try:
-                    await user.send(
-                        embed=disnake.Embed(
-                            color=disnake.Color.red(),
-                            title="⚠ Plasmo Tools не смог произвести выплату",
-                            description="Не удалось найти карту для выплаты, чтобы в дальнейшем получать выплаты от "
-                            "структур оформите карту на свой аккаунт или укажите любую карту через "
-                            "/установить-карту-для-выплат",
-                        )
-                    )
-                except disnake.Forbidden:
-                    await inter.send(
-                        embed=disnake.Embed(
-                            color=disnake.Color.red(),
-                            title="Ошибка",
-                            description=f"У {user.mention} закрыты личные сообщения, вам придется лично попросить игрока "
-                            f"установить карту через /установить-карту-для-выплат",
-                        ),
-                        ephemeral=True,
-                    )
-                return
-
-            user_card: int = user_cards[0]["id"]
-            try:
-                await user.send(
-                    embed=disnake.Embed(
-                        color=disnake.Color.red(),
-                        title="⚠ Plasmo Tools установил первую найденную карту как основную",
-                        description=f"Вы не установили карту для выплат. Бот установил карту "
-                        f"**{formatters.format_bank_card(user_card)}** как основную.\n\n"
-                        f"Воспользуйтесь /указать-карту-для-выплат, если хотите получать выплаты "
-                        f"на другую карту",
-                    )
-                )
-            except disnake.Forbidden:
-                pass
-            await database.set_saved_card(user.id, user_card)
-
-        await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.yellow(), description="Перевожу алмазы..."
-            )
-        )
-        if from_card == user_card:
-            await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="Невозможно первести алмазы на эту карту",
-                ),
-            )
-            return
-        status, error_message = await bank.transfer(
-            token=db_project.plasmo_bearer_token,
-            from_card=from_card,
-            to_card=user_card,
-            amount=amount,
-            message=message,
-        )
-        if not status:
-            await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="API вернуло ошибку: **" + error_message + "**",
-                ),
-            )
-            return
-        await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.yellow(),
-                description="Отправляю оповещение о выплате...",
-            )
-        )
-
-        embed = disnake.Embed(
-            color=disnake.Color.green(),
-            description=f"{user.mention} получает выплату в размере **{amount}** алм. ",
-        ).set_author(
-            name=plasmo_user.display_name,
-            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name,
-        )
-        if message != "":
-            embed.add_field(name="Комментарий", value=message)
-
-        async with ClientSession() as session:
-            webhook = disnake.Webhook.from_url(db_project.webhook_url, session=session)
-            try:
-                await webhook.send(
-                    content=user.mention,
-                    embed=embed,
-                )
-            except disnake.errors.NotFound:
-
-                await inter.edit_original_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.red(),
-                        title="Ошибка",
-                        description="Не удалось получить доступ к вебхуку. Оплата прошла, но игрок не был оповещен",
-                    ),
-                )
-
-        await self.bot.get_channel(guild.logs_channel_id).send(
-            embed=embed.add_field("Выплатил", inter.author.mention, inline=False)
-            .add_field("Проект", db_project.name, inline=False)
-            .add_field("С карты", formatters.format_bank_card(from_card), inline=False)
-            .add_field(
-                "На карту",
-                formatters.format_bank_card(user_card),
-                inline=False,
-            )
-        )
-
-        await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.green(),
-                title="Успех",
-                description=f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
-                f"карту {formatters.format_bank_card(user_card)}",
-            ),
-        )
-        # todo: save failed payments and retry them later
-        await database.register_payout_entry(
-            project_id=db_project.id,
-            user_id=user.id,
-            amount=amount,
-            message=message,
-            from_card=from_card,
-            to_card=user_card,
-            is_payed=True,
-        )
-        await self.bot.get_channel(settings.DevServer.transactions_channel_id).send(
-            embed=disnake.Embed(
-                description=f"{formatters.format_bank_card(from_card)} -> "
-                f"{amount} {settings.Emojis.diamond} -> "
-                f"{formatters.format_bank_card(user_card)}\n"
-                f" {message}",
-            )
-        )
+        await self.payout(inter, user, amount, db_project, message)
 
     @commands.slash_command(name="установить-карту-для-выплат")
     async def set_saved_card(
