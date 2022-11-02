@@ -38,13 +38,11 @@ class PlasmoSync(commands.Bot):
             ],
             status=disnake.Status.do_not_disturb,
             intents=_intents,
-            sync_commands=True,
             command_prefix=commands.when_mentioned,
             allowed_mentions=disnake.AllowedMentions(everyone=False),
             help_command=None,
             description="PlasmoSync",
             case_insensitive=True,
-            command_not_found=None,
         )
 
     async def on_ready(self):

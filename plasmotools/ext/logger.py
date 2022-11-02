@@ -13,7 +13,7 @@ from plasmotools import settings
 logger = logging.getLogger(__name__)
 
 
-# TODO: fwarns logger
+# todo: check audit log for bans, unbans, role changes
 
 
 class PlasmoLogger(commands.Cog):
@@ -32,68 +32,104 @@ class PlasmoLogger(commands.Cog):
 
         if (
             after.guild.id != settings.PlasmoRPGuild.guild_id
-            or before.roles == after.roles
-        ):
+        ) or before.roles == after.roles:
             return False
 
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
             settings.LogsServer.role_logs_channel_id
         )
 
-        removed_roles = list(set(before.roles) - set(after.roles))
-        added_roles = list(set(after.roles) - set(before.roles))
+        added_roles = [role for role in after.roles if role not in before.roles]
+        removed_roles = [role for role in before.roles if role not in after.roles]
+
+        audit_entry = None
+        async for entry in after.guild.audit_logs(
+            action=disnake.AuditLogAction.member_role_update, limit=30
+        ):
+            if entry.target == after and (
+                added_roles == entry.after.roles or removed_roles == entry.after.roles
+            ):
+                audit_entry = entry
+                break
 
         for role in removed_roles:
-            if (
-                role.id not in settings.PlasmoRPGuild.monitored_roles
-                and role.id != settings.PlasmoRPGuild.player_role_id
-            ):
-                continue
-
-            log_embed = disnake.Embed(
-                title=f"Роль {role.name} снята - {after.display_name}",
-                color=disnake.Color.dark_red(),
-                description=f"{after.mention}("
-                f"[{after.display_name}](https://rp.plo.su/u/"
-                f"{after.display_name}))",
-            )
-
-            await log_channel.send(content=f"<@{before.id}>", embed=log_embed)
+            await self.log_role_change(after, role, False, audit_entry)
 
         for role in added_roles:
-            if role.id not in settings.PlasmoRPGuild.monitored_roles:
-                continue
+            await self.log_role_change(after, role, True, audit_entry)
 
-            log_embed = disnake.Embed(
-                title=f"Роль {role.name} добавлена - {after.display_name}",
-                color=disnake.Color.dark_green(),
-                description=f"{after.mention}("
-                f"[{after.display_name}](https://rp.plo.su/u/"
-                f"{after.display_name}))",
+    async def log_role_change(
+        self,
+        user: disnake.Member,
+        role: disnake.Role,
+        is_role_added: bool,
+        audit_entry: disnake.AuditLogEntry,
+    ):
+        if role.id not in settings.PlasmoRPGuild.monitored_roles:
+            return
+
+        executed_by_rrs = str(audit_entry.reason).startswith("RRS")
+        if executed_by_rrs:
+            operation_author = user.guild.get_member(int(
+                audit_entry.reason.split("/")[-1].strip())
             )
+        else:
+            operation_author = audit_entry.user
 
-            msg = await log_channel.send(content=f"<@{before.id}>", embed=log_embed)
-            try:
-                await msg.publish()
-            except disnake.HTTPException:
-                pass
+        description_text = f" [u/{user.display_name}](https://rp.plo.su/u/{user.display_name}) | {user.mention}\n"
+        description_text += "\n"
+
+        if executed_by_rrs:
+            description_text += (
+                "**" + ("Выдано " if is_role_added else "Снято ")
+                + "через RRS (Plasmo Tools), с согласия** "
+                + operation_author.display_name
+                + " "
+                + operation_author.mention
+            )
+        else:
+            description_text += (
+                "**" + ("Выдал: " if is_role_added else "Снял: ") + "**"
+                + operation_author.display_name
+                + " "
+                + operation_author.mention
+            )
+        description_text += "\n"
+        description_text += "\n"
+        description_text += "**Роли после изменения:** " + ", ".join([role.name for role in user.roles[1:]])
+
+        log_embed = disnake.Embed(
+            color=disnake.Color.dark_green()
+            if is_role_added
+            else disnake.Color.dark_red(),
+            title=f"{user.display_name}  - Роль {role.name} {'добавлена' if is_role_added else 'снята'}",
+            description=description_text,
+        )
+
+        log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
+            settings.LogsServer.role_logs_channel_id
+        )
+        await log_channel.send(embed=log_embed)
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild: disnake.Guild, member: disnake.Member):
         """
         Monitor bans, calls PlasmoAPI to get reason, nickname and discord user project_id
         """
-        if guild.id != settings.PlasmoRPGuild.guild_id:
+        if (
+            not guild is None
+            and guild.id != settings.PlasmoRPGuild.guild_id
+        ):
             return False
 
         # TODO: Rewrite with plasmo.py
 
-        await asyncio.sleep(10)
+        await asyncio.sleep(10)  # Wait for plasmo API to update
 
         for tries in range(10):
             async with ClientSession() as session:
                 async with session.get(
-                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
+                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=stats,teams",
                 ) as response:
                     try:
                         user_data = (await response.json())["data"]
@@ -105,23 +141,37 @@ class PlasmoLogger(commands.Cog):
                         logger.warning("Could not get data from PRP API: %s", user_data)
             break
 
-        reason: str = user_data.get("ban_reason", "Не указана")
-        nickname: str = user_data.get("nick", "Неизвестен")
-
-        log_embed = disnake.Embed(
-            title="☠️ Игрок забанен",
-            color=disnake.Color.red(),
-            description=f"[{nickname if nickname else member.display_name}]"
-            f"(https://rp.plo.su/u/{nickname}) был забанен\n\n"
-            f"**Причина:**\n{reason.strip()}"
-            f"\n\n⚡ by [digital drugs technologies]({settings.LogsServer.invite_url})",
-        )
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
             settings.LogsServer.ban_logs_channel_id
         )
-        msg: disnake.Message = await log_channel.send(
-            content=member.mention, embed=log_embed
-        )
+
+        reason: str = user_data.get("ban_reason", "Не указана")
+        nickname: str = user_data.get("nick", None)
+        if nickname is None:
+            return await log_channel.send(f"{member.mention} got banned")
+
+        ban_time: int = user_data.get("ban_time", 0)
+        user_stats: dict = user_data.get("stats", {})
+
+        log_embed = disnake.Embed(
+            title=f"⚡ {nickname} получил бан",
+            color=disnake.Color.dark_red(),
+            description=f"""
+            Причина: **{reason.strip()}**
+            {'> Примечание: rows - это количество строк(логов) в базе данных. Т.е. - количество выкопанных блоков'
+            if 'rows' in reason else ''}
+            Профиль [Plasmo](https://rp.plo.su/u/{nickname}) | {member.mention}
+            
+            {('Получил бан: <t:' + str(ban_time) + ':R>') if ban_time > 0 else ''}
+            Наиграно за текущий сезон: {user_stats.get('all', 0) / 3600:.2f} ч.
+            Состоит в общинах: {', '.join([('[' + team['name'] + '](https://rp.plo.su/t/' + team['url'] + ')')
+                                           for team in user_data.get('teams', [])])}
+            
+            Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
+                        """,
+        ).set_thumbnail(url="https://rp.plo.su/avatar/" + nickname)
+
+        msg: disnake.Message = await log_channel.send(embed=log_embed)
         await msg.publish()
 
     @commands.Cog.listener()
@@ -168,23 +218,6 @@ class PlasmoLogger(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: disnake.Message):
         if (
-            message.guild is not None
-            and message.guild.id == settings.PlasmoRPGuild.guild_id
-            and message.type == disnake.MessageType.thread_created
-        ):
-            try:
-                await message.delete(delay=3)
-            except disnake.Forbidden:
-                await self.bot.get_channel(settings.DevServer.bot_logs_channel_id).send(
-                    embed=disnake.Embed(
-                        title="Не удалось удалить сообщение",
-                        description=f"Не удалось удалить сообщение в канале {message.channel.mention}",
-                        color=disnake.Color.red(),
-                    )
-                )
-            return
-
-        if (
             message.channel.id == settings.PlasmoRPGuild.notifications_channel_id
             and message.author.name == "Предупреждения"
         ):
@@ -196,7 +229,7 @@ class PlasmoLogger(commands.Cog):
                 )
                 await warned_user.send(
                     embed=disnake.Embed(
-                        title="Вам выдали предупреждение на Plasmo RP",
+                        title="⚠ Вам выдали предупреждение на Plasmo RP",
                         color=disnake.Color.dark_red(),
                         description=f"Оспорить решение "
                         f"модерации или снять варн можно "

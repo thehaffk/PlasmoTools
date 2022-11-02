@@ -288,13 +288,12 @@ class UserManagement(commands.Cog):
             return
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if plasmo_guild is None:
-            if not settings.DEBUG:
-                raise RuntimeError("Plasmo RP guild not found")
+            raise RuntimeError("Plasmo RP guild not found")
         plasmo_user = plasmo_guild.get_member(user.id)
         if (
             user.bot
             or inter.guild.get_role(guild.player_role_id) not in user.roles
-            or (plasmo_user is None and not settings.DEBUG)
+            or plasmo_user is None
         ):
             return await inter.send(
                 embed=disnake.Embed(
@@ -314,23 +313,17 @@ class UserManagement(commands.Cog):
                 ephemeral=True,
             )
 
-        if not settings.DEBUG:
-            plasmo_user: disnake.Member
-            await inter.response.defer(ephemeral=True)
-            embed = disnake.Embed(
-                color=disnake.Color.green(),
-                description=f"{user.mention} был принят на должность **{db_role.name}**",
-            ).set_author(
-                name=plasmo_user.display_name,
-                icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name,
-            )
-            if comment is not None:
-                embed.add_field(name="Комментарий", value=comment)
-        else:
-            await inter.send(
-                "уведомления отключены во время дебаг режима",
-                ephemeral=True,
-            )
+        plasmo_user: disnake.Member
+        await inter.response.defer(ephemeral=True)
+        embed = disnake.Embed(
+            color=disnake.Color.green(),
+            description=f"{user.mention} был принят на должность **{db_role.name}**",
+        ).set_author(
+            name=plasmo_user.display_name,
+            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name,
+        )
+        if comment is not None:
+            embed.add_field(name="Комментарий", value=comment)
 
         try:
             await user.add_roles(
@@ -347,31 +340,29 @@ class UserManagement(commands.Cog):
                 ephemeral=True,
             )
 
-        if not settings.DEBUG:
-            embed = None  # todo: fix
-            async with aiohttp.ClientSession() as session:
-                webhook = disnake.Webhook.from_url(db_role.webhook_url, session=session)
-                try:
-                    await webhook.send(
-                        content=user.mention,
-                        embed=embed,
-                    )
-                except disnake.errors.NotFound:
-                    await user.remove_roles(
-                        inter.guild.get_role(db_role.role_discord_id),
-                        reason=f"Unexpected error",
-                    )
-                    return await inter.edit_original_message(
-                        embed=disnake.Embed(
-                            color=disnake.Color.red(),
-                            title="Error",
-                            description="Unable to access webhook.",
-                        ),
-                    )
+        async with aiohttp.ClientSession() as session:
+            webhook = disnake.Webhook.from_url(db_role.webhook_url, session=session)
+            try:
+                await webhook.send(
+                    content=user.mention,
+                    embed=embed,
+                )
+            except disnake.errors.NotFound:
+                await user.remove_roles(
+                    inter.guild.get_role(db_role.role_discord_id),
+                    reason=f"Unexpected error",
+                )
+                return await inter.edit_original_message(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Error",
+                        description="Unable to access webhook.",
+                    ),
+                )
 
-            await self.bot.get_channel(guild.logs_channel_id).send(
-                embed=embed.add_field("Called by", inter.author.mention)
-            )
+        await self.bot.get_channel(guild.logs_channel_id).send(
+            embed=embed.add_field("Called by", inter.author.mention)
+        )
 
         await inter.edit_original_message(
             embed=disnake.Embed(
@@ -415,13 +406,12 @@ class UserManagement(commands.Cog):
             return
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if plasmo_guild is None:
-            if not settings.DEBUG:
-                raise RuntimeError("Plasmo RP guild not found")
+            raise RuntimeError("Plasmo RP guild not found")
         plasmo_user = plasmo_guild.get_member(user.id)
         if (
             user.bot
             or inter.guild.get_role(guild.player_role_id) not in user.roles
-            or (plasmo_user is None and not settings.DEBUG)
+            or plasmo_user is None
         ):
             return await inter.send(
                 embed=disnake.Embed(
@@ -441,23 +431,17 @@ class UserManagement(commands.Cog):
                 ephemeral=True,
             )
 
-        if not settings.DEBUG:
-            plasmo_user: disnake.Member
-            await inter.response.defer(ephemeral=True)
-            embed = disnake.Embed(
-                color=disnake.Color.dark_red(),
-                description=f"{user.mention} был уволен с должности **{db_role.name}**",
-            ).set_author(
-                name=plasmo_user.display_name,
-                icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name,
-            )
-            if reason is not None:
-                embed.add_field(name="Причина", value=reason)
-        else:
-            await inter.send(
-                "уведомления отключены во время дебаг режима",
-                ephemeral=True,
-            )
+        plasmo_user: disnake.Member
+        await inter.response.defer(ephemeral=True)
+        embed = disnake.Embed(
+            color=disnake.Color.dark_red(),
+            description=f"{user.mention} был уволен с должности **{db_role.name}**",
+        ).set_author(
+            name=plasmo_user.display_name,
+            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name,
+        )
+        if reason is not None:
+            embed.add_field(name="Причина", value=reason)
 
         try:
             await user.remove_roles(
@@ -473,28 +457,25 @@ class UserManagement(commands.Cog):
                 ),
                 ephemeral=True,
             )
-
-        if not settings.DEBUG:
-            embed = None  # todo: fix
-            async with aiohttp.ClientSession() as session:
-                webhook = disnake.Webhook.from_url(db_role.webhook_url, session=session)
-                try:
-                    await webhook.send(
-                        content=user.mention,
-                        embed=embed,
-                    )
-                except disnake.errors.NotFound:
-                    await user.add_roles(
-                        inter.guild.get_role(db_role.role_discord_id),
-                        reason=f"Unexpected error",
-                    )
-                    return await inter.edit_original_message(
-                        embed=disnake.Embed(
-                            color=disnake.Color.red(),
-                            title="Error",
-                            description="Unable to access webhook.",
-                        ),
-                    )
+        async with aiohttp.ClientSession() as session:
+            webhook = disnake.Webhook.from_url(db_role.webhook_url, session=session)
+            try:
+                await webhook.send(
+                    content=user.mention,
+                    embed=embed,
+                )
+            except disnake.errors.NotFound:
+                await user.add_roles(
+                    inter.guild.get_role(db_role.role_discord_id),
+                    reason=f"Unexpected error",
+                )
+                return await inter.edit_original_message(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Error",
+                        description="Unable to access webhook.",
+                    ),
+                )
 
         await self.bot.get_channel(guild.logs_channel_id).send(
             embed=embed.add_field("Called by", inter.author.mention)
