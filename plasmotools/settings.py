@@ -42,7 +42,6 @@ class Emojis:
     site_online = "<:site_online:1006320686693879929>"
 
 
-
 class DevServer:
     """
     Config for development(logging) server (digital drugs)
@@ -193,4 +192,3 @@ culture_guild = PlasmoStructureGuild(
     public_chat_channel_id=841395461222432848,
 )
 structure_guilds.append(culture_guild)
-
