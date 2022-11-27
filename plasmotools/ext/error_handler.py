@@ -68,7 +68,7 @@ class ErrorHandler(commands.Cog):
             )
         else:
             logger.error(error)
-            await inter.followup.send_messages(
+            await inter.send(
                 embed=disnake.Embed(
                     title="Error",
                     description=f"Возникла неожиданная ошибка.\n\n`{error}`"
