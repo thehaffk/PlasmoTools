@@ -105,11 +105,16 @@ class PlasmoLogger(commands.Cog):
             title=f"{user.display_name}  - Роль {role.name} {'добавлена' if is_role_added else 'снята'}",
             description=description_text,
         )
-
-        log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
+        logs_guild = self.bot.get_guild(settings.LogsServer.guild_id)
+        log_channel = logs_guild.get_channel(
             settings.LogsServer.role_logs_channel_id
         )
         await log_channel.send(embed=log_embed)
+
+        logs_guild_member = logs_guild.get_member(user.id)
+        if logs_guild_member:
+            if logs_guild.get_role(settings.LogsServer.roles_notifications_role_id) in logs_guild_member.roles:
+                await logs_guild_member.send(embed=log_embed)
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild: disnake.Guild, member: disnake.Member):

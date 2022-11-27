@@ -27,6 +27,8 @@ class LogsServer:
     messages_channel_id = 1008822105200132106
     rrs_logs_channel_id = 1033768782801420340
 
+    roles_notifications_role_id = 1046524223377637416
+
 
 class Emojis:
     plasmo_sync_logo = "<:PlasmoSync:996079144825794560>"
