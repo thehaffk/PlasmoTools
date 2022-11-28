@@ -22,12 +22,32 @@ class RRSCommands(commands.Cog):
         Get list of registered RRS entries
         """
         entries = await rrs_database.get_rrs_roles()
-        roles_text = "id - disabled - sgid - srid - prid:\n"
-        for entry in entries:
-            roles_text += f"{entry.id} - {entry.disabled} - SGID {entry.structure_guild_id} " \
-                          f"- SRID {entry.structure_role_id} - PRID {entry.plasmo_role_id}\n"
 
-        await inter.send(roles_text, ephemeral=True)
+        rrs_embed = disnake.Embed(
+            title="Registered RRS entries",
+            color=disnake.Color.green()
+        )
+
+        plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
+        for structure_guild_id in set([entry.structure_guild_id for entry in entries]):
+            guild = self.bot.get_guild(structure_guild_id)
+            if guild is None:
+                rrs_embed.add_field(name="Guild not found", value=f"Guild ID: {structure_guild_id}")
+                continue
+            roles_text = ""
+            for entry in [entry for entry in entries if entry.structure_guild_id == structure_guild_id]:
+                structure_role = guild.get_role(entry.structure_role_id)
+                if plasmo_guild is None and settings.DEBUG:
+                    plasmo_role = None
+                elif plasmo_guild is None:
+                    raise RuntimeError("Plasmo guild not found")
+                else:
+                    plasmo_role = plasmo_guild.get_role(entry.plasmo_role_id)
+                roles_text += f"{'✔' if not entry.disabled else '❌'} " \
+                              f"| **{entry.id}**. {structure_role} - {plasmo_role}\n"
+            rrs_embed.add_field(name=guild.name, value=roles_text, inline=False)
+
+        await inter.send(embed=rrs_embed, ephemeral=True)
 
     @commands.is_owner()
     @commands.slash_command(name="rrs-add", dm_permission=False, guild_ids=[settings.DevServer.guild_id])
