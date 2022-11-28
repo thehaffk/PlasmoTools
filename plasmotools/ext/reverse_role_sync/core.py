@@ -27,6 +27,11 @@ logger = logging.getLogger(__name__)
 # edit plasmo roles if needed
 # save changes to database
 
+# leave
+# player role removed
+# account transfer
+# head changes
+
 class RRSConfirmView(disnake.ui.View):
     def __init__(
             self,
