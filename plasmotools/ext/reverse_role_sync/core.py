@@ -13,6 +13,25 @@ logger = logging.getLogger(__name__)
 # todo: force role sync
 # todo: scheduled sync
 
+# RRS default scenario:
+# listen to role changes at structure
+# check if role is registered
+# find operation author
+# check permissions + head role check
+# ask head for confirmation if needed
+#       if head is not available - ask for confirmation from president
+#       if president is not available - ask for confirmation from ddtech
+#       rollback role at structure until confirmation
+#       log changes
+# check plasmo roles
+# edit plasmo roles if needed
+# save changes to database
+
+# leave
+# player role removed
+# account transfer
+# head changes
+
 class RRSConfirmView(disnake.ui.View):
     def __init__(
             self,

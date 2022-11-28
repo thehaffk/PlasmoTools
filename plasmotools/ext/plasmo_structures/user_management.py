@@ -287,13 +287,25 @@ class UserManagement(commands.Cog):
         if not await check_role(inter, guild, db_role):
             return
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
-        if plasmo_guild is None:
+        if plasmo_guild is None and not settings.DEBUG:
             raise RuntimeError("Plasmo RP guild not found")
-        plasmo_user = plasmo_guild.get_member(user.id)
+        plasmo_user = plasmo_guild.get_member(user.id) if plasmo_guild else None
+        structure_role = inter.guild.get_role(db_role.role_discord_id)
+        if structure_role is None:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="Role not found.",
+                ),
+                ephemeral=True,
+            )
+            await db_role.edit(available=False)
+            return
         if (
             user.bot
             or inter.guild.get_role(guild.player_role_id) not in user.roles
-            or plasmo_user is None
+            or (plasmo_user is None and not settings.DEBUG)
         ):
             return await inter.send(
                 embed=disnake.Embed(
@@ -313,21 +325,34 @@ class UserManagement(commands.Cog):
                 ephemeral=True,
             )
 
+
+
+        # Check for permissions
+        if inter.author.top_role.position <= structure_role.position:
+            return await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="You cannot manage this role.",
+                ),
+                ephemeral=True,
+            )
+
         plasmo_user: disnake.Member
         await inter.response.defer(ephemeral=True)
         embed = disnake.Embed(
             color=disnake.Color.green(),
             description=f"{user.mention} был принят на должность **{db_role.name}**",
         ).set_author(
-            name=plasmo_user.display_name,
-            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name,
+            name=plasmo_user.display_name if plasmo_user else user.display_name,
+            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name if plasmo_user else user.display_name,
         )
         if comment is not None:
             embed.add_field(name="Комментарий", value=comment)
 
         try:
             await user.add_roles(
-                inter.guild.get_role(db_role.role_discord_id),
+                structure_role,
                 reason=f"Hired " f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]",
             )
         except disnake.Forbidden:
@@ -349,7 +374,7 @@ class UserManagement(commands.Cog):
                 )
             except disnake.errors.NotFound:
                 await user.remove_roles(
-                    inter.guild.get_role(db_role.role_discord_id),
+                    structure_role,
                     reason=f"Unexpected error",
                 )
                 return await inter.edit_original_message(
@@ -407,11 +432,23 @@ class UserManagement(commands.Cog):
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if plasmo_guild is None:
             raise RuntimeError("Plasmo RP guild not found")
-        plasmo_user = plasmo_guild.get_member(user.id)
+        plasmo_user = plasmo_guild.get_member(user.id) if plasmo_guild else None
+        structure_role = inter.guild.get_role(db_role.role_discord_id)
+        if structure_role is None:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="Role not found.",
+                ),
+                ephemeral=True,
+            )
+            await db_role.edit(available=False)
+            return
         if (
             user.bot
             or inter.guild.get_role(guild.player_role_id) not in user.roles
-            or plasmo_user is None
+            or (plasmo_user is None and not settings.DEBUG)
         ):
             return await inter.send(
                 embed=disnake.Embed(
@@ -431,21 +468,33 @@ class UserManagement(commands.Cog):
                 ephemeral=True,
             )
 
+
+        # Check for permissions
+        if inter.author.top_role.position <= structure_role.position:
+            return await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="You cannot manage this role.",
+                ),
+                ephemeral=True,
+            )
+
         plasmo_user: disnake.Member
         await inter.response.defer(ephemeral=True)
         embed = disnake.Embed(
             color=disnake.Color.dark_red(),
             description=f"{user.mention} был уволен с должности **{db_role.name}**",
         ).set_author(
-            name=plasmo_user.display_name,
-            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name,
+            name=plasmo_user.display_name if plasmo_user else user.display_name,
+            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name if plasmo_user else user.display_name,
         )
         if reason is not None:
             embed.add_field(name="Причина", value=reason)
 
         try:
             await user.remove_roles(
-                inter.guild.get_role(db_role.role_discord_id),
+                structure_role,
                 reason=f"Fired " f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]",
             )
         except disnake.Forbidden:
@@ -466,7 +515,7 @@ class UserManagement(commands.Cog):
                 )
             except disnake.errors.NotFound:
                 await user.add_roles(
-                    inter.guild.get_role(db_role.role_discord_id),
+                    structure_role,
                     reason=f"Unexpected error",
                 )
                 return await inter.edit_original_message(
