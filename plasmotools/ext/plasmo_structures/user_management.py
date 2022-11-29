@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Optional
 
@@ -325,8 +326,6 @@ class UserManagement(commands.Cog):
                 ephemeral=True,
             )
 
-
-
         # Check for permissions
         if inter.author.top_role.position <= structure_role.position:
             return await inter.send(
@@ -345,7 +344,8 @@ class UserManagement(commands.Cog):
             description=f"{user.mention} был принят на должность **{db_role.name}**",
         ).set_author(
             name=plasmo_user.display_name if plasmo_user else user.display_name,
-            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name if plasmo_user else user.display_name,
+            icon_url="https://rp.plo.su/avatar/"
+            + (plasmo_user.display_name if plasmo_user else user.display_name),
         )
         if comment is not None:
             embed.add_field(name="Комментарий", value=comment)
@@ -353,7 +353,8 @@ class UserManagement(commands.Cog):
         try:
             await user.add_roles(
                 structure_role,
-                reason=f"Hired " f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]",
+                reason=f"Hired "
+                f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]",
             )
         except disnake.Forbidden:
             return await inter.send(
@@ -416,32 +417,31 @@ class UserManagement(commands.Cog):
         user: Player
         role: Role [⚠ Choose from autocomplete!]
         """
+        await inter.response.defer(ephemeral=True)
         try:
             guild, db_role = await database.get_guild(
                 inter.guild.id
             ), await database.get_role(role_discord_id=int(role))
         except ValueError:
-            return await inter.send(
+            return await inter.edit_original_message(
                 "https://tenor.com/view/%D0%B2%D0%B4%D1%83%D1%80%D0%BA%D1%83"
                 "-%D0%B4%D1%83%D1%80%D0%BA%D0%B0-%D0%BA%D0%BE%D1%82-%D0%BA%D0%BE%D1%82%D1%8D"
                 "-gif-25825159",
-                ephemeral=True,
             )
         if not await check_role(inter, guild, db_role):
             return
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
-        if plasmo_guild is None:
+        if plasmo_guild is None and not settings.DEBUG:
             raise RuntimeError("Plasmo RP guild not found")
         plasmo_user = plasmo_guild.get_member(user.id) if plasmo_guild else None
         structure_role = inter.guild.get_role(db_role.role_discord_id)
         if structure_role is None:
-            await inter.send(
+            await inter.edit_original_message(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Error",
                     description="Role not found.",
                 ),
-                ephemeral=True,
             )
             await db_role.edit(available=False)
             return
@@ -450,25 +450,41 @@ class UserManagement(commands.Cog):
             or inter.guild.get_role(guild.player_role_id) not in user.roles
             or (plasmo_user is None and not settings.DEBUG)
         ):
-            return await inter.send(
+            return await inter.edit_original_message(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Error",
                     description="You cant fire this user.",
                 ),
-                ephemeral=True,
             )
         if db_role.role_discord_id not in [role.id for role in user.roles]:
-            return await inter.send(
+            await inter.edit_original_message(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Error",
                     description=f"User does not have <@&{db_role.role_discord_id}> role.",
                 ),
-                ephemeral=True,
+                components=[
+                    disnake.ui.Button(
+                        label="Просто отправить уведомление",
+                        style=disnake.ButtonStyle.red,
+                        custom_id=f"fire_anyway.{user.id}.{db_role.role_discord_id}",
+                    )
+                ],
             )
+            try:
 
-
+                await self.bot.wait_for(
+                    "button_click",
+                    check=lambda i: (
+                        i.component.custom_id
+                        == f"fire_anyway.{user.id}.{db_role.role_discord_id}"
+                    ),
+                    timeout=60,
+                )
+            except asyncio.TimeoutError:
+                return await inter.edit_original_message(components=[])
+            await inter.edit_original_message(components=[])
         # Check for permissions
         if inter.author.top_role.position <= structure_role.position:
             return await inter.send(
@@ -481,13 +497,14 @@ class UserManagement(commands.Cog):
             )
 
         plasmo_user: disnake.Member
-        await inter.response.defer(ephemeral=True)
+
         embed = disnake.Embed(
             color=disnake.Color.dark_red(),
             description=f"{user.mention} был уволен с должности **{db_role.name}**",
         ).set_author(
             name=plasmo_user.display_name if plasmo_user else user.display_name,
-            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name if plasmo_user else user.display_name,
+            icon_url="https://rp.plo.su/avatar/"
+            + (plasmo_user.display_name if plasmo_user else user.display_name),
         )
         if reason is not None:
             embed.add_field(name="Причина", value=reason)
@@ -495,7 +512,8 @@ class UserManagement(commands.Cog):
         try:
             await user.remove_roles(
                 structure_role,
-                reason=f"Fired " f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]",
+                reason=f"Fired "
+                f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]",
             )
         except disnake.Forbidden:
             return await inter.send(
