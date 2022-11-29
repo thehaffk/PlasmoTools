@@ -36,13 +36,13 @@ async def setup_database():
 
 class RRSRole:
     def __init__(
-            self,
-            _id: int,
-            structure_guild_id: int,
-            structure_role_id: int,
-            plasmo_role_id: int,
-            verified_by_plasmo: bool = False,
-            disabled: bool = False,
+        self,
+        _id: int,
+        structure_guild_id: int,
+        structure_role_id: int,
+        plasmo_role_id: int,
+        verified_by_plasmo: bool = False,
+        disabled: bool = False,
     ):
         self.id = _id
         self.structure_guild_id = structure_guild_id
@@ -75,12 +75,12 @@ class RRSRole:
             await db.commit()
 
     async def edit(
-            self,
-            structure_guild_id: Optional[int] = None,
-            structure_role_id: Optional[int] = None,
-            plasmo_role_id: Optional[int] = None,
-            verified_by_plasmo: Optional[bool] = None,
-            disabled: Optional[bool] = None,
+        self,
+        structure_guild_id: Optional[int] = None,
+        structure_role_id: Optional[int] = None,
+        plasmo_role_id: Optional[int] = None,
+        verified_by_plasmo: Optional[bool] = None,
+        disabled: Optional[bool] = None,
     ):
         if structure_guild_id is not None:
             self.structure_guild_id = structure_guild_id
@@ -108,8 +108,8 @@ class RRSRole:
 async def get_rrs_role(_id: int) -> Optional[RRSRole]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """ SELECT id, structure_guild_id, structure_role_id, plasmo_role_id, verified_by_plasmo, disabled FROM rrs_roles WHERE id = ?""",
-                (_id,),
+            """ SELECT id, structure_guild_id, structure_role_id, plasmo_role_id, verified_by_plasmo, disabled FROM rrs_roles WHERE id = ?""",
+            (_id,),
         ) as cursor:
             row = await cursor.fetchone()
             if row is None:
@@ -125,40 +125,42 @@ async def get_rrs_role(_id: int) -> Optional[RRSRole]:
 
 
 async def register_rrs_role(
-        structure_guild_id: int,
-        structure_role_id: int,
-        plasmo_role_id: int,
-        verified_by_plasmo: bool = False,
-        disabled: bool = False,
+    structure_guild_id: int,
+    structure_role_id: int,
+    plasmo_role_id: int,
+    verified_by_plasmo: bool = False,
+    disabled: bool = False,
 ) -> RRSRole:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """
+            """
             INSERT INTO rrs_roles (structure_guild_id, structure_role_id, plasmo_role_id, verified_by_plasmo, disabled)
             VALUES (?, ?, ?, ?, ?)
             """,
-                (
-                        structure_guild_id,
-                        structure_role_id,
-                        plasmo_role_id,
-                        int(verified_by_plasmo),
-                        int(disabled),
-                ),
+            (
+                structure_guild_id,
+                structure_role_id,
+                plasmo_role_id,
+                int(verified_by_plasmo),
+                int(disabled),
+            ),
         ) as cursor:
             await db.commit()
             return await get_rrs_role(cursor.lastrowid)
 
 
-async def get_rrs_roles(structure_role_id: Optional[int] = None, plasmo_role_id: Optional[int] = None) -> List[RRSRole]:
+async def get_rrs_roles(
+    structure_role_id: Optional[int] = None, plasmo_role_id: Optional[int] = None
+) -> List[RRSRole]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-                """
+            """
             SELECT id, structure_guild_id, structure_role_id, plasmo_role_id, verified_by_plasmo, disabled FROM rrs_roles
             WHERE
                 (structure_role_id = ? OR ? IS NULL)
                 AND (plasmo_role_id = ? OR ? IS NULL)
             """,
-                (structure_role_id, structure_role_id, plasmo_role_id, plasmo_role_id),
+            (structure_role_id, structure_role_id, plasmo_role_id, plasmo_role_id),
         ) as cursor:
             rows = await cursor.fetchall()
             return [

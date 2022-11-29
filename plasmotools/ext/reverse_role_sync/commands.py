@@ -197,7 +197,6 @@ class RRSCommands(commands.Cog):
 
         await ctx.send("⚠ RRS rule was registered without verification ⚠")
 
-
     @commands.is_owner()
     @commands.slash_command(
         name="rrs-remove", dm_permission=False, guild_ids=[settings.DevServer.guild_id]

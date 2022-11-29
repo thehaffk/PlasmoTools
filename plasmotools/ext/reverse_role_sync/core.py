@@ -32,9 +32,10 @@ logger = logging.getLogger(__name__)
 # account transfer
 # head changes
 
+
 class RRSConfirmView(disnake.ui.View):
     def __init__(
-            self,
+        self,
     ):
         super().__init__(timeout=86400)
         self.decision = None
@@ -42,7 +43,7 @@ class RRSConfirmView(disnake.ui.View):
 
     @disnake.ui.button(label="Подтвердить", style=disnake.ButtonStyle.green, emoji="✅")
     async def confirm(
-            self, button: disnake.ui.Button, interaction: disnake.Interaction
+        self, button: disnake.ui.Button, interaction: disnake.Interaction
     ):
         self.decision = True
         await interaction.response.send_message(
@@ -65,7 +66,7 @@ class RRSConfirmView(disnake.ui.View):
         row=1,
     )
     async def report_to_ddt(
-            self, button: disnake.ui.Button, interaction: disnake.Interaction
+        self, button: disnake.ui.Button, interaction: disnake.Interaction
     ):
         self.report_to_ddt = True
         self.decision = False
@@ -85,14 +86,14 @@ class RRSCore(commands.Cog):
 
     @commands.Cog.listener("on_member_update")
     async def on_member_update_listener(
-            self, before: disnake.Member, after: disnake.Member
+        self, before: disnake.Member, after: disnake.Member
     ):
         if before.roles == after.roles:
             return
         if before.guild.id == (
-                settings.LogsServer.guild_id
-                if settings.DEBUG
-                else settings.PlasmoRPGuild.guild_id
+            settings.LogsServer.guild_id
+            if settings.DEBUG
+            else settings.PlasmoRPGuild.guild_id
         ):
             return
         added_roles = [role for role in after.roles if role not in before.roles]
@@ -102,36 +103,36 @@ class RRSCore(commands.Cog):
         is_role_added = True if added_roles else False
 
         async for entry in after.guild.audit_logs(
-                action=disnake.AuditLogAction.member_role_update, limit=100
+            action=disnake.AuditLogAction.member_role_update, limit=100
         ):
             if entry.target == after:
                 if (is_role_added and entry.changes.after.roles == target_roles) or (
-                        not is_role_added and entry.changes.before.roles == target_roles
+                    not is_role_added and entry.changes.before.roles == target_roles
                 ):
                     return await self.sync_structure_update(
                         after, target_roles[0], is_role_added, entry
                     )
 
     async def get_head_decision(
-            self,
-            head_user: disnake.Member,
-            structure_member: disnake.Member,
-            structure_role: disnake.Role,
-            plasmo_role: disnake.Role,
-            operation_is_add: bool,
-            operation_author: disnake.Member,
+        self,
+        head_user: disnake.Member,
+        structure_member: disnake.Member,
+        structure_role: disnake.Role,
+        plasmo_role: disnake.Role,
+        operation_is_add: bool,
+        operation_author: disnake.Member,
     ) -> bool:
         info_embed = disnake.Embed(
             title="RRS - Подтверждение операции",
             description=f"В дискорде структуры `{head_user.guild.name}` "
-                        f"пользователь `{operation_author.display_name}`({operation_author.mention}) "
-                        f"попытался {'добавить' if operation_is_add else 'забрать'} "
-                        f"роль `{structure_role.name}` {'игроку' if operation_is_add else 'у игрока'} "
-                        f"`{structure_member.display_name}`({structure_member.mention})\n\n"
-                        f"К локальной роли структуры `{structure_role.name}` "
-                        f"привязана роль `{plasmo_role.name}` на Plasmo\n\n"
-                        f"У `{operation_author.display_name}`({operation_author.mention}) нет полномочий на выдачу "
-                        f"этой роли на Plasmo, поэтому RRS требует вашего подтверждения.",
+            f"пользователь `{operation_author.display_name}`({operation_author.mention}) "
+            f"попытался {'добавить' if operation_is_add else 'забрать'} "
+            f"роль `{structure_role.name}` {'игроку' if operation_is_add else 'у игрока'} "
+            f"`{structure_member.display_name}`({structure_member.mention})\n\n"
+            f"К локальной роли структуры `{structure_role.name}` "
+            f"привязана роль `{plasmo_role.name}` на Plasmo\n\n"
+            f"У `{operation_author.display_name}`({operation_author.mention}) нет полномочий на выдачу "
+            f"этой роли на Plasmo, поэтому RRS требует вашего подтверждения.",
             color=disnake.Color.dark_green(),
         )
         view = RRSConfirmView()
@@ -145,12 +146,12 @@ class RRSCore(commands.Cog):
                 embed=disnake.Embed(
                     title="Глава пожаловался на превышение полномочий",
                     description=f"`User:` {structure_member.mention} ||{structure_member.id}||\n"
-                                f"`Structure:` {structure_role.name} ||{structure_role.id}||\n"
-                                f"`Plasmo:` {plasmo_role.name} ||{plasmo_role.id}||\n"
-                                f"`Operation:` {'Add' if operation_is_add else 'Remove'}\n"
-                                f"`Operation author:` {operation_author.display_name} {operation_author.mention}\n"
-                                f"`Structure head:` {head_user.display_name} {head_user.mention}\n"
-                                f"`Guild:` {head_user.guild.name} ||{head_user.guild.id}||",
+                    f"`Structure:` {structure_role.name} ||{structure_role.id}||\n"
+                    f"`Plasmo:` {plasmo_role.name} ||{plasmo_role.id}||\n"
+                    f"`Operation:` {'Add' if operation_is_add else 'Remove'}\n"
+                    f"`Operation author:` {operation_author.display_name} {operation_author.mention}\n"
+                    f"`Structure head:` {head_user.display_name} {head_user.mention}\n"
+                    f"`Guild:` {head_user.guild.name} ||{head_user.guild.id}||",
                     color=disnake.Color.red(),
                 )
             )
@@ -158,16 +159,16 @@ class RRSCore(commands.Cog):
         return view.decision
 
     async def sync_structure_update(
-            self,
-            member: disnake.Member,
-            role: disnake.Role,
-            structure_role_added: bool,
-            audit_entry: disnake.AuditLogEntry,
+        self,
+        member: disnake.Member,
+        role: disnake.Role,
+        structure_role_added: bool,
+        audit_entry: disnake.AuditLogEntry,
     ):
         # todo: divide this into smaller functions
 
         if audit_entry.user == self.bot.user and str(audit_entry.reason).startswith(
-                "RRS"
+            "RRS"
         ):
             # Abort if role is added/removed by RRS (structure head declined request / some other errors)
             return
@@ -208,7 +209,7 @@ class RRSCore(commands.Cog):
                     embed=disnake.Embed(
                         title="RRS AutoRemove",
                         description=f"Role {role.mention} was added to {member.mention},\n"
-                                    f"but user is not in PlasmoRP server, so role was removed by PT",
+                        f"but user is not in PlasmoRP server, so role was removed by PT",
                         color=disnake.Color.red(),
                     ),
                 )
@@ -246,11 +247,9 @@ class RRSCore(commands.Cog):
                     settings.PlasmoRPGuild.president_role_id,
                     settings.PlasmoRPGuild.helper_role_id,
                 )
-                if (
-                        any(
-                            role.id in allowed_roles_ids
-                            for role in operation_author_plasmo_member.roles
-                        )
+                if any(
+                    role.id in allowed_roles_ids
+                    for role in operation_author_plasmo_member.roles
                 ):
                     operation_is_allowed = True
 
@@ -263,18 +262,18 @@ class RRSCore(commands.Cog):
                     title="RRS - Недостаточно полномочий",
                     color=disnake.Color.yellow(),
                     description=f"К локальной роли {role.mention} привяна роль **{plasmo_role.name}** на Plasmo RP\n\n"
-                                f"Так как у вас нет полномочий управлять ролями на Plasmo - "
-                                f"**операция ожидает подтверждения от главы структуры**",
+                    f"Так как у вас нет полномочий управлять ролями на Plasmo - "
+                    f"**операция ожидает подтверждения от главы структуры**",
                 ).set_footer(text="Plasmo Tools Reverse Role Sync")
                 await guild_logs_channel.send(
                     embed=disnake.Embed(
                         title="403 > HOLD",
                         description=f"`User:` {member.display_name} {member.mention}\n"
-                                    f"`Structure:` {role.name} ||{role.id}||\n"
-                                    f"`Plasmo:` {plasmo_role.name} ||{plasmo_role.id}||\n"
-                                    f"`Author:` {operation_author.display_name} {operation_author.mention}\n"
-                                    f"`Operation:` {'Add' if structure_role_added else 'Remove'}\n"
-                                    f"`Guild:` {member.guild.name} ||{member.guild.id}||",
+                        f"`Structure:` {role.name} ||{role.id}||\n"
+                        f"`Plasmo:` {plasmo_role.name} ||{plasmo_role.id}||\n"
+                        f"`Author:` {operation_author.display_name} {operation_author.mention}\n"
+                        f"`Operation:` {'Add' if structure_role_added else 'Remove'}\n"
+                        f"`Guild:` {member.guild.name} ||{member.guild.id}||",
                     )
                 )
                 await guild_logs_channel.send(
@@ -287,9 +286,9 @@ class RRSCore(commands.Cog):
                     alert_embed = disnake.Embed(
                         title="RRS Alert",
                         description=f"Не удалось найти главу структуры!\n"
-                                    f"Ролью {head_role.name}||{head_role.mention}|| "
-                                    f"должен владеть только один пользователь\n"
-                                    f"Если вы считаете, что произошла ошибка откройте тикет в дискорде Plasmo RP",
+                        f"Ролью {head_role.name}||{head_role.mention}|| "
+                        f"должен владеть только один пользователь\n"
+                        f"Если вы считаете, что произошла ошибка откройте тикет в дискорде Plasmo RP",
                         color=disnake.Color.red(),
                     )
                     await guild_logs_channel.send(
@@ -308,12 +307,12 @@ class RRSCore(commands.Cog):
 
                 try:
                     if not await self.get_head_decision(
-                            head_user=structure_heads[0],
-                            structure_member=member,
-                            structure_role=role,
-                            plasmo_role=plasmo_role,
-                            operation_author=operation_author,
-                            operation_is_add=structure_role_added,
+                        head_user=structure_heads[0],
+                        structure_member=member,
+                        structure_role=role,
+                        plasmo_role=plasmo_role,
+                        operation_author=operation_author,
+                        operation_is_add=structure_role_added,
                     ):
                         await guild_logs_channel.send(
                             content=operation_author.mention,
@@ -326,7 +325,7 @@ class RRSCore(commands.Cog):
                             .add_field(
                                 name="Операция",
                                 value=f"{'Добавление' if structure_role_added else 'Удаление'} "
-                                      f"роли {role.mention}",
+                                f"роли {role.mention}",
                             ),
                         )
 
@@ -336,11 +335,11 @@ class RRSCore(commands.Cog):
                             embed=disnake.Embed(
                                 title="403 > DENIED",
                                 description=f"`User:` {member.display_name} {member.mention}\n"
-                                            f"`Structure:` {role.name} ||{role.id}||\n"
-                                            f"`Plasmo:` {plasmo_role.name} ||{plasmo_role.id}||\n"
-                                            f"`Author:` {operation_author.display_name} {operation_author.mention}\n"
-                                            f"`Operation:` {'Add' if structure_role_added else 'Remove'}\n"
-                                            f"`Guild:` {member.guild.name} ||{member.guild.id}||",
+                                f"`Structure:` {role.name} ||{role.id}||\n"
+                                f"`Plasmo:` {plasmo_role.name} ||{plasmo_role.id}||\n"
+                                f"`Author:` {operation_author.display_name} {operation_author.mention}\n"
+                                f"`Operation:` {'Add' if structure_role_added else 'Remove'}\n"
+                                f"`Guild:` {member.guild.name} ||{member.guild.id}||",
                             )
                         )
                         continue
@@ -360,7 +359,7 @@ class RRSCore(commands.Cog):
                     alert_embed = disnake.Embed(
                         title="RRS Alert",
                         description=f"Не удалось отправить сообщение главе структуры!\n"
-                                    f"Операция отменена",
+                        f"Операция отменена",
                         color=disnake.Color.red(),
                     )
                     await guild_logs_channel.send(
@@ -415,11 +414,11 @@ class RRSCore(commands.Cog):
             log_embed = disnake.Embed(
                 title="RRS Log",
                 description=f"`User`: {member.display_name}({member.mention})\n"
-                            f"`Structure:` **{'+' if structure_role_added else '-'}** "
-                            f"{role.name} ||{role.id}||\n"
-                            f"`Plasmo:` {'**-**' if plasmo_role_removed else ' '}{'**+**' if plasmo_role_added else ' '} "
-                            f"{plasmo_role.name} ||{plasmo_role.id}||\n"
-                            f"`Author`: {operation_author.display_name}({operation_author.mention})",
+                f"`Structure:` **{'+' if structure_role_added else '-'}** "
+                f"{role.name} ||{role.id}||\n"
+                f"`Plasmo:` {'**-**' if plasmo_role_removed else ' '}{'**+**' if plasmo_role_added else ' '} "
+                f"{plasmo_role.name} ||{plasmo_role.id}||\n"
+                f"`Author`: {operation_author.display_name}({operation_author.mention})",
                 color=disnake.Color.green(),
             )
             await guild_logs_channel.send(embed=log_embed)

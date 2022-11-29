@@ -70,8 +70,8 @@ class PlasmoLogger(commands.Cog):
 
         executed_by_rrs = str(audit_entry.reason).startswith("RRS")
         if executed_by_rrs:
-            operation_author = user.guild.get_member(int(
-                audit_entry.reason.split("/")[-1].strip())
+            operation_author = user.guild.get_member(
+                int(audit_entry.reason.split("/")[-1].strip())
             )
         else:
             operation_author = audit_entry.user
@@ -81,7 +81,8 @@ class PlasmoLogger(commands.Cog):
 
         if executed_by_rrs:
             description_text += (
-                "**" + ("Выдано " if is_role_added else "Снято ")
+                "**"
+                + ("Выдано " if is_role_added else "Снято ")
                 + "через RRS (Plasmo Tools), с согласия** "
                 + operation_author.display_name
                 + " "
@@ -89,14 +90,18 @@ class PlasmoLogger(commands.Cog):
             )
         else:
             description_text += (
-                "**" + ("Выдал: " if is_role_added else "Снял: ") + "**"
+                "**"
+                + ("Выдал: " if is_role_added else "Снял: ")
+                + "**"
                 + operation_author.display_name
                 + " "
                 + operation_author.mention
             )
         description_text += "\n"
         description_text += "\n"
-        description_text += "**Роли после изменения:** " + ", ".join([role.name for role in user.roles[1:]])
+        description_text += "**Роли после изменения:** " + ", ".join(
+            [role.name for role in user.roles[1:]]
+        )
 
         log_embed = disnake.Embed(
             color=disnake.Color.dark_green()
@@ -106,14 +111,15 @@ class PlasmoLogger(commands.Cog):
             description=description_text,
         )
         logs_guild = self.bot.get_guild(settings.LogsServer.guild_id)
-        log_channel = logs_guild.get_channel(
-            settings.LogsServer.role_logs_channel_id
-        )
+        log_channel = logs_guild.get_channel(settings.LogsServer.role_logs_channel_id)
         await log_channel.send(embed=log_embed)
 
         logs_guild_member = logs_guild.get_member(user.id)
         if logs_guild_member:
-            if logs_guild.get_role(settings.LogsServer.roles_notifications_role_id) in logs_guild_member.roles:
+            if (
+                logs_guild.get_role(settings.LogsServer.roles_notifications_role_id)
+                in logs_guild_member.roles
+            ):
                 await logs_guild_member.send(embed=log_embed)
 
     @commands.Cog.listener()
@@ -121,10 +127,7 @@ class PlasmoLogger(commands.Cog):
         """
         Monitor bans, calls PlasmoAPI to get reason, nickname and discord user project_id
         """
-        if (
-            not guild is None
-            and guild.id != settings.PlasmoRPGuild.guild_id
-        ):
+        if not guild is None and guild.id != settings.PlasmoRPGuild.guild_id:
             return False
 
         # TODO: Rewrite with plasmo.py
