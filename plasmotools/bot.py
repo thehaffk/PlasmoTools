@@ -50,8 +50,8 @@ class PlasmoSync(commands.Bot):
         log_channel = self.get_channel(settings.DevServer.bot_logs_channel_id)
         await self.change_presence(
             activity=disnake.Activity(
-                type=disnake.ActivityType.watching,
-                name=f"{sum(len(server.members) for server in self.guilds)} members",
+                type=disnake.ActivityType.playing,
+                name=f"Plasmo Tools роботаем",
             )
         )
         await log_channel.send(

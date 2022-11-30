@@ -15,18 +15,24 @@ class RRSCommands(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-    @commands.is_owner()
     @commands.slash_command(
-        name="rrs-list", dm_permission=False, guild_ids=[settings.DevServer.guild_id]
+        name="rrs-list",
+        dm_permission=False,
     )
+    @commands.default_member_permissions(manage_roles=True)
     async def get_registered_rrs_entries(self, inter: ApplicationCommandInteraction):
         """
         Get list of registered RRS entries
         """
-        entries = await rrs_database.get_rrs_roles()
+        entries = await rrs_database.get_rrs_roles(
+            structure_guild_id=inter.guild.id
+            if inter.guild.id != settings.DevServer.guild_id
+            else None
+        )
 
         rrs_embed = disnake.Embed(
-            title="Registered RRS entries", color=disnake.Color.green()
+            title="Registered RRS entries", color=disnake.Color.green(),
+            description="`id`.`локальная роль` **->** `роль на PRP` **|** `количество игроков с ролью`"
         )
 
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
@@ -51,9 +57,9 @@ class RRSCommands(commands.Cog):
                 else:
                     plasmo_role = plasmo_guild.get_role(entry.plasmo_role_id)
                 roles_text += (
-                    f"{'✔' if not entry.disabled else '❌'} "
-                    f"| **{entry.id}**. {structure_role} - {plasmo_role}\n"
-                )
+                    f"**{entry.id}.** {structure_role} **->** {plasmo_role} **|** {len(structure_role.members)} "
+                    f"{'**- ⚠ Отключено**' if entry.disabled else ''}\n"
+                ) + (f"SRID: {structure_role.id}\n" if inter.guild_id != settings.DevServer.guild_id else "")
             rrs_embed.add_field(name=guild.name, value=roles_text, inline=False)
 
         await inter.send(embed=rrs_embed, ephemeral=True)

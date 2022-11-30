@@ -150,7 +150,9 @@ async def register_rrs_role(
 
 
 async def get_rrs_roles(
-    structure_role_id: Optional[int] = None, plasmo_role_id: Optional[int] = None
+    structure_role_id: Optional[int] = None,
+    plasmo_role_id: Optional[int] = None,
+    structure_guild_id: Optional[int] = None,
 ) -> List[RRSRole]:
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
@@ -159,8 +161,16 @@ async def get_rrs_roles(
             WHERE
                 (structure_role_id = ? OR ? IS NULL)
                 AND (plasmo_role_id = ? OR ? IS NULL)
+                AND (structure_guild_id = ? OR ? IS NULL)
             """,
-            (structure_role_id, structure_role_id, plasmo_role_id, plasmo_role_id),
+            (
+                structure_role_id,
+                structure_role_id,
+                plasmo_role_id,
+                plasmo_role_id,
+                structure_guild_id,
+                structure_guild_id,
+            ),
         ) as cursor:
             rows = await cursor.fetchall()
             return [
