@@ -332,7 +332,7 @@ class RRSCore(commands.Cog):
                         title="RRS - Недостаточно полномочий",
                         color=disnake.Color.yellow(),
                         description=f"К локальной роли {role.mention}"
-                                    f" привяна роль **{plasmo_role.name}** на Plasmo RP\n\n"
+                        f" привяна роль **{plasmo_role.name}** на Plasmo RP\n\n"
                         f"Так как у вас нет полномочий управлять ролями на Plasmo - "
                         f"**операция ожидает подтверждения от главы структуры**",
                     ).set_footer(text="Plasmo Tools RRS"),

@@ -3,12 +3,14 @@ Cog-file for listener, detects bans, unbans, role changes, cheats, deaths, fwarn
 """
 import asyncio
 import logging
+import re
 
 import disnake
 from aiohttp import ClientSession
 from disnake.ext import commands
 
 from plasmotools import settings
+from plasmotools.utils.database.rrs import get_action, get_rrs_roles
 
 logger = logging.getLogger(__name__)
 
@@ -70,9 +72,10 @@ class PlasmoLogger(commands.Cog):
 
         executed_by_rrs = str(audit_entry.reason).startswith("RRS")
         if executed_by_rrs:
-            operation_author = user.guild.get_member(
-                int(audit_entry.reason.split("/")[-1].strip())
+            rrs_entry_id = int(
+                re.findall(r"RRS / \w* / RRSID: (\d+)", audit_entry.reason)[0]
             )
+            rrs_entry = await get_action(rrs_entry_id)
         else:
             operation_author = audit_entry.user
 
@@ -80,13 +83,26 @@ class PlasmoLogger(commands.Cog):
         description_text += "\n"
 
         if executed_by_rrs:
+
             description_text += (
                 "**"
                 + ("Выдано " if is_role_added else "Снято ")
-                + "через RRS (Plasmo Tools), с согласия** "
-                + operation_author.display_name
-                + " "
-                + operation_author.mention
+                + "через RRS (Plasmo Tools)**\n"
+            )
+
+            rrs_rules = await get_rrs_roles(
+                structure_role_id=rrs_entry.structure_role_id
+            )
+            rrs_rule = [rule for rule in rrs_rules if rule.plasmo_role_id == role.id][0]
+            structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
+            structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
+
+            description_text += (
+                f"**RRS ID:** {rrs_entry.id}\n"
+                f"**Структура:** {structure_guild.name}\n"
+                f"**Роль:** {structure_role.name}\n"
+                f"**Автор:** <@{rrs_entry.author_id}>\n"
+                f"**Одобрил:** <@{rrs_entry.approved_by_user_id}>"
             )
         else:
             description_text += (
@@ -97,8 +113,7 @@ class PlasmoLogger(commands.Cog):
                 + " "
                 + operation_author.mention
             )
-        description_text += "\n"
-        description_text += "\n"
+        description_text += "\n\n"
         description_text += "**Роли после изменения:** " + ", ".join(
             [role.name for role in user.roles[1:]]
         )
@@ -127,7 +142,7 @@ class PlasmoLogger(commands.Cog):
         """
         Monitor bans, calls PlasmoAPI to get reason, nickname and discord user project_id
         """
-        if not guild is None and guild.id != settings.PlasmoRPGuild.guild_id:
+        if guild is not None and guild.id != settings.PlasmoRPGuild.guild_id:
             return False
 
         # TODO: Rewrite with plasmo.py

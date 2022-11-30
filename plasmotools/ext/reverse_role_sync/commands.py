@@ -31,8 +31,9 @@ class RRSCommands(commands.Cog):
         )
 
         rrs_embed = disnake.Embed(
-            title="Registered RRS entries", color=disnake.Color.green(),
-            description="`id`.`локальная роль` **->** `роль на PRP` **|** `количество игроков с ролью`"
+            title="Registered RRS entries",
+            color=disnake.Color.green(),
+            description="`id`.`локальная роль` **->** `роль на PRP` **|** `количество игроков с ролью`",
         )
 
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
@@ -59,7 +60,11 @@ class RRSCommands(commands.Cog):
                 roles_text += (
                     f"**{entry.id}.** {structure_role} **->** {plasmo_role} **|** {len(structure_role.members)} "
                     f"{'**- ⚠ Отключено**' if entry.disabled else ''}\n"
-                ) + (f"SRID: {structure_role.id}\n" if inter.guild_id != settings.DevServer.guild_id else "")
+                ) + (
+                    f"SRID: {structure_role.id}\n"
+                    if inter.guild_id != settings.DevServer.guild_id
+                    else ""
+                )
             rrs_embed.add_field(name=guild.name, value=roles_text, inline=False)
 
         await inter.send(embed=rrs_embed, ephemeral=True)
