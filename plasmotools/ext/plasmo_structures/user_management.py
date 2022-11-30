@@ -8,6 +8,7 @@ from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
 from plasmotools import settings
+from plasmotools.ext.reverse_role_sync import core
 from plasmotools.utils.autocompleters import role_autocompleter
 from plasmotools.utils.database import plasmo_structures as database
 
@@ -350,11 +351,34 @@ class UserManagement(commands.Cog):
         if comment is not None:
             embed.add_field(name="Комментарий", value=comment)
 
+        rrs_cog: core.RRSCore = self.bot.get_cog("RRSCore")
+        if rrs_cog is not None:
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.green(), description="Проверка правил RRS..."
+                )
+            )
+            rrs_result = await rrs_cog.process_structure_role_change(
+                member=user,
+                role=structure_role,
+                operation_author=inter.author,
+                role_is_added=True,
+            )
+            if rrs_result is False:
+                return await inter.edit_original_message(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Error",
+                        description="Operation was cancelled by RRS.",
+                    )
+                )
+
         try:
             await user.add_roles(
                 structure_role,
                 reason=f"Hired "
-                f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]",
+                f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]"
+                + (" | RRSNR" if rrs_cog is not None and rrs_cog is None else ""),
             )
         except disnake.Forbidden:
             return await inter.send(
@@ -509,11 +533,34 @@ class UserManagement(commands.Cog):
         if reason is not None:
             embed.add_field(name="Причина", value=reason)
 
+        rrs_cog: core.RRSCore = self.bot.get_cog("RRSCore")
+        if rrs_cog is not None:
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.green(), description="Проверка правил RRS..."
+                )
+            )
+            rrs_result = await rrs_cog.process_structure_role_change(
+                member=user,
+                role=structure_role,
+                operation_author=inter.author,
+                role_is_added=False,
+            )
+            if rrs_result is False:
+                return await inter.edit_original_message(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Error",
+                        description="Operation was cancelled by RRS.",
+                    )
+                )
+
         try:
             await user.remove_roles(
                 structure_role,
                 reason=f"Fired "
-                f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]",
+                f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]"
+                + (" | RRSNR" if rrs_cog is not None and rrs_cog is None else ""),
             )
         except disnake.Forbidden:
             return await inter.send(
