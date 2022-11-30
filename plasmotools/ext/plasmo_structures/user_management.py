@@ -26,7 +26,7 @@ async def check_role(
             embed=disnake.Embed(
                 color=disnake.Color.red(),
                 title="Ошибка",
-                description="Сервер не зарегистрирован как офицальная структура.\n"
+                description="Сервер не зарегистрирован как официальная структура.\n"
                 f"Если вы считаете что произошла ошибка - "
                 f"обратитесь в [поддержку DDT]({settings.DevServer.support_invite})",
             ),
@@ -124,7 +124,7 @@ class UserManagement(commands.Cog):
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Ошибка",
-                    description="Сервер не зарегистрирован как офицальная структура.\n"
+                    description="Сервер не зарегистрирован как официальная структура.\n"
                     "Если вы считаете что это ошибка - обратитесь в "
                     f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
