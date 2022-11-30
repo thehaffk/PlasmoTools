@@ -88,7 +88,10 @@ async def check_for_authority(
     operation_author: disnake.Member,
     db_guild: guilds_database.Guild,
 ) -> bool:
-    if db_guild.head_role_id in [role.id for role in operation_author.roles]:
+    if (
+        plasmo_role != settings.PlasmoRPGuild.mko_head_role_id
+        and db_guild.head_role_id in [role.id for role in operation_author.roles]
+    ):
         return True
 
     operation_author_plasmo_member = plasmo_role.guild.get_member(operation_author.id)
@@ -346,6 +349,16 @@ class RRSCore(commands.Cog):
                         f"Unable to find structure head role {db_guild.head_role_id}"
                     )
                 try:
+                    if plasmo_role.id == settings.PlasmoRPGuild.mko_head_role_id:
+                        await guild_logs_channel.send(
+                            content=operation_author.mention,
+                            embed=disnake.Embed(
+                                title="RRS - Недостаточно полномочий",
+                                color=disnake.Color.dark_red(),
+                                description=f"You are not allowed to change mko_head roles",
+                            ),
+                        )
+                        return False
                     head_decision, head_user = await self.get_head_decision(
                         structure_head_role=structure_head_role,
                         structure_member=member,
