@@ -36,7 +36,7 @@ class Payouts(commands.Cog):
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Ошибка",
-                    description="Сервер не зарегистрирован как офицальная структура.\n"
+                    description="Сервер не зарегистриро структура.\n"
                     "Если вы считаете что это ошибка - обратитесь в "
                     f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
@@ -83,7 +83,7 @@ class Payouts(commands.Cog):
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Ошибка",
-                    description="Сервер не зарегистрирован как офицальная структура.\n"
+                    description="Сервер не зарегистрирован как официальная структура.\n"
                     "Если вы считаете что это ошибка - обратитесь в "
                     f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
@@ -253,7 +253,7 @@ class Payouts(commands.Cog):
                 embed.add_field(
                     name=f"{project.name} - {'Активен' if project.is_active else 'Неактивен'}  ",
                     value=f"{project.id} / {formatters.format_bank_card(project.from_card)} / "
-                          f"||{project.plasmo_bearer_token[:-5]}\\*\\*\\*\\*||\n"
+                    f"||{project.plasmo_bearer_token[:-5]}\\*\\*\\*\\*||\n"
                     f"||{project.webhook_url}||",
                     inline=False,
                 )
@@ -274,7 +274,7 @@ class Payouts(commands.Cog):
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Ошибка",
-                    description="Сервер не зарегистрирован как офицальная структура.\n"
+                    description="Сервер не зарегистрирован как официальная структура.\n"
                     "Если вы считаете что это ошибка - обратитесь в "
                     f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
@@ -287,9 +287,9 @@ class Payouts(commands.Cog):
         )
 
         if not settings.DEBUG:
-            plasmo_user = self.bot.get_guild(settings.PlasmoRPGuild.guild_id).get_member(
-                user.id
-            )
+            plasmo_user = self.bot.get_guild(
+                settings.PlasmoRPGuild.guild_id
+            ).get_member(user.id)
 
             if (
                 user.bot
@@ -307,7 +307,8 @@ class Payouts(commands.Cog):
                 return False
             await interaction.edit_original_message(
                 embed=disnake.Embed(
-                    color=disnake.Color.yellow(), description="Получаю карту для выплаты..."
+                    color=disnake.Color.yellow(),
+                    description="Получаю карту для выплаты...",
                 )
             )
         else:
@@ -355,7 +356,7 @@ class Payouts(commands.Cog):
                             color=disnake.Color.red(),
                             title="Ошибка",
                             description=f"У {user.mention} закрыты личные сообщения,"
-                                        f" вам придется лично попросить игрока "
+                            f" вам придется лично попросить игрока "
                             f"установить карту через /установить-карту-для-выплат",
                         ),
                         ephemeral=True,

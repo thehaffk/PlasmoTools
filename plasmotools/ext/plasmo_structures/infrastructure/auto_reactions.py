@@ -10,7 +10,7 @@ class InfrastructureReactions(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-    '''
+    """
     @commands.Cog.listener("on_message")
     async def on_message_listener(self, message: disnake.Message):
         if (
@@ -24,7 +24,7 @@ class InfrastructureReactions(commands.Cog):
 
         await message.add_reaction("🕒")
         await message.add_reaction("✅")
-    '''
+    """
 
     async def cog_load(self):
         """

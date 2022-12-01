@@ -58,7 +58,7 @@ class AdminCommands(commands.Cog):
             embed=disnake.Embed(
                 color=disnake.Color.green(),
                 title="Успех",
-                description=f"Сервер {inter.guild.name} зарегистрирован как офицальная структура.",
+                description=f"Сервер {inter.guild.name} зарегистрирован как официальная структура.",
             ).add_field(
                 name="guild data",
                 value=f"""
@@ -86,7 +86,7 @@ class AdminCommands(commands.Cog):
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Ошибка",
-                    description="Сервер не зарегистрирован как офицальная структура.\n",
+                    description="Сервер не зарегистрирован как официальная структура.\n",
                 ),
                 ephemeral=True,
             )
@@ -129,7 +129,7 @@ class AdminCommands(commands.Cog):
             embed=disnake.Embed(
                 color=disnake.Color.green(),
                 title="Успех",
-                description=f"Сервер {inter.guild.name} зарегистрирован как офицальная структура.",
+                description=f"Сервер {inter.guild.name} зарегистрирован как официальная структура.",
             ).add_field(
                 name="guild data",
                 value=f"""
