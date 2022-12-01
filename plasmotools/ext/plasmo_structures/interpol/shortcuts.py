@@ -48,7 +48,7 @@ class FastInterpolPayouts(commands.Cog):
     )
     @commands.default_member_permissions(administrator=True)
     async def fast_fake_call_payout_button(
-            self, inter: ApplicationCommandInteraction, message: disnake.Message
+        self, inter: ApplicationCommandInteraction, message: disnake.Message
     ):
         await inter.response.defer(ephemeral=True)
         rank = None
@@ -97,7 +97,7 @@ class FastInterpolPayouts(commands.Cog):
     )
     @commands.default_member_permissions(administrator=True)
     async def event_payout_button(
-            self, inter: ApplicationCommandInteraction, message: disnake.Message
+        self, inter: ApplicationCommandInteraction, message: disnake.Message
     ):
         await inter.response.defer(ephemeral=True)
         rank = None
@@ -119,7 +119,10 @@ class FastInterpolPayouts(commands.Cog):
         message_text = message.content
         # find data in message_text via regex
 
-        finded_groups = re.findall(r"1[. ]*([\s\S]+)2[. ]*([0-9]{1,2}):([0-9]{2})[ ]*-[ ]*([0-9]{1,2}):([0-9]{2})", message_text)
+        finded_groups = re.findall(
+            r"1[. ]*([\s\S]+)2[. ]*([0-9]{1,2}):([0-9]{2})[ ]*-[ ]*([0-9]{1,2}):([0-9]{2})",
+            message_text,
+        )
         if len(finded_groups) == 0:
             await inter.send(
                 embed=disnake.Embed(
@@ -162,10 +165,12 @@ class FastInterpolPayouts(commands.Cog):
             return
 
         payout_amount = rank["event_10min_payout"] * (event_duration // 10)
-        await inter.send(f"Ивент `{event_title}`\nДлительность "
-                         f"**{event_duration} мин. ({start_hour}:{start_minute} - {end_hour}:{end_minute})**\n"
-                         f"Ранк **{rank['name']}**\n"
-                         f"Выплата **{payout_amount} = {rank['event_10min_payout']} * ({event_duration} / 10)**")
+        await inter.send(
+            f"Ивент `{event_title}`\nДлительность "
+            f"**{event_duration} мин. ({start_hour}:{start_minute} - {end_hour}:{end_minute})**\n"
+            f"Ранк **{rank['name']}**\n"
+            f"Выплата **{payout_amount} = {rank['event_10min_payout']} * ({event_duration} / 10)**"
+        )
 
         payouts_cog = self.bot.get_cog("Payouts")
         if payouts_cog is None:
