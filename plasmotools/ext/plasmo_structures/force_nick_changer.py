@@ -37,7 +37,7 @@ class ForceNickChanger(commands.Cog):
 
         if plasmo_member.display_name != after.display_name:
             await after.edit(
-                nick=after.display_name,
+                nick=plasmo_member.display_name,
                 reason="Nickname change in structures is not allowed",
             )
 
