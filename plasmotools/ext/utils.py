@@ -4,6 +4,7 @@ import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import tasks, commands
 
+from plasmotools import settings
 from plasmotools.utils.api.user import get_user_data
 
 logger = logging.getLogger(__name__)
@@ -53,10 +54,9 @@ class Utils(commands.Cog):
         self.bot = bot
 
     @commands.is_owner()
-    @commands.slash_command(name="say", dm_permission=False)
-    async def msg(self, inter: disnake.ApplicationCommandInteraction, text: str):
-        await inter.send("ok", ephemeral=True)
-        await inter.channel.send(text)
+    @commands.comman(name="say")
+    async def msg(self, ctx, *, text: str):
+        await ctx.channel.send(text)
 
     @commands.user_command(
         name="Get API Data",

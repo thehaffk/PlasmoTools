@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 bot.load_extensions("plasmotools/ext")
 asyncio.run(plasmo_structures.setup_database())
-asyncio.run(rrs.setup_database())
+asyncio.run(rrs.roles.setup_database())
+asyncio.run(rrs.actions.setup_database())
 asyncio.run(banker.setup_database())
 
 bot.run(settings.TOKEN)
