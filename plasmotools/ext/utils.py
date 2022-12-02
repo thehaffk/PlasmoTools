@@ -54,32 +54,9 @@ class Utils(commands.Cog):
         self.bot = bot
 
     @commands.is_owner()
-    @commands.slash_command(name="say", dm_permission=False)
-    async def msg(self, inter: disnake.ApplicationCommandInteraction, text: str):
-        await inter.send("ok", ephemeral=True)
-        await inter.channel.send(text)
-
-    @commands.is_owner()
-    @commands.slash_command(
-        name="say-to", dm_permission=False, guild_ids=[settings.DevServer.guild_id]
-    )
-    async def msg(
-        self, inter: disnake.ApplicationCommandInteraction, channel_id: str, text: str
-    ):
-        channel = self.bot.get_channel(int(channel_id))
-        await inter.send(channel.mention, ephemeral=True)
-        await channel.send(text)
-
-    @commands.is_owner()
-    @commands.command(
-        name="say-to", dm_permission=False, guild_ids=[settings.DevServer.guild_id]
-    )
-    async def msg(
-        self, ctx: disnake.ext.commands.Context, channel_id: str, *, text: str
-    ):
-        await ctx.message.delete()
-        channel = self.bot.get_channel(int(channel_id))
-        await channel.send(text)
+    @commands.comman(name="say")
+    async def msg(self, ctx, *, text: str):
+        await ctx.channel.send(text)
 
     @commands.user_command(
         name="Get API Data",
