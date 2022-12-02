@@ -36,7 +36,7 @@ class Payouts(commands.Cog):
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Ошибка",
-                    description="Сервер не зарегистриро структура.\n"
+                    description="Сервер не зарегистрирован как официальная структура.\n"
                     "Если вы считаете что это ошибка - обратитесь в "
                     f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
