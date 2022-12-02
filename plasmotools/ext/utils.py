@@ -54,7 +54,7 @@ class Utils(commands.Cog):
         self.bot = bot
 
     @commands.is_owner()
-    @commands.comman(name="say")
+    @commands.command(name="say")
     async def msg(self, ctx, *, text: str):
         await ctx.channel.send(text)
 
