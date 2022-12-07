@@ -1,5 +1,4 @@
 import logging
-from random import randint
 
 import disnake
 from disnake.ext import commands
@@ -92,12 +91,10 @@ class ErrorHandler(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: disnake.ext.commands.Context, error):
         if isinstance(error, disnake.ext.commands.errors.CommandNotFound):
-            if randint(1, 10) == 1:
-                await ctx.reply("https://imgur.com/tEe8LUQ")
-            else:
-                await ctx.message.add_reaction("😬")
+            await ctx.message.add_reaction("❓")
         else:
             logger.error(error)
+            await ctx.message.add_reaction("⚠")
             await ctx.send(
                 embed=disnake.Embed(
                     title="Error",
@@ -105,6 +102,7 @@ class ErrorHandler(commands.Cog):
                     f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
                     color=disnake.Color.red(),
                 ),
+                delete_after=10,
             )
             await self.bot.get_channel(settings.DevServer.errors_channel_id).send(
                 embed=disnake.Embed(
