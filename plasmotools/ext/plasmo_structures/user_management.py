@@ -197,6 +197,16 @@ class UserManagement(commands.Cog):
                 ephemeral=True,
             )
             return
+        if db_role.guild_discord_id != inter.guild.id:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Роль не приналежит этому серверу",
+                ),
+                ephemeral=True,
+            )
+            return
         await db_role.delete()
 
         await inter.send(
@@ -236,6 +246,16 @@ class UserManagement(commands.Cog):
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description="Роль не найдена в базе данных",
+                ),
+                ephemeral=True,
+            )
+            return
+        if db_role.guild_discord_id != inter.guild.id:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Роль не приналежит этому серверу",
                 ),
                 ephemeral=True,
             )
