@@ -197,6 +197,16 @@ class UserManagement(commands.Cog):
                 ephemeral=True,
             )
             return
+        if db_role.guild_discord_id != inter.guild.id:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Роль не приналежит этому серверу",
+                ),
+                ephemeral=True,
+            )
+            return
         await db_role.delete()
 
         await inter.send(
@@ -236,6 +246,16 @@ class UserManagement(commands.Cog):
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description="Роль не найдена в базе данных",
+                ),
+                ephemeral=True,
+            )
+            return
+        if db_role.guild_discord_id != inter.guild.id:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Роль не приналежит этому серверу",
                 ),
                 ephemeral=True,
             )
@@ -378,7 +398,7 @@ class UserManagement(commands.Cog):
                 structure_role,
                 reason=f"Hired "
                 f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]"
-                + (" | RRSNR" if rrs_cog is not None and rrs_cog is None else ""),
+                + (" | RRSNR" if rrs_cog is not None else ""),
             )
         except disnake.Forbidden:
             return await inter.send(
@@ -560,7 +580,7 @@ class UserManagement(commands.Cog):
                 structure_role,
                 reason=f"Fired "
                 f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]"
-                + (" | RRSNR" if rrs_cog is not None and rrs_cog is None else ""),
+                + (" | RRSNR" if rrs_cog is not None else ""),
             )
         except disnake.Forbidden:
             return await inter.send(

@@ -171,6 +171,16 @@ class Payouts(commands.Cog):
                 ephemeral=True,
             )
             return
+        if db_project.guild_discord_id != inter.guild.id:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Проект не приналежит этому серверу",
+                ),
+                ephemeral=True,
+            )
+            return
         await db_project.edit(
             name=name,
             is_active=is_active,
@@ -212,6 +222,16 @@ class Payouts(commands.Cog):
                     title="Ошибка",
                     description="Проект не найден",
                 ),
+            )
+            return
+        if db_project.guild_discord_id != inter.guild.id:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Проект не приналежит этому серверу",
+                ),
+                ephemeral=True,
             )
             return
         await db_project.delete()
@@ -510,6 +530,15 @@ class Payouts(commands.Cog):
             db_project = await database.get_project(int(project))
             if db_project is None:
                 raise ValueError("Проект не найден")
+            if db_project.guild_discord_id != inter.guild.id:
+                await inter.edit_original_message(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Ошибка",
+                        description="Проект не приналежит этому серверу",
+                    ),
+                )
+                return
         except ValueError:
             await inter.edit_original_message(
                 embed=disnake.Embed(
