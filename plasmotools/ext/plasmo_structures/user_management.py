@@ -378,7 +378,7 @@ class UserManagement(commands.Cog):
                 structure_role,
                 reason=f"Hired "
                 f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]"
-                + (" | RRSNR" if rrs_cog is not None and rrs_cog is None else ""),
+                + (" | RRSNR" if rrs_cog is not None else ""),
             )
         except disnake.Forbidden:
             return await inter.send(
@@ -560,7 +560,7 @@ class UserManagement(commands.Cog):
                 structure_role,
                 reason=f"Fired "
                 f"[by {inter.author.display_name} / {inter.author} / {inter.author.id}]"
-                + (" | RRSNR" if rrs_cog is not None and rrs_cog is None else ""),
+                + (" | RRSNR" if rrs_cog is not None else ""),
             )
         except disnake.Forbidden:
             return await inter.send(

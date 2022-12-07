@@ -435,7 +435,7 @@ class RRSCore(commands.Cog):
                             f"`Guild:` {member.guild.name} ||{member.guild.id}||",
                         )
                     )
-                    continue
+                    return False
 
                 else:
                     if role_is_added:
