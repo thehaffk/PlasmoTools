@@ -23,6 +23,7 @@ async def get_user_data(
         params["discord_id"] = discord_id
     if plasmo_id is not None:
         params["plasmo_id"] = plasmo_id
+    params["fields"] = "stats,warns,teams"
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(
