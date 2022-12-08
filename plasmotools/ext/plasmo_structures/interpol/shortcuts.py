@@ -85,7 +85,7 @@ class FastInterpolPayouts(commands.Cog):
             user=message.author,
             amount=rank["fake_call_payout"],
             project=await database.projects.get_project(fake_call_project_id),
-            message=f"Выплата за ложный вызов / {rank['name']}",
+            message=f"За [ложный вызов]({message.jump_url}) / {rank['name']}",
         )
         if result:
             await message.add_reaction("✅")
@@ -153,23 +153,26 @@ class FastInterpolPayouts(commands.Cog):
                 ephemeral=True,
             )
             return
-        elif event_duration > 150:
+        elif event_duration > 120:
             await inter.send(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Ошибка",
-                    description="Многовато минут, такое вручную выплачивайте ⚠",
+                    description=f"Многовато минут, такое вручную выплачивайте ⚠\n"
+                    f"Лимит - 120 минут. Если что, выплата должна быть такой:\n"
+                    f"**{rank['event_10min_payout'] * ((event_duration + 3) // 10)} "
+                    f"= {rank['event_10min_payout']} * (({event_duration} + 3)/ 10)**",
                 ),
                 ephemeral=True,
             )
             return
 
-        payout_amount = rank["event_10min_payout"] * (event_duration // 10)
+        payout_amount = rank["event_10min_payout"] * ((event_duration + 3) // 10)
         await inter.send(
             f"Ивент `{event_title}`\nДлительность "
             f"**{event_duration} мин. ({start_hour}:{start_minute} - {end_hour}:{end_minute})**\n"
             f"Ранк **{rank['name']}**\n"
-            f"Выплата **{payout_amount} = {rank['event_10min_payout']} * ({event_duration} / 10)**"
+            f"Выплата **{payout_amount} = {rank['event_10min_payout']} * (({event_duration} + 3)/ 10)**"
         )
 
         payouts_cog = self.bot.get_cog("Payouts")
@@ -190,7 +193,7 @@ class FastInterpolPayouts(commands.Cog):
             user=message.author,
             amount=payout_amount,
             project=await database.projects.get_project(events_project_id),
-            message=f"Выплата за ивент '{event_title}' ({event_duration} мин.) / {rank['name']}",
+            message=f"За ивент '{event_title}' ({event_duration} мин.) / {rank['name']}",
         )
         if result:
             await message.add_reaction("✅")
