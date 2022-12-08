@@ -4,7 +4,6 @@ import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import tasks, commands
 
-from plasmotools import settings
 from plasmotools.utils.api.user import get_user_data
 
 logger = logging.getLogger(__name__)
@@ -54,7 +53,7 @@ class Utils(commands.Cog):
         self.bot = bot
 
     @commands.is_owner()
-    @commands.comman(name="say")
+    @commands.command(name="say")
     async def msg(self, ctx, *, text: str):
         await ctx.channel.send(text)
 
