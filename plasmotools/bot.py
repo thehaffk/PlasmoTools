@@ -9,7 +9,7 @@ from plasmotools import settings
 logger = logging.getLogger()
 
 
-class PlasmoSync(commands.Bot):
+class PlasmoTools(commands.Bot):
     """
     Base bot instance.
     """
@@ -18,7 +18,7 @@ class PlasmoSync(commands.Bot):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def create(cls) -> "PlasmoSync":
+    def create(cls) -> "PlasmoTools":
         """Create and return an instance of a Bot"""
         _intents = disnake.Intents.none()
         _intents.members = True
@@ -41,17 +41,18 @@ class PlasmoSync(commands.Bot):
             command_prefix=commands.when_mentioned,
             allowed_mentions=disnake.AllowedMentions(everyone=False),
             help_command=None,
-            description="PlasmoSync",
+            description="Plasmo Tools",
             case_insensitive=True,
         )
 
     async def on_ready(self):
+        logger.info("Plasmo Tools %s is ready", settings.__version__)
         logger.info(f"Logged in as {self.user}")
         log_channel = self.get_channel(settings.DevServer.bot_logs_channel_id)
         await self.change_presence(
             activity=disnake.Activity(
                 type=disnake.ActivityType.playing,
-                name=f"Plasmo Tools роботаем",
+                name=f"Plasmo Tools роботаем | {settings.__version__}",
             )
         )
         await log_channel.send(

@@ -4,7 +4,6 @@ import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import tasks, commands
 
-from plasmotools import settings
 from plasmotools.utils.api.user import get_user_data
 
 logger = logging.getLogger(__name__)

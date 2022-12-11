@@ -104,6 +104,8 @@ class ErrorHandler(commands.Cog):
                 ),
                 delete_after=10,
             )
+            if isinstance(error, disnake.ext.commands.errors.NotOwner):
+                return
             await self.bot.get_channel(settings.DevServer.errors_channel_id).send(
                 embed=disnake.Embed(
                     title="⚠⚠⚠",

@@ -3,6 +3,7 @@ Cog-file for listener, detects bans, unbans, role changes, cheats, deaths, fwarn
 """
 import asyncio
 import logging
+import random
 import re
 
 import disnake
@@ -13,6 +14,23 @@ from plasmotools import settings
 from plasmotools.utils.database.rrs import get_action, get_rrs_roles
 
 logger = logging.getLogger(__name__)
+
+logo_emojis = [
+    "👍",
+    "😭",
+    "🤨",
+    "<:aRolf:952482170881048616>",
+    "<:KOMAP:995730375504568361>",
+    "4️⃣",
+    "❤️",
+    "🇿",
+    "😎",
+    "🍆",
+    "📸🤡",
+    "☠️",
+    "🇷🇺",
+    "🇺🇦",
+]
 
 
 # todo: check audit log for bans, unbans, role changes
@@ -36,10 +54,6 @@ class PlasmoLogger(commands.Cog):
             after.guild.id != settings.PlasmoRPGuild.guild_id
         ) or before.roles == after.roles:
             return False
-
-        log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
-            settings.LogsServer.role_logs_channel_id
-        )
 
         added_roles = [role for role in after.roles if role not in before.roles]
         removed_roles = [role for role in before.roles if role not in after.roles]
@@ -145,14 +159,12 @@ class PlasmoLogger(commands.Cog):
         if guild is not None and guild.id != settings.PlasmoRPGuild.guild_id:
             return False
 
-        # TODO: Rewrite with plasmo.py
-
         await asyncio.sleep(10)  # Wait for plasmo API to update
 
         for tries in range(10):
             async with ClientSession() as session:
                 async with session.get(
-                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=stats,teams",
+                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=stats,teams,warns",
                 ) as response:
                     try:
                         user_data = (await response.json())["data"]
@@ -169,12 +181,21 @@ class PlasmoLogger(commands.Cog):
         )
 
         reason: str = user_data.get("ban_reason", "Не указана")
-        nickname: str = user_data.get("nick", None)
-        if nickname is None:
+        nickname: str = user_data.get("nick", "")
+        if nickname == "":
             return await log_channel.send(f"{member.mention} got banned")
 
         ban_time: int = user_data.get("ban_time", 0)
         user_stats: dict = user_data.get("stats", {})
+
+        warns_text = ""
+        if reason == "За красные варны":
+            warns = user_data.get("warns", [])
+            warns = [warn for warn in warns if not warn["revoked"] and warn["force"]]
+            if warns:
+                warns_text = f"**Список красных варнов:\n**"
+            for warn in warns:
+                warns_text += f"⚠ Выдал **{warn['helper']}** <t:{warn['date']}:R>\n {warn['message']}\n"
 
         log_embed = disnake.Embed(
             title=f"⚡ {nickname} получил бан",
@@ -185,12 +206,15 @@ class PlasmoLogger(commands.Cog):
             if 'rows' in reason else ''}
             Профиль [Plasmo](https://rp.plo.su/u/{nickname}) | {member.mention}
             
+            {warns_text.strip()}
             {('Получил бан: <t:' + str(ban_time) + ':R>') if ban_time > 0 else ''}
             Наиграно за текущий сезон: {user_stats.get('all', 0) / 3600:.2f} ч.
-            Состоит в общинах: {', '.join([('[' + team['name'] + '](https://rp.plo.su/t/' + team['url'] + ')')
-                                           for team in user_data.get('teams', [])])}
+            {'Состоит в общинах:' if user_data.get('teams') else ''} {', '.join([('[' + team['name'] 
+                                                                                  + '](https://rp.plo.su/t/' 
+                                                                                  + team['url'] + ')')
+                        for team in user_data.get('teams', [])])}
             
-            Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
+            {random.choice(logo_emojis)} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
                         """,
         ).set_thumbnail(url="https://rp.plo.su/avatar/" + nickname)
 

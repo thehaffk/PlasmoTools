@@ -10,12 +10,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-__version__ = "0.0.5"
 
 DEBUG = bool(os.getenv("BOT_DEBUG", 0))
 TOKEN = os.getenv("TOKEN")
 ADMIN_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
 DATABASE_PATH = "./data.sqlite"
+
+__version__ = "1.5.5" + " BETA ⚠" if DEBUG else ""
+# todo: update version?
 
 
 class LogsServer:
