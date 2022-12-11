@@ -19,6 +19,7 @@ DATABASE_PATH = "./data.sqlite"
 __version__ = "1.5.5" + " BETA ⚠" if DEBUG else ""
 # todo: update version?
 
+
 class LogsServer:
     guild_id = 828683007635488809
     invite_url = "https://discord.gg/XYS43z7vj2"

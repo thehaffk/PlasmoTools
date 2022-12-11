@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 # todo: force role sync
 # todo: scheduled sync
+# todo: check for player role
 
 # RRS default scenario:
 # listen to role changes at structure
@@ -139,9 +140,9 @@ class RRSCore(commands.Cog):
                         == [role for role in before.roles if role not in after.roles]
                     )
                 ):
-                    return await self.process_structure_role_update(entry)
+                    return await self.on_structure_role_update(entry)
 
-    async def process_structure_role_update(
+    async def on_structure_role_update(
         self,
         audit_entry: disnake.AuditLogEntry,
     ):

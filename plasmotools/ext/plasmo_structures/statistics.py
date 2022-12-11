@@ -66,9 +66,7 @@ class StructureStatictics(commands.Cog):
         for user_stats in sorted(users, key=lambda _: _[-1], reverse=True):
             stats_text += f"{user_stats[1]} - {user_stats[2]} - {user_stats[3]} - {user_stats[0].mention}\n"
 
-        stats_embed.add_field(
-            name="Наиграно часов", value=stats_text
-        )
+        stats_embed.add_field(name="Наиграно часов", value=stats_text)
         await inter.edit_original_message(
             embed=stats_embed.set_footer(
                 text="Отсортировано по количеству часов за неделю"
