@@ -52,9 +52,9 @@ class Emojis:
 
 
 word_emojis = {
-"симпл": Emojis.s1mple,
-"ДИАНА": Emojis.diana,
-"помидоры": Emojis.ru_flag,
+    "симпл": Emojis.s1mple,
+    "ДИАНА": Emojis.diana,
+    "помидоры": Emojis.ru_flag,
 }
 
 
@@ -208,4 +208,3 @@ culture_guild = PlasmoStructureGuild(
     public_chat_channel_id=841395461222432848,
 )
 structure_guilds.append(culture_guild)
-

@@ -15,11 +15,14 @@ class RRSCommands(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-    @commands.slash_command(
-        name="rrs-sync"
-    )
+    @commands.slash_command(name="rrs-sync")
     @commands.is_owner()
-    async def rrs_sync_command(self, interaction: ApplicationCommandInteraction, user: disnake.User=None, user_id: str=None):
+    async def rrs_sync_command(
+        self,
+        interaction: ApplicationCommandInteraction,
+        user: disnake.User = None,
+        user_id: str = None,
+    ):
         await interaction.response.defer(ephemeral=True)
         if user_id is not None:
             user = await self.bot.fetch_user(int(user_id))
@@ -30,13 +33,13 @@ class RRSCommands(commands.Cog):
         added_roles_ids, removed_roles_ids = await rrs_core.sync_user(user)
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         added_roles = [plasmo_guild.get_role(role_id) for role_id in added_roles_ids]
-        removed_roles = [plasmo_guild.get_role(role_id) for role_id in removed_roles_ids]
+        removed_roles = [
+            plasmo_guild.get_role(role_id) for role_id in removed_roles_ids
+        ]
         await interaction.edit_original_message(
             f"Added roles: {', '.join([str(role) for role in added_roles])}\n"
             f"Removed roles: {', '.join([str(role) for role in removed_roles])}\n"
         )
-
-
 
     @commands.slash_command(
         name="rrs-list",

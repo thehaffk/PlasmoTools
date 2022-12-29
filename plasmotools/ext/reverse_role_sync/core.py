@@ -163,8 +163,10 @@ class RRSCore(commands.Cog):
                     int(str(audit_entry.reason).split("/")[-1].replace("]", "").strip())
                 )
             except ValueError:
-                return logger.error(f"Unexpected error while parsing reason: {audit_entry.reason}, "
-                                    f"{audit_entry.__dict__}")
+                return logger.error(
+                    f"Unexpected error while parsing reason: {audit_entry.reason}, "
+                    f"{audit_entry.__dict__}"
+                )
 
         for role in audit_entry.changes.after.roles:
             return await self.process_structure_role_change(
@@ -518,26 +520,34 @@ class RRSCore(commands.Cog):
             )
             return True
 
-    async def sync_user(self, user: Union[disnake.Member, disnake.User]) -> Tuple[Tuple, Tuple]:
+    async def sync_user(
+        self, user: Union[disnake.Member, disnake.User]
+    ) -> Tuple[Tuple, Tuple]:
         """
         Syncs user roles with RRS rules
         :param user: User to sync
         :return: Two tuples: (roles added, roles removed)
         """
-        rrs_rules = [rule for rule in await rrs_database.get_rrs_roles() if not rule.disabled]
+        rrs_rules = [
+            rule for rule in await rrs_database.get_rrs_roles() if not rule.disabled
+        ]
 
         neccessary_plasmo_roles = ()
         unwanted_plasmo_roles = ()
         for rrs_rule in rrs_rules:
             structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
             if not structure_guild:
-                logger.warning("Unable to find guild with id %s", rrs_rule.structure_guild_id)
+                logger.warning(
+                    "Unable to find guild with id %s", rrs_rule.structure_guild_id
+                )
                 await rrs_rule.edit(disabled=True)
                 continue
 
             structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
             if not structure_role:
-                logger.warning("Unable to find role with id %s", rrs_rule.structure_role_id)
+                logger.warning(
+                    "Unable to find role with id %s", rrs_rule.structure_role_id
+                )
                 await rrs_rule.edit(disabled=True)
                 continue
 
@@ -594,6 +604,7 @@ class RRSCore(commands.Cog):
             return
         for user in plasmo_guild.members:
             await self.sync_user(user)
+
     async def cog_load(self):
         logger.info("%s Ready", __name__)
 

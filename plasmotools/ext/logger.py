@@ -52,15 +52,14 @@ class PlasmoLogger(commands.Cog):
         if member.guild.id != settings.PlasmoRPGuild.guild_id:
             return
 
-
         logs_guild = self.bot.get_guild(settings.LogsServer.guild_id)
         log_channel = logs_guild.get_channel(settings.LogsServer.leave_logs_channel_id)
         await log_channel.send(
             embed=disnake.Embed(
                 title="PRP User Leave log",
                 description=f"**Member:** {member.display_name}{member.mention}\n"
-            f"**Roles:** {', '.join([role.name for role in member.roles[1:]])}",
-        )
+                f"**Roles:** {', '.join([role.name for role in member.roles[1:]])}",
+            )
         )
 
     @commands.Cog.listener()
@@ -103,7 +102,6 @@ class PlasmoLogger(commands.Cog):
         if role.id not in settings.PlasmoRPGuild.monitored_roles:
             return
 
-
         description_text = (
             f" [u/{user.display_name}](https://rp.plo.su/u/{user.display_name}) "
             f"| {user.mention}"
@@ -114,10 +112,10 @@ class PlasmoLogger(commands.Cog):
         if executed_by_rrs:
             if audit_entry.reason.endswith("RRS | Automated Sync"):
                 description_text += (
-                        "**"
-                        + ("Выдано " if is_role_added else "Снято ")
-                        + f"через Plasmo Tools**\n"
-                          f"Причина: Автоматическая синхронизация с дискордами структур (RRS)\n"
+                    "**"
+                    + ("Выдано " if is_role_added else "Снято ")
+                    + f"через Plasmo Tools**\n"
+                    f"Причина: Автоматическая синхронизация с дискордами структур (RRS)\n"
                 )
             if "RRSID" in audit_entry.reason:
                 rrs_entry_id = int(
@@ -126,15 +124,17 @@ class PlasmoLogger(commands.Cog):
                 rrs_entry = await get_action(rrs_entry_id)
 
                 description_text += (
-                        "**"
-                        + ("Выдано " if is_role_added else "Снято ")
-                        + f"через Plasmo Tools** (ID: {rrs_entry.id})\n"
+                    "**"
+                    + ("Выдано " if is_role_added else "Снято ")
+                    + f"через Plasmo Tools** (ID: {rrs_entry.id})\n"
                 )
 
                 rrs_rules = await get_rrs_roles(
                     structure_role_id=rrs_entry.structure_role_id
                 )
-                rrs_rule = [rule for rule in rrs_rules if rule.plasmo_role_id == role.id][0]
+                rrs_rule = [
+                    rule for rule in rrs_rules if rule.plasmo_role_id == role.id
+                ][0]
                 structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
                 structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
 
@@ -147,12 +147,12 @@ class PlasmoLogger(commands.Cog):
         else:
             operation_author = audit_entry.user
             description_text += (
-                    "**"
-                    + ("Выдал: " if is_role_added else "Снял: ")
-                    + "**"
-                    + operation_author.display_name
-                    + " "
-                    + operation_author.mention
+                "**"
+                + ("Выдал: " if is_role_added else "Снял: ")
+                + "**"
+                + operation_author.display_name
+                + " "
+                + operation_author.mention
             )
 
         description_text += f"\n\n|||"
