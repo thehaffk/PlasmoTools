@@ -112,6 +112,14 @@ class PlasmoRPGuild:
     logs_channel_id = 959332068993679400
 
 
+disallowed_to_rrs_roles = [
+    PlasmoRPGuild.player_role_id,
+    PlasmoRPGuild.helper_role_id,
+    PlasmoRPGuild.fusion_role_id,
+    PlasmoRPGuild.president_role_id,
+    PlasmoRPGuild.admin_role_id,
+]
+
 api_roles = {
     "admin": PlasmoRPGuild.admin_role_id,
     "president": PlasmoRPGuild.president_role_id,

@@ -110,12 +110,17 @@ class PlasmoLogger(commands.Cog):
 
         executed_by_rrs = str(audit_entry.reason).startswith("RRS")
         if executed_by_rrs:
-            if audit_entry.reason.endswith("RRS | Automated Sync"):
+            if "Automated Sync" in audit_entry.reason:
+                sync_reason_raw = re.findall(
+                    r"RRS | Automated Sync | ([\s\S]+)", audit_entry.reason
+                )
+                sync_reason = sync_reason_raw[0] if sync_reason_raw else "Не указана"
                 description_text += (
                     "**"
                     + ("Выдано " if is_role_added else "Снято ")
                     + f"через Plasmo Tools**\n"
-                    f"Причина: Автоматическая синхронизация с дискордами структур (RRS)\n"
+                    f"Автоматическая синхронизация с дискордами структур (RRS)\n\n"
+                    f"**Причина:** {sync_reason}"
                 )
             if "RRSID" in audit_entry.reason:
                 rrs_entry_id = int(
