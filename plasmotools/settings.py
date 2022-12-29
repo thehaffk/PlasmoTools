@@ -45,6 +45,17 @@ class Emojis:
     offline = " <:offline:1006310760898629702>"
     site_offline = "<:site_offline:1006321494575550514>"
     site_online = "<:site_online:1006320686693879929>"
+    s1mple = "<:S1mple:1048173667781193738>"
+    komaru = "<:KOMAP:995730375504568361>"
+    diana = "<:DIANA:1053604789147160656>"
+    ru_flag = "🇷🇺"
+
+
+word_emojis = {
+"симпл": Emojis.s1mple,
+"ДИАНА": Emojis.diana,
+"помидоры": Emojis.ru_flag,
+}
 
 
 class DevServer:
@@ -105,11 +116,11 @@ api_roles = {
     "president": PlasmoRPGuild.president_role_id,
     "supa_helper": PlasmoRPGuild.mko_head_role_id,
     "soviet-helper": PlasmoRPGuild.mko_helper_role_id,
-    "helper": PlasmoRPGuild.interpol_role_id,
+    "interpol": PlasmoRPGuild.interpol_role_id,
     "banker": PlasmoRPGuild.banker_role_id,
     "keeper": PlasmoRPGuild.keeper_role_id,
     "player": PlasmoRPGuild.player_role_id,
-    "support": PlasmoRPGuild.fusion_role_id,
+    "fusion": PlasmoRPGuild.fusion_role_id,
 }
 
 
@@ -197,3 +208,4 @@ culture_guild = PlasmoStructureGuild(
     public_chat_channel_id=841395461222432848,
 )
 structure_guilds.append(culture_guild)
+

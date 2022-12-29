@@ -1,8 +1,11 @@
+import asyncio
 import logging
 from random import choice, randint
 
 import disnake
 from disnake.ext import tasks, commands
+
+from plasmotools import settings
 
 logger = logging.getLogger(__name__)
 
@@ -39,19 +42,30 @@ class Fun(commands.Cog):
         if message.content == self.bot.user.mention:
             try:
                 if message.author.id in self.bot.owner_ids:
-                    await message.add_reaction("✅")
-                elif randint(1, 10) == 1:
+                    await message.add_reaction("<:KOMAP:995730375504568361>")
+                else:
+                    await message.add_reaction("😡")
+
+                if randint(1, 10) == 1:
                     await message.reply(
                         "https://tenor.com/view/discord-komaru-gif-26032653"
                     )
-                else:
-                    await message.add_reaction("😡")
             except disnake.Forbidden:
                 pass
-            return
+        elif self.bot.user.id in [user.id for user in message.mentions]:
+            async with message.channel.typing():
+                await asyncio.sleep(1)
+                if randint(1, 1000) == 1:
+                    await message.reply(
+                        "пошел нахуй"
+                    )
         if " комар " in (" " + message.content + " ").lower():
             if randint(1, 10) == 1:
                 await message.channel.send(content=choice(komaru_gifs))
+        if randint(0, 1) == 1:
+            for word in settings.word_emojis:
+                if word == message.content:
+                    await message.add_reaction(settings.word_emojis[word])
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
