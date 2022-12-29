@@ -587,6 +587,13 @@ class RRSCore(commands.Cog):
 
         return added_plasmo_roles, removed_plasmo_roles
 
+    async def sync_all_players(self):
+        plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
+        if not plasmo_guild:
+            logger.critical("Unable to connect to Plasmo Guild")
+            return
+        for user in plasmo_guild.members:
+            await self.sync_user(user)
     async def cog_load(self):
         logger.info("%s Ready", __name__)
 
