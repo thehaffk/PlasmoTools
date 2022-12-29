@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import List
+from typing import List, Tuple, Union
 
 import disnake
 from disnake.ext import tasks, commands
@@ -517,6 +517,74 @@ class RRSCore(commands.Cog):
                 )
             )
             return True
+
+    async def sync_user(self, user: Union[disnake.Member, disnake.User]) -> Tuple[Tuple, Tuple]:
+        """
+        Syncs user roles with RRS rules
+        :param user: User to sync
+        :return: Two tuples: (roles added, roles removed)
+        """
+        rrs_rules = [rule for rule in await rrs_database.get_rrs_roles() if not rule.disabled]
+
+        neccessary_plasmo_roles = tuple()
+        unwanted_plasmo_roles = tuple()
+        removed_plasmo_roles = tuple()
+        added_plasmo_roles = tuple()
+        for rrs_rule in rrs_rules:
+            structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
+            if not structure_guild:
+                logger.warning("Unable to find guild with id %s", rrs_rule.structure_guild_id)
+                await rrs_rule.edit(disabled=True)
+                continue
+
+            structure_user = structure_guild.get_member(user.id)
+            if not structure_user:
+                continue
+
+            structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
+            if not structure_role:
+                logger.warning("Unable to find role with id %s", rrs_rule.structure_role_id)
+                await rrs_rule.edit(disabled=True)
+                continue
+
+            if structure_role in structure_user.roles:
+                neccessary_plasmo_roles += rrs_rule.plasmo_role_id
+            else:
+                unwanted_plasmo_roles += rrs_rule.plasmo_role_id
+
+        plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
+        if not plasmo_guild:
+            logger.critical("Unable to connect to Plasmo Guild")
+            return (), ()
+
+        plasmo_member = plasmo_guild.get_member(user.id)
+        if not plasmo_member:
+            return (), ()
+
+        for role in neccessary_plasmo_roles:
+            if role not in plasmo_member.roles:
+                added_plasmo_roles += role
+
+        for role in unwanted_plasmo_roles:
+            if role in plasmo_member.roles:
+                removed_plasmo_roles += role
+
+        try:
+            await plasmo_member.remove_roles(
+                *removed_plasmo_roles,
+                reason="RRS | Sync",
+                atomic=False,
+            )
+            await plasmo_member.add_roles(
+                *added_plasmo_roles,
+                reason="RRS | Sync",
+                atomic=False,
+            )
+        except disnake.Forbidden:
+            logger.warning("Unable to sync user %s", user.id)
+            return (), ()
+
+        return added_plasmo_roles, removed_plasmo_roles
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
