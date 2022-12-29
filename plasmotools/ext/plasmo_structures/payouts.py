@@ -287,7 +287,10 @@ class Payouts(commands.Cog):
         amount: int,
         project: database.Project,
         message: str,
+        transaction_message: str = None,
     ) -> bool:
+        if transaction_message is None:
+            transaction_message = message
         guild = await database.get_guild(interaction.guild.id)
         if guild is None:
             await interaction.edit_original_message(
@@ -418,7 +421,7 @@ class Payouts(commands.Cog):
             from_card=from_card,
             to_card=user_card,
             amount=amount,
-            message=message,
+            message=transaction_message,
         )
         if not status:
             await interaction.edit_original_message(
@@ -445,6 +448,7 @@ class Payouts(commands.Cog):
         )
         if message != "":
             embed.add_field(name="Комментарий", value=message)
+            embed.add_field(name="Комментарий к переводу", value=transaction_message)
 
         async with ClientSession() as session:
             webhook = disnake.Webhook.from_url(project.webhook_url, session=session)
