@@ -103,14 +103,6 @@ class PlasmoLogger(commands.Cog):
         if role.id not in settings.PlasmoRPGuild.monitored_roles:
             return
 
-        executed_by_rrs = str(audit_entry.reason).startswith("RRS")
-        if executed_by_rrs:
-            rrs_entry_id = int(
-                re.findall(r"RRS / \w* / RRSID: (\d+)", audit_entry.reason)[0]
-            )
-            rrs_entry = await get_action(rrs_entry_id)
-        else:
-            operation_author = audit_entry.user
 
         description_text = (
             f" [u/{user.display_name}](https://rp.plo.su/u/{user.display_name}) "
@@ -118,11 +110,17 @@ class PlasmoLogger(commands.Cog):
         )
         description_text += "\n\n"
 
+        executed_by_rrs = str(audit_entry.reason).startswith("RRS")
         if executed_by_rrs:
+            rrs_entry_id = int(
+                re.findall(r"RRS / \w* / RRSID: (\d+)", audit_entry.reason)[0]
+            )
+            rrs_entry = await get_action(rrs_entry_id)
+
             description_text += (
-                "**"
-                + ("Выдано " if is_role_added else "Снято ")
-                + f"через Plasmo Tools** (ID: {rrs_entry.id})\n"
+                    "**"
+                    + ("Выдано " if is_role_added else "Снято ")
+                    + f"через Plasmo Tools** (ID: {rrs_entry.id})\n"
             )
 
             rrs_rules = await get_rrs_roles(
@@ -139,14 +137,16 @@ class PlasmoLogger(commands.Cog):
                 f"**Одобрил:** <@{rrs_entry.approved_by_user_id}>"
             )
         else:
+            operation_author = audit_entry.user
             description_text += (
-                "**"
-                + ("Выдал: " if is_role_added else "Снял: ")
-                + "**"
-                + operation_author.display_name
-                + " "
-                + operation_author.mention
+                    "**"
+                    + ("Выдал: " if is_role_added else "Снял: ")
+                    + "**"
+                    + operation_author.display_name
+                    + " "
+                    + operation_author.mention
             )
+
         description_text += f"\n\n|||"
         description_text += "**Роли после изменения:** " + ", ".join(
             [role.name for role in user.roles[1:]]

@@ -57,14 +57,17 @@ class RRSCommands(commands.Cog):
                     raise RuntimeError("Plasmo guild not found")
                 else:
                     plasmo_role = plasmo_guild.get_role(entry.plasmo_role_id)
+                if not structure_role or not plasmo_role:
+                    await entry.edit(disabled=True)
                 roles_text += (
-                    f"**{entry.id}.** {structure_role} **->** {plasmo_role} **|** {len(structure_role.members)} "
-                    f"{'**- ⚠ Отключено**' if entry.disabled else ''}\n"
+                    f"**{entry.id}.** {structure_role} **->** {plasmo_role} **|** {len(structure_role.members) if structure_role else 'role not found'} "
+                    f"{'** Disabled**' if entry.disabled else ''}\n"
                 ) + (
                     f"SRID: {structure_role.id}\n"
                     if inter.guild_id != settings.DevServer.guild_id
                     else ""
                 )
+
             rrs_embed.add_field(name=guild.name, value=roles_text, inline=False)
 
         await inter.send(embed=rrs_embed, ephemeral=True)
