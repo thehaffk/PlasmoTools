@@ -537,14 +537,15 @@ class RRSCore(commands.Cog):
                 await rrs_rule.edit(disabled=True)
                 continue
 
-            structure_user = structure_guild.get_member(user.id)
-            if not structure_user:
-                continue
-
             structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
             if not structure_role:
                 logger.warning("Unable to find role with id %s", rrs_rule.structure_role_id)
                 await rrs_rule.edit(disabled=True)
+                continue
+
+            structure_user = structure_guild.get_member(user.id)
+            if not structure_user:
+                unwanted_plasmo_roles += rrs_rule.plasmo_role_id
                 continue
 
             if structure_role in structure_user.roles:
