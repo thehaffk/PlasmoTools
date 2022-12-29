@@ -5,6 +5,7 @@ from disnake import ApplicationCommandInteraction
 from disnake.ext import tasks, commands
 
 from plasmotools import settings
+from plasmotools import utils
 from plasmotools.utils.database import rrs as rrs_database
 from plasmotools.utils.database.plasmo_structures import guilds as guilds_database
 
@@ -40,6 +41,40 @@ class RRSCommands(commands.Cog):
             f"Added roles: {', '.join([str(role) for role in added_roles])}\n"
             f"Removed roles: {', '.join([str(role) for role in removed_roles])}\n"
         )
+
+    @commands.slash_command(name="rrs-everyone-sync", guild_ids=[settings.DevServer.guild_id])
+    @commands.is_owner()
+    async def rrs_everyone_sync_command(self, inter: ApplicationCommandInteraction):
+        await inter.response.defer(ephemeral=True)
+
+        status_embed = disnake.Embed(
+            title=f"Синхронизация всех пользователей через RRS",
+            color=disnake.Color.dark_green(),
+        )
+        plasmo_members = self.bot.get_guild(settings.PlasmoRPGuild.guild_id).members
+
+        rrs_core = self.bot.get_cog("RRSCore")
+
+        lazy_update_members_count = len(plasmo_members) // 10
+        for counter, member in enumerate(plasmo_members):
+            status_embed.clear_fields()
+            await rrs_core.sync_user(member)
+            status_embed.add_field(
+                        name=f"Прогресc",
+                        value=utils.build_progressbar(counter + 1, len(plasmo_members)),
+                    )
+
+            if counter % lazy_update_members_count == 0:
+                await inter.edit_original_message(embed=status_embed)
+            continue
+
+        status_embed.clear_fields()
+        status_embed.add_field(
+            name=f"Синхронизировано пользователей: {len(plasmo_members)}/{len(plasmo_members)}",
+            value=utils.build_progressbar(1, 1),
+            inline=False,
+        )
+        await inter.edit_original_message(embed=status_embed)
 
     @commands.slash_command(
         name="rrs-list",
