@@ -124,7 +124,7 @@ api_roles = {
 }
 
 
-class BACGuild:  # TODO: Rename BAC(Big Appeal Court) to GCA(Grand Court of Appeal)
+class GCAGuild:
     """
     Config for Grand Court of Appeal discord guild
     """

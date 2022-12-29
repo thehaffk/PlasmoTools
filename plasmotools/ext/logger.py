@@ -304,12 +304,12 @@ class PlasmoLogger(commands.Cog):
                         color=disnake.Color.dark_red(),
                         description=f"Оспорить решение "
                         f"модерации или снять варн можно "
-                        f"только тут - {settings.BACGuild.invite_url}\n\n\n"
+                        f"только тут - {settings.GCAGuild.invite_url}\n\n\n"
                         f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
                     )
                 )
                 await warned_user.send(
-                    content=f"{settings.BACGuild.invite_url}",
+                    content=f"{settings.GCAGuild.invite_url}",
                 )
             except disnake.Forbidden as err:
                 logger.warning(err)
