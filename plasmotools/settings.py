@@ -28,6 +28,7 @@ class LogsServer:
     role_logs_channel_id = 935571360393068614
     messages_channel_id = 1008822105200132106
     rrs_logs_channel_id = 1033768782801420340
+    leave_logs_channel_id = 1057983888229670922
 
     roles_notifications_role_id = 1046524223377637416
 
