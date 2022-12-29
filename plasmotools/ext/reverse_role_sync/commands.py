@@ -6,6 +6,7 @@ from disnake.ext import tasks, commands
 
 from plasmotools import settings
 from plasmotools import utils
+from plasmotools.ext.reverse_role_sync.core import RRSCore
 from plasmotools.utils.database import rrs as rrs_database
 from plasmotools.utils.database.plasmo_structures import guilds as guilds_database
 
@@ -30,8 +31,8 @@ class RRSCommands(commands.Cog):
         if user is None:
             await interaction.edit_original_message("Please provide a user")
             return
-        rrs_core = self.bot.get_cog("RRSCore")
-        added_roles_ids, removed_roles_ids = await rrs_core.sync_user(user)
+        rrs_core: RRSCore = self.bot.get_cog("RRSCore")
+        added_roles_ids, removed_roles_ids = await rrs_core.sync_user(user, reason=f"Индивидуальная синхронизация")
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         added_roles = [plasmo_guild.get_role(role_id) for role_id in added_roles_ids]
         removed_roles = [
@@ -53,12 +54,12 @@ class RRSCommands(commands.Cog):
         )
         plasmo_members = self.bot.get_guild(settings.PlasmoRPGuild.guild_id).members
 
-        rrs_core = self.bot.get_cog("RRSCore")
+        rrs_core: RRSCore = self.bot.get_cog("RRSCore")
 
         lazy_update_members_count = len(plasmo_members) // 10
         for counter, member in enumerate(plasmo_members):
             status_embed.clear_fields()
-            await rrs_core.sync_user(member)
+            await rrs_core.sync_user(member, reason=f"Синхронизация всех игроков, вызвано {inter.author.display_name}")
             status_embed.add_field(
                         name=f"Прогресc",
                         value=utils.build_progressbar(counter + 1, len(plasmo_members)),

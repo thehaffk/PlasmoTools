@@ -521,11 +521,12 @@ class RRSCore(commands.Cog):
             return True
 
     async def sync_user(
-        self, user: Union[disnake.Member, disnake.User]
+        self, user: Union[disnake.Member, disnake.User], reason="Not specified"
     ) -> Tuple[Tuple, Tuple]:
         """
         Syncs user roles with RRS rules
         :param user: User to sync
+        :param reason: Reason for sync
         :return: Two tuples: (roles added, roles removed)
         """
         rrs_rules = [
@@ -535,6 +536,14 @@ class RRSCore(commands.Cog):
         neccessary_plasmo_roles = ()
         unwanted_plasmo_roles = ()
         for rrs_rule in rrs_rules:
+            if rrs_rule.plasmo_role_id in settings.disallowed_to_rrs_roles:
+                logger.warning(
+                    "It is not allowed to sync player role, deleting rrs rule %s",
+                    rrs_rule.id,
+                )
+                await rrs_rule.edit(disabled=True)
+                continue
+
             structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
             if not structure_guild:
                 logger.warning(
@@ -583,12 +592,12 @@ class RRSCore(commands.Cog):
         try:
             await plasmo_member.remove_roles(
                 *removed_plasmo_roles,
-                reason="RRS | Automated Sync",
+                reason="RRS | Automated Sync | " + reason,
                 atomic=False,
             )
             await plasmo_member.add_roles(
                 *added_plasmo_roles,
-                reason="RRS | Automated Sync",
+                reason="RRS | Automated Sync | " + reason,
                 atomic=False,
             )
         except disnake.Forbidden:
@@ -603,7 +612,7 @@ class RRSCore(commands.Cog):
             logger.critical("Unable to connect to Plasmo Guild")
             return
         for user in plasmo_guild.members:
-            await self.sync_user(user)
+            await self.sync_user(user, "Синхронизация всех игроков")
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
