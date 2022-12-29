@@ -573,12 +573,12 @@ class RRSCore(commands.Cog):
         try:
             await plasmo_member.remove_roles(
                 *removed_plasmo_roles,
-                reason="RRS | Sync",
+                reason="RRS | Automated Sync",
                 atomic=False,
             )
             await plasmo_member.add_roles(
                 *added_plasmo_roles,
-                reason="RRS | Sync",
+                reason="RRS | Automated Sync",
                 atomic=False,
             )
         except disnake.Forbidden:

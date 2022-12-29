@@ -112,30 +112,38 @@ class PlasmoLogger(commands.Cog):
 
         executed_by_rrs = str(audit_entry.reason).startswith("RRS")
         if executed_by_rrs:
-            rrs_entry_id = int(
-                re.findall(r"RRS / \w* / RRSID: (\d+)", audit_entry.reason)[0]
-            )
-            rrs_entry = await get_action(rrs_entry_id)
+            if audit_entry.reason.endswith("RRS | Automated Sync"):
+                description_text += (
+                        "**"
+                        + ("Выдано " if is_role_added else "Снято ")
+                        + f"через Plasmo Tools**\n"
+                          f"Причина: Автоматическая синхронизация с дискордами структур (RRS)\n"
+                )
+            if "RRSID" in audit_entry.reason:
+                rrs_entry_id = int(
+                    re.findall(r"RRS / \w* / RRSID: (\d+)", audit_entry.reason)[0]
+                )
+                rrs_entry = await get_action(rrs_entry_id)
 
-            description_text += (
-                    "**"
-                    + ("Выдано " if is_role_added else "Снято ")
-                    + f"через Plasmo Tools** (ID: {rrs_entry.id})\n"
-            )
+                description_text += (
+                        "**"
+                        + ("Выдано " if is_role_added else "Снято ")
+                        + f"через Plasmo Tools** (ID: {rrs_entry.id})\n"
+                )
 
-            rrs_rules = await get_rrs_roles(
-                structure_role_id=rrs_entry.structure_role_id
-            )
-            rrs_rule = [rule for rule in rrs_rules if rule.plasmo_role_id == role.id][0]
-            structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
-            structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
+                rrs_rules = await get_rrs_roles(
+                    structure_role_id=rrs_entry.structure_role_id
+                )
+                rrs_rule = [rule for rule in rrs_rules if rule.plasmo_role_id == role.id][0]
+                structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
+                structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
 
-            description_text += (
-                f"**Структура:** {structure_guild.name}\n"
-                f"**Роль:** {structure_role.name}\n"
-                f"**Автор:** <@{rrs_entry.author_id}>\n"
-                f"**Одобрил:** <@{rrs_entry.approved_by_user_id}>"
-            )
+                description_text += (
+                    f"**Структура:** {structure_guild.name}\n"
+                    f"**Роль:** {structure_role.name}\n"
+                    f"**Автор:** <@{rrs_entry.author_id}>\n"
+                    f"**Одобрил:** <@{rrs_entry.approved_by_user_id}>"
+                )
         else:
             operation_author = audit_entry.user
             description_text += (
