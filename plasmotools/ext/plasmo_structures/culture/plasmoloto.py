@@ -10,30 +10,32 @@ logger = logging.getLogger(__name__)
 
 
 def generate_ticket_page(ticket: int = 1) -> str:
-    ticket_text = ""
-    ticket_names = ["   Поле Альфа", "   Поле Бета", "   Поле Фокстрот"]
-    tickets = [[[randint(0, 99) for _ in range(5)] for _ in range(5)] for _ in range(3)]
+    ticket_text = f"**PLASMO LOTO TICKET {ticket}**\n"
+    ticket_names = ["      Поле Альфа", "      Поле Бета", "      Поле Фокстрот"]
+    tickets = [[[(number if len(number:=str(randint(1, 99))) == 2 else '0' + str(number)) for _ in range(5)] for _ in range(5)] for _ in range(3)]
     for ticket_page in tickets:
         page_text = "".join("".join(list(map(str, row))) for row in ticket_page)
-        while page_text.count("☽") < 2:
+        while page_text.count(" ☽") < 2:
             x, y = randint(0, 4), randint(0, 4)
-            if ticket_page[x][y] != "☽":
-                ticket_page[x][y] = "☽"
+            if ticket_page[x][y] != " ☽":
+                ticket_page[x][y] = " ☽"
             page_text = "".join("".join(list(map(str, row))) for row in ticket_page)
 
     for ticket_name, ticket_rows in zip(ticket_names, tickets):
-        ticket_text += """\n-=-=-ЛотоРП-=-=-\n"""
+        ticket_text += f"New book page```"
+        ticket_text += """\n  -=-=-ЛотоРП-=-=-\n"""
         ticket_text += ticket_name + "\n\n"
         for row in ticket_rows:
-            ticket_text += "  " + " ".join([str(i) for i in row]) + "\n"
+            ticket_text += "     " + " ".join([str(i) for i in row]) + "\n"
             ticket_text += "\n"
-        ticket_text += f"  -=Билет№{ticket}=-"
+        ticket_text += " " * (6 -  len(str(ticket))) + f"-=Билет№{ticket}=-"
+        ticket_text += "```"
     ticket_text += f"\n{ticket}\n"
     for ticket_rows in tickets:
         for row in ticket_rows:
             ticket_text += "".join(
                 ["=$A$" + str(number) + " " for number in row]
-            ).replace("☽", "100")
+            ).replace(" ☽", "100")
             ticket_text += "\n"
         ticket_text += "\n"
     return ticket_text
@@ -54,7 +56,7 @@ class LotoView(disnake.ui.View):
     ):
         self.ticket += 1
         await interaction.response.edit_message(
-            content="```\n" + generate_ticket_page(self.ticket) + "\n```", view=self
+            content=generate_ticket_page(self.ticket), view=self
         )
 
 
@@ -76,7 +78,7 @@ class PlasmoLoto(commands.Cog):
         ticket: Номер билета, с которого нужно начать генерацию
         """
         await inter.send(
-            "```\n" + generate_ticket_page(ticket) + "\n```",
+            generate_ticket_page(ticket),
             ephemeral=True,
             view=LotoView(ticket=ticket),
         )
