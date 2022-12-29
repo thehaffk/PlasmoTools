@@ -526,10 +526,8 @@ class RRSCore(commands.Cog):
         """
         rrs_rules = [rule for rule in await rrs_database.get_rrs_roles() if not rule.disabled]
 
-        neccessary_plasmo_roles = tuple()
-        unwanted_plasmo_roles = tuple()
-        removed_plasmo_roles = tuple()
-        added_plasmo_roles = tuple()
+        neccessary_plasmo_roles = ()
+        unwanted_plasmo_roles = ()
         for rrs_rule in rrs_rules:
             structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
             if not structure_guild:
@@ -562,6 +560,8 @@ class RRSCore(commands.Cog):
         if not plasmo_member:
             return (), ()
 
+        removed_plasmo_roles = ()
+        added_plasmo_roles = ()
         for role in neccessary_plasmo_roles:
             if role not in plasmo_member.roles:
                 added_plasmo_roles += role
