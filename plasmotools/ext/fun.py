@@ -56,9 +56,7 @@ class Fun(commands.Cog):
             async with message.channel.typing():
                 await asyncio.sleep(1)
                 if randint(1, 1000) == 1:
-                    await message.reply(
-                        "пошел нахуй"
-                    )
+                    await message.reply("пошел нахуй")
         if " комар " in (" " + message.content + " ").lower():
             if randint(1, 10) == 1:
                 await message.channel.send(content=choice(komaru_gifs))
