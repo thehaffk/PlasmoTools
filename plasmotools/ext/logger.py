@@ -26,10 +26,13 @@ logo_emojis = [
     "🇿",
     "😎",
     "🍆",
-    "📸🤡",
+    "🤡",
     "☠️",
     "🇷🇺",
     "🇺🇦",
+    "<:DIANA:1053604789147160656>",
+    "<:S1mple:1048173667781193738>",
+    "<:4_:890216267804467280>",
 ]
 
 
@@ -43,6 +46,22 @@ class PlasmoLogger(commands.Cog):
 
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_member_leave(self, member: disnake.Member):
+        if member.guild.id != settings.PlasmoRPGuild.guild_id:
+            return
+
+
+        logs_guild = self.bot.get_guild(settings.LogsServer.guild_id)
+        log_channel = logs_guild.get_channel(settings.LogsServer.leave_logs_channel_id)
+        await log_channel.send(
+            embed=disnake.Embed(
+                title="PRP User Leave log",
+                description=f"**Member:** {member.display_name}{member.mention}\n"
+            f"**Roles:** {', '.join([role.name for role in member.roles[1:]])}",
+        )
+        )
 
     @commands.Cog.listener()
     async def on_member_update(self, before: disnake.Member, after: disnake.Member):
@@ -84,24 +103,24 @@ class PlasmoLogger(commands.Cog):
         if role.id not in settings.PlasmoRPGuild.monitored_roles:
             return
 
+
+        description_text = (
+            f" [u/{user.display_name}](https://rp.plo.su/u/{user.display_name}) "
+            f"| {user.mention}"
+        )
+        description_text += "\n\n"
+
         executed_by_rrs = str(audit_entry.reason).startswith("RRS")
         if executed_by_rrs:
             rrs_entry_id = int(
                 re.findall(r"RRS / \w* / RRSID: (\d+)", audit_entry.reason)[0]
             )
             rrs_entry = await get_action(rrs_entry_id)
-        else:
-            operation_author = audit_entry.user
-
-        description_text = f" [u/{user.display_name}](https://rp.plo.su/u/{user.display_name}) | {user.mention}\n"
-        description_text += "\n"
-
-        if executed_by_rrs:
 
             description_text += (
-                "**"
-                + ("Выдано " if is_role_added else "Снято ")
-                + "через RRS (Plasmo Tools)**\n"
+                    "**"
+                    + ("Выдано " if is_role_added else "Снято ")
+                    + f"через Plasmo Tools** (ID: {rrs_entry.id})\n"
             )
 
             rrs_rules = await get_rrs_roles(
@@ -112,22 +131,23 @@ class PlasmoLogger(commands.Cog):
             structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
 
             description_text += (
-                f"**RRS ID:** {rrs_entry.id}\n"
                 f"**Структура:** {structure_guild.name}\n"
                 f"**Роль:** {structure_role.name}\n"
                 f"**Автор:** <@{rrs_entry.author_id}>\n"
                 f"**Одобрил:** <@{rrs_entry.approved_by_user_id}>"
             )
         else:
+            operation_author = audit_entry.user
             description_text += (
-                "**"
-                + ("Выдал: " if is_role_added else "Снял: ")
-                + "**"
-                + operation_author.display_name
-                + " "
-                + operation_author.mention
+                    "**"
+                    + ("Выдал: " if is_role_added else "Снял: ")
+                    + "**"
+                    + operation_author.display_name
+                    + " "
+                    + operation_author.mention
             )
-        description_text += "\n\n"
+
+        description_text += f"\n\n|||"
         description_text += "**Роли после изменения:** " + ", ".join(
             [role.name for role in user.roles[1:]]
         )
@@ -207,6 +227,7 @@ class PlasmoLogger(commands.Cog):
             Профиль [Plasmo](https://rp.plo.su/u/{nickname}) | {member.mention}
             
             {warns_text.strip()}
+            
             {('Получил бан: <t:' + str(ban_time) + ':R>') if ban_time > 0 else ''}
             Наиграно за текущий сезон: {user_stats.get('all', 0) / 3600:.2f} ч.
             {'Состоит в общинах:' if user_data.get('teams') else ''} {', '.join([('[' + team['name'] 
@@ -245,14 +266,17 @@ class PlasmoLogger(commands.Cog):
                         logger.warning("Could not get data from PRP API: %s", user_data)
             break
 
-        nickname = user_data.get("nick", "unknown")
+        nickname = user_data.get("nick", "")
+        if nickname == "":
+            return
 
         log_embed = disnake.Embed(
-            title="🔓 Игрок разбанен",
+            title=f"⚡ {nickname} был разбанен",
             color=disnake.Color.green(),
-            description=f"[{nickname if nickname else member.name}]"
-            f"(https://rp.plo.su/u/{nickname}) был разбанен"
-            f"\n\n⚡ by [digital drugs]({settings.LogsServer.invite_url})",
+            description=f"""
+            {member.mention}
+            В 
+            {random.choice(logo_emojis)} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})""",
         )
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
             settings.LogsServer.ban_logs_channel_id
@@ -280,12 +304,12 @@ class PlasmoLogger(commands.Cog):
                         color=disnake.Color.dark_red(),
                         description=f"Оспорить решение "
                         f"модерации или снять варн можно "
-                        f"только тут - {settings.BACGuild.invite_url}\n\n\n"
+                        f"только тут - {settings.GCAGuild.invite_url}\n\n\n"
                         f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
                     )
                 )
                 await warned_user.send(
-                    content=f"{settings.BACGuild.invite_url}",
+                    content=f"{settings.GCAGuild.invite_url}",
                 )
             except disnake.Forbidden as err:
                 logger.warning(err)

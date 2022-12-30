@@ -16,7 +16,8 @@ TOKEN = os.getenv("TOKEN")
 ADMIN_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
 DATABASE_PATH = "./data.sqlite"
 
-__version__ = "1.5.5" + (" BETA ⚠" if DEBUG else "")
+__version__ = "1.5.6" + (" BETA ⚠" if DEBUG else "")
+
 # todo: update version?
 
 
@@ -28,6 +29,7 @@ class LogsServer:
     role_logs_channel_id = 935571360393068614
     messages_channel_id = 1008822105200132106
     rrs_logs_channel_id = 1033768782801420340
+    leave_logs_channel_id = 1057983888229670922
 
     roles_notifications_role_id = 1046524223377637416
 
@@ -44,6 +46,17 @@ class Emojis:
     offline = " <:offline:1006310760898629702>"
     site_offline = "<:site_offline:1006321494575550514>"
     site_online = "<:site_online:1006320686693879929>"
+    s1mple = "<:S1mple:1048173667781193738>"
+    komaru = "<:KOMAP:995730375504568361>"
+    diana = "<:DIANA:1053604789147160656>"
+    ru_flag = "🇷🇺"
+
+
+word_emojis = {
+"симпл": Emojis.s1mple,
+"ДИАНА": Emojis.diana,
+"помидоры": Emojis.ru_flag,
+}
 
 
 class DevServer:
@@ -104,15 +117,15 @@ api_roles = {
     "president": PlasmoRPGuild.president_role_id,
     "supa_helper": PlasmoRPGuild.mko_head_role_id,
     "soviet-helper": PlasmoRPGuild.mko_helper_role_id,
-    "helper": PlasmoRPGuild.interpol_role_id,
+    "interpol": PlasmoRPGuild.interpol_role_id,
     "banker": PlasmoRPGuild.banker_role_id,
     "keeper": PlasmoRPGuild.keeper_role_id,
     "player": PlasmoRPGuild.player_role_id,
-    "support": PlasmoRPGuild.fusion_role_id,
+    "fusion": PlasmoRPGuild.fusion_role_id,
 }
 
 
-class BACGuild:  # TODO: Rename BAC(Big Appeal Court) to GCA(Grand Court of Appeal)
+class GCAGuild:
     """
     Config for Grand Court of Appeal discord guild
     """
@@ -196,3 +209,4 @@ culture_guild = PlasmoStructureGuild(
     public_chat_channel_id=841395461222432848,
 )
 structure_guilds.append(culture_guild)
+

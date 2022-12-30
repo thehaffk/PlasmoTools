@@ -86,6 +86,7 @@ class FastInterpolPayouts(commands.Cog):
             amount=rank["fake_call_payout"],
             project=await database.projects.get_project(fake_call_project_id),
             message=f"За [ложный вызов]({message.jump_url}) / {rank['name']}",
+            transaction_message=f"Автоматическая выплата ложный вызов / Расценка по рангу {rank['name']}",
         )
         if result:
             await message.add_reaction("✅")

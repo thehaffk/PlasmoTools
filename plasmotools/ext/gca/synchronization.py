@@ -31,13 +31,13 @@ class BACSynchronization(commands.Cog):
         :return: bool - success or failed
         """
         if (
-            member not in self.bot.get_guild(settings.BACGuild.guild_id).members
+            member not in self.bot.get_guild(settings.GCAGuild.guild_id).members
             or member.bot
             or not isinstance(member, disnake.Member)
         ):
             return False
         logger.debug("Syncing %s (%s)", member, member.display_name)
-        member = self.bot.get_guild(settings.BACGuild.guild_id).get_member(member.id)
+        member = self.bot.get_guild(settings.GCAGuild.guild_id).get_member(member.id)
 
         # TODO: Rewrite with plasmo.py
         for _ in range(10):
@@ -90,14 +90,14 @@ class BACSynchronization(commands.Cog):
                 await member.edit(nick=nickname)
             except HTTPException:
                 pass
-        gca_guild: disnake.Guild = self.bot.get_guild(settings.BACGuild.guild_id)
+        gca_guild: disnake.Guild = self.bot.get_guild(settings.GCAGuild.guild_id)
         has_pass_role: disnake.Role = gca_guild.get_role(
-            settings.BACGuild.has_pass_role_id
+            settings.GCAGuild.has_pass_role_id
         )
         without_pass_role: disnake.Role = gca_guild.get_role(
-            settings.BACGuild.without_pass_role_id
+            settings.GCAGuild.without_pass_role_id
         )
-        banned_role: disnake.Role = gca_guild.get_role(settings.BACGuild.banned_role_id)
+        banned_role: disnake.Role = gca_guild.get_role(settings.GCAGuild.banned_role_id)
         if has_pass:
             await member.add_roles(has_pass_role)
             await member.remove_roles(without_pass_role)
@@ -140,12 +140,12 @@ class BACSynchronization(commands.Cog):
                     color=disnake.Color.dark_red(),
                     description=f"Узнать причину бана, оспорить решение "
                     f"администрации или разбаниться можно "
-                    f"только тут - {settings.BACGuild.invite_url}\n\n\n"
+                    f"только тут - {settings.GCAGuild.invite_url}\n\n\n"
                     f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
                 )
             )
             await member.send(
-                content=f"{settings.BACGuild.invite_url}",
+                content=f"{settings.GCAGuild.invite_url}",
             )
         except HTTPException as err:
             logger.warning(err)
@@ -188,13 +188,13 @@ class BACSynchronization(commands.Cog):
         """
         Called on discord event when user join the guild, used for automatically sync user
         """
-        if not member.guild.id == settings.BACGuild.guild_id:
+        if not member.guild.id == settings.GCAGuild.guild_id:
             return False
         return await self.sync(member)
 
     @commands.slash_command(
         name="everyone-sync",
-        guild_ids=[settings.BACGuild.guild_id],
+        guild_ids=[settings.GCAGuild.guild_id],
         dm_permission=False,
     )
     @commands.has_permissions(manage_roles=True)
@@ -238,7 +238,7 @@ class BACSynchronization(commands.Cog):
         )
 
     @commands.slash_command(
-        name="sync", guild_ids=[settings.BACGuild.guild_id], dm_permission=False
+        name="sync", guild_ids=[settings.GCAGuild.guild_id], dm_permission=False
     )
     @commands.has_permissions(manage_roles=True)
     async def sync_user(
@@ -276,7 +276,7 @@ class BACSynchronization(commands.Cog):
 
     @disnake.ext.commands.user_command(
         name="Синхронизировать",
-        guild_ids=[settings.BACGuild.guild_id],
+        guild_ids=[settings.GCAGuild.guild_id],
     )
     async def sync_button(
         self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member

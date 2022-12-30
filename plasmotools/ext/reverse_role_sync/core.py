@@ -158,9 +158,13 @@ class RRSCore(commands.Cog):
         else:
             # todo: remove
             # todo: refactor with re
-            operation_author = audit_entry.guild.get_member(
-                int(str(audit_entry.reason).split("/")[-1].replace("]", "").strip())
-            )
+            try:
+                operation_author = audit_entry.guild.get_member(
+                    int(str(audit_entry.reason).split("/")[-1].replace("]", "").strip())
+                )
+            except ValueError:
+                return logger.error(f"Unexpected error while parsing reason: {audit_entry.reason}, "
+                                    f"{audit_entry.__dict__}")
 
         for role in audit_entry.changes.after.roles:
             return await self.process_structure_role_change(
