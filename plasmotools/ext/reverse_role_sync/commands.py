@@ -53,7 +53,7 @@ class RRSCommands(commands.Cog):
         plasmo_members = self.bot.get_guild(settings.PlasmoRPGuild.guild_id).members
         if all_guilds:
             guilds = await guilds_database.get_all_guilds()
-            guilds = [self.bot.get_guild(guild.discord_id) for guild in guilds]
+            guilds = [self.bot.get_guild(guild.id) for guild in guilds]
             for guild in guilds:
                 plasmo_members += guild.members
             plasmo_members = set(plasmo_members)
