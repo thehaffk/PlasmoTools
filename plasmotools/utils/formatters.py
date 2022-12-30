@@ -9,6 +9,7 @@ def format_bank_card(number: Optional[int]) -> str:
         return "EB-????"
     return "EB-" + "0" * (4 - len(str(number))) + str(number)
 
+
 def build_progressbar(cursor: int, total_count: int) -> str:
     """
     Build progressbar with given numbers
