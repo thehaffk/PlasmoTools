@@ -36,7 +36,6 @@ logo_emojis = [
 ]
 
 
-# todo: check audit log for bans, unbans, role changes
 
 
 class PlasmoLogger(commands.Cog):
