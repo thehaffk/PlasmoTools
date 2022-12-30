@@ -286,8 +286,8 @@ class PlasmoLogger(commands.Cog):
             title=f"⚡ {nickname} был разбанен",
             color=disnake.Color.green(),
             description=f"""
-            {member.mention}
-            В 
+            {member.mention} | [u/{nickname}](https://rp.plo.su/u/{nickname})
+             
             {random.choice(logo_emojis)} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})""",
         )
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
