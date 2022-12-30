@@ -533,8 +533,8 @@ class RRSCore(commands.Cog):
             rule for rule in await rrs_database.get_rrs_roles() if not rule.disabled
         ]
 
-        neccessary_plasmo_roles = ()
-        unwanted_plasmo_roles = ()
+        neccessary_plasmo_roles = []
+        unwanted_plasmo_roles = []
 
         is_user_player = True
         rules_to_remove = []
@@ -577,16 +577,16 @@ class RRSCore(commands.Cog):
 
             structure_user = structure_guild.get_member(user.id)
             if not structure_user:
-                unwanted_plasmo_roles += rule.plasmo_role_id
+                unwanted_plasmo_roles.append(rule.plasmo_role_id)
                 continue
 
             if structure_role in structure_user.roles:
                 if is_user_player:
-                    neccessary_plasmo_roles += rule.plasmo_role_id
+                    neccessary_plasmo_roles.append(rule.plasmo_role_id)
                 else:
                     rules_to_remove.append(rule)
             else:
-                unwanted_plasmo_roles += rule.plasmo_role_id
+                unwanted_plasmo_roles.append(rule.plasmo_role_id)
 
         rrs_logs_channel = self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id)
 
@@ -630,12 +630,16 @@ class RRSCore(commands.Cog):
             return
 
         removed_plasmo_roles = set(
-            [role for role in unwanted_plasmo_roles if role in plasmo_member.roles]
+            [
+                plasmo_guild.get_role(role)
+                for role in set(unwanted_plasmo_roles)
+                if role in plasmo_member.roles
+            ]
         )
         added_plasmo_roles = set(
             [
-                role
-                for role in neccessary_plasmo_roles
+                plasmo_guild.get_role(role)
+                for role in set(neccessary_plasmo_roles)
                 if role not in plasmo_member.roles
             ]
         )
@@ -731,7 +735,6 @@ class RRSCore(commands.Cog):
                     operation_reason = entry.reason
                     break
 
-
         for removed_role in removed_roles:
             if removed_role.id == settings.PlasmoRPGuild.player_role_id:
                 continue
@@ -739,7 +742,8 @@ class RRSCore(commands.Cog):
                 rule
                 for rule in await rrs_database.get_rrs_roles(
                     plasmo_role_id=removed_role.id
-                ) if not rule.disabled
+                )
+                if not rule.disabled
             ]
             for rule in rrs_rules:
                 structure_guild = self.bot.get_guild(rule.structure_guild_id)
