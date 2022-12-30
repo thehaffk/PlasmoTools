@@ -124,7 +124,7 @@ class RRSCore(commands.Cog):
             settings.LogsServer.guild_id
             if settings.DEBUG
             else settings.PlasmoRPGuild.guild_id
-        ):
+        ):  # todo: add plasmo guild listener
             return
 
         async for entry in after.guild.audit_logs(
@@ -613,6 +613,23 @@ class RRSCore(commands.Cog):
             return
         for user in plasmo_guild.members:
             await self.sync_user(user, "Синхронизация всех игроков")
+
+    @commands.Cog.listener("on_member_leave")
+    async def on_member_leave(self, member: disnake.Member):
+        if member.guild.id == settings.PlasmoRPGuild.guild_id:
+            return
+        if not await rrs_database.get_rrs_roles(structure_guild_id=member.guild.id):
+            return
+        await self.sync_user(member, "Пользователь вышел из дискорда структуры")
+
+    @commands.Cog.listener("on_member_update")
+    async def plasmo_updates_listener(self, before: disnake.Member, after: disnake.Member):
+        if before.guild.id != settings.PlasmoRPGuild.guild_id:
+            return
+        if before.roles == after.roles:
+            return
+        # todo: check for player role
+        # todo: remove roles from other guilds if role is removed in plasmo
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
