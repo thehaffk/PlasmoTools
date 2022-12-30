@@ -16,7 +16,7 @@ TOKEN = os.getenv("TOKEN")
 ADMIN_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
 DATABASE_PATH = "./data.sqlite"
 
-__version__ = "1.5.6" + (" BETA ⚠" if DEBUG else "")
+__version__ = "1.5.7" + (" BETA ⚠" if DEBUG else "")
 
 # todo: update version?
 
@@ -53,9 +53,9 @@ class Emojis:
 
 
 word_emojis = {
-"симпл": Emojis.s1mple,
-"ДИАНА": Emojis.diana,
-"помидоры": Emojis.ru_flag,
+    "симпл": Emojis.s1mple,
+    "ДИАНА": Emojis.diana,
+    "помидоры": Emojis.ru_flag,
 }
 
 
@@ -111,6 +111,14 @@ class PlasmoRPGuild:
     server_logs_channel_id = 1008814971926364300
     logs_channel_id = 959332068993679400
 
+
+disallowed_to_rrs_roles = [
+    PlasmoRPGuild.player_role_id,
+    PlasmoRPGuild.helper_role_id,
+    PlasmoRPGuild.fusion_role_id,
+    PlasmoRPGuild.president_role_id,
+    PlasmoRPGuild.admin_role_id,
+]
 
 api_roles = {
     "admin": PlasmoRPGuild.admin_role_id,
@@ -209,4 +217,3 @@ culture_guild = PlasmoStructureGuild(
     public_chat_channel_id=841395461222432848,
 )
 structure_guilds.append(culture_guild)
-

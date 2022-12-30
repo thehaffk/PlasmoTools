@@ -36,7 +36,6 @@ logo_emojis = [
 ]
 
 
-# todo: check audit log for bans, unbans, role changes
 
 
 class PlasmoLogger(commands.Cog):
@@ -52,15 +51,14 @@ class PlasmoLogger(commands.Cog):
         if member.guild.id != settings.PlasmoRPGuild.guild_id:
             return
 
-
         logs_guild = self.bot.get_guild(settings.LogsServer.guild_id)
         log_channel = logs_guild.get_channel(settings.LogsServer.leave_logs_channel_id)
         await log_channel.send(
             embed=disnake.Embed(
                 title="PRP User Leave log",
                 description=f"**Member:** {member.display_name}{member.mention}\n"
-            f"**Roles:** {', '.join([role.name for role in member.roles[1:]])}",
-        )
+                f"**Roles:** {', '.join([role.name for role in member.roles[1:]])}",
+            )
         )
 
     @commands.Cog.listener()
@@ -103,7 +101,6 @@ class PlasmoLogger(commands.Cog):
         if role.id not in settings.PlasmoRPGuild.monitored_roles:
             return
 
-
         description_text = (
             f" [u/{user.display_name}](https://rp.plo.su/u/{user.display_name}) "
             f"| {user.mention}"
@@ -112,39 +109,54 @@ class PlasmoLogger(commands.Cog):
 
         executed_by_rrs = str(audit_entry.reason).startswith("RRS")
         if executed_by_rrs:
-            rrs_entry_id = int(
-                re.findall(r"RRS / \w* / RRSID: (\d+)", audit_entry.reason)[0]
-            )
-            rrs_entry = await get_action(rrs_entry_id)
+            if "Automated Sync" in audit_entry.reason:
+                sync_reason_raw = re.findall(
+                    r"RRS | Automated Sync | ([\s\S]+)", audit_entry.reason
+                )
+                sync_reason = sync_reason_raw[0] if sync_reason_raw else "Не указана"
+                description_text += (
+                    "**"
+                    + ("Выдано " if is_role_added else "Снято ")
+                    + f"через Plasmo Tools**\n"
+                    f"Автоматическая синхронизация с дискордами структур (RRS)\n\n"
+                    f"**Причина:** {sync_reason}"
+                )
+            if "RRSID" in audit_entry.reason:
+                rrs_entry_id = int(
+                    re.findall(r"RRS / \w* / RRSID: (\d+)", audit_entry.reason)[0]
+                )
+                rrs_entry = await get_action(rrs_entry_id)
 
-            description_text += (
+                description_text += (
                     "**"
                     + ("Выдано " if is_role_added else "Снято ")
                     + f"через Plasmo Tools** (ID: {rrs_entry.id})\n"
-            )
+                )
 
-            rrs_rules = await get_rrs_roles(
-                structure_role_id=rrs_entry.structure_role_id
-            )
-            rrs_rule = [rule for rule in rrs_rules if rule.plasmo_role_id == role.id][0]
-            structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
-            structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
+                rrs_rules = await get_rrs_roles(
+                    structure_role_id=rrs_entry.structure_role_id
+                )
+                rrs_rule = [
+                    rule for rule in rrs_rules if rule.plasmo_role_id == role.id
+                ][0]
+                structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
+                structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
 
-            description_text += (
-                f"**Структура:** {structure_guild.name}\n"
-                f"**Роль:** {structure_role.name}\n"
-                f"**Автор:** <@{rrs_entry.author_id}>\n"
-                f"**Одобрил:** <@{rrs_entry.approved_by_user_id}>"
-            )
+                description_text += (
+                    f"**Структура:** {structure_guild.name}\n"
+                    f"**Роль:** {structure_role.name}\n"
+                    f"**Автор:** <@{rrs_entry.author_id}>\n"
+                    f"**Одобрил:** <@{rrs_entry.approved_by_user_id}>"
+                )
         else:
             operation_author = audit_entry.user
             description_text += (
-                    "**"
-                    + ("Выдал: " if is_role_added else "Снял: ")
-                    + "**"
-                    + operation_author.display_name
-                    + " "
-                    + operation_author.mention
+                "**"
+                + ("Выдал: " if is_role_added else "Снял: ")
+                + "**"
+                + operation_author.display_name
+                + " "
+                + operation_author.mention
             )
 
         description_text += f"\n\n|||"
@@ -274,8 +286,8 @@ class PlasmoLogger(commands.Cog):
             title=f"⚡ {nickname} был разбанен",
             color=disnake.Color.green(),
             description=f"""
-            {member.mention}
-            В 
+            {member.mention} | [u/{nickname}](https://rp.plo.su/u/{nickname})
+             
             {random.choice(logo_emojis)} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})""",
         )
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
