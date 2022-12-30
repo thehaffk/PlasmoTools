@@ -17,6 +17,7 @@ ADMIN_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
 DATABASE_PATH = "./data.sqlite"
 
 __version__ = "1.5.7" + (" BETA ⚠" if DEBUG else "")
+
 # todo: update version?
 
 

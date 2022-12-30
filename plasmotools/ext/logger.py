@@ -36,8 +36,6 @@ logo_emojis = [
 ]
 
 
-
-
 class PlasmoLogger(commands.Cog):
     """
     Cog for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
@@ -159,7 +157,7 @@ class PlasmoLogger(commands.Cog):
                 + operation_author.mention
             )
 
-        description_text += f"\n\n|||"
+        description_text += f"\n\n"
         description_text += "**Роли после изменения:** " + ", ".join(
             [role.name for role in user.roles[1:]]
         )
@@ -286,8 +284,8 @@ class PlasmoLogger(commands.Cog):
             title=f"⚡ {nickname} был разбанен",
             color=disnake.Color.green(),
             description=f"""
-            {member.mention}
-            В 
+            {member.mention} | [u/{nickname}](https://rp.plo.su/u/{nickname})
+             
             {random.choice(logo_emojis)} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})""",
         )
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
