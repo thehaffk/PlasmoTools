@@ -32,20 +32,18 @@ class RRSCommands(commands.Cog):
             await interaction.edit_original_message("Please provide a user")
             return
         rrs_core: RRSCore = self.bot.get_cog("RRSCore")
-        added_roles_ids, removed_roles_ids = await rrs_core.sync_user(user, reason=f"Индивидуальная синхронизация")
-        plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
-        added_roles = [plasmo_guild.get_role(role_id) for role_id in added_roles_ids]
-        removed_roles = [
-            plasmo_guild.get_role(role_id) for role_id in removed_roles_ids
-        ]
+        await rrs_core.sync_user(user, reason=f"Индивидуальная синхронизация")
         await interaction.edit_original_message(
-            f"Added roles: {', '.join([str(role) for role in added_roles])}\n"
-            f"Removed roles: {', '.join([str(role) for role in removed_roles])}\n"
+            f"Синхронизация {user.mention} завершена"
         )
 
-    @commands.slash_command(name="rrs-everyone-sync", guild_ids=[settings.DevServer.guild_id])
+    @commands.slash_command(
+        name="rrs-everyone-sync", guild_ids=[settings.DevServer.guild_id]
+    )
     @commands.is_owner()
-    async def rrs_everyone_sync_command(self, inter: ApplicationCommandInteraction):
+    async def rrs_everyone_sync_command(
+        self, inter: ApplicationCommandInteraction, all_guilds: bool = False
+    ):
         await inter.response.defer(ephemeral=True)
 
         status_embed = disnake.Embed(
@@ -53,17 +51,26 @@ class RRSCommands(commands.Cog):
             color=disnake.Color.dark_green(),
         )
         plasmo_members = self.bot.get_guild(settings.PlasmoRPGuild.guild_id).members
+        if all_guilds:
+            guilds = await guilds_database.get_all_guilds()
+            guilds = [self.bot.get_guild(guild.discord_id) for guild in guilds]
+            for guild in guilds:
+                plasmo_members += guild.members
+            plasmo_members = set(plasmo_members)
 
         rrs_core: RRSCore = self.bot.get_cog("RRSCore")
 
         lazy_update_members_count = len(plasmo_members) // 10
         for counter, member in enumerate(plasmo_members):
             status_embed.clear_fields()
-            await rrs_core.sync_user(member, reason=f"Синхронизация всех игроков, вызвано {inter.author.display_name}")
+            await rrs_core.sync_user(
+                member,
+                reason=f"Синхронизация всех игроков, вызвано {inter.author.display_name}",
+            )
             status_embed.add_field(
-                        name=f"Прогресc",
-                        value=utils.build_progressbar(counter + 1, len(plasmo_members)),
-                    )
+                name=f"Прогресc",
+                value=utils.build_progressbar(counter + 1, len(plasmo_members)),
+            )
 
             if counter % lazy_update_members_count == 0:
                 await inter.edit_original_message(embed=status_embed)

@@ -131,10 +131,7 @@ async def register_guild(
 async def get_all_guilds():
     async with aiosqlite.connect(PATH) as db:
         async with db.execute(
-            """SELECT 
-                                        discord_id
-                                        FROM structure_guilds
-                                        """,
+            """SELECT discord_id FROM structure_guilds""",
         ) as cursor:
             rows = await cursor.fetchall()
             return [await get_guild(row[0]) for row in rows]
