@@ -72,7 +72,9 @@ class Utils(commands.Cog):
             ]
         )
         if active_warns_text:
-            api_embed.add_field(name="Active warns", value=active_warns_text, inline=False)
+            api_embed.add_field(
+                name="Active warns", value=active_warns_text, inline=False
+            )
 
         revoked_warns_text = "\n".join(
             [
@@ -86,10 +88,12 @@ class Utils(commands.Cog):
                 name="Revoked warns",
                 value=revoked_warns_text
                 if len(revoked_warns_text) < 1024
-                else ("**Unable to display all warns bc of discord limits\n**"
-                + revoked_warns_text[:950]
-                + "..."),
-            inline = False
+                else (
+                    "**Unable to display all warns bc of discord limits\n**"
+                    + revoked_warns_text[:950]
+                    + "..."
+                ),
+                inline=False,
             )
         embeds = [api_embed]
         rrs_cog: Optional[RRSCore] = self.bot.get_cog("RRSCore")
@@ -110,7 +114,9 @@ class Utils(commands.Cog):
         self, inter: ApplicationCommandInteraction, user: disnake.Member
     ):
         await inter.response.defer(ephemeral=True)
-        await inter.edit_original_message(embeds=(await self.generate_profile_embeds(user)))
+        await inter.edit_original_message(
+            embeds=(await self.generate_profile_embeds(user))
+        )
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)

@@ -145,6 +145,8 @@ class PlasmoLogger(commands.Cog):
                     f"**Роль:** {structure_role.name}\n"
                     f"**Автор:** <@{rrs_entry.author_id}>\n"
                     f"**Одобрил:** <@{rrs_entry.approved_by_user_id}>"
+                    if rrs_entry.approved_by_user_id != rrs_entry.author_id
+                    else ""
                 )
         else:
             operation_author = audit_entry.user
@@ -246,7 +248,9 @@ class PlasmoLogger(commands.Cog):
                         for team in user_data.get('teams', [])])}
             
             {random.choice(logo_emojis)} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
-                        """,
+                        """.replace(
+                "_", "\_"
+            ),
         ).set_thumbnail(url="https://rp.plo.su/avatar/" + nickname)
 
         msg: disnake.Message = await log_channel.send(embed=log_embed)

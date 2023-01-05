@@ -18,6 +18,7 @@ class RRSCommands(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="rrs-sync")
+    @commands.default_member_permissions(manage_roles=True)
     async def rrs_sync_command(
         self,
         interaction: ApplicationCommandInteraction,
@@ -45,18 +46,13 @@ class RRSCommands(commands.Cog):
         )
 
     @commands.slash_command(
-        name="rrs-everyone-sync", guild_ids=[settings.DevServer.guild_id]
+        name="rrs-everyone-sync",
+        guild_ids=[settings.DevServer.guild_id, settings.LogsServer.guild_id],
     )
     @commands.is_owner()
-    async def rrs_everyone_sync_command(
-        self, inter: ApplicationCommandInteraction, all_guilds: bool = False
-    ):
+    async def rrs_everyone_sync_command(self, inter: ApplicationCommandInteraction):
         """
-        Sync roles for everyone
-
-        Parameters
-        ----------
-        all_guilds: Sync roles for members in all guilds, including structure guilds
+        Run rrs sync for all users
         """
         await inter.response.defer(ephemeral=True)
 
@@ -65,12 +61,11 @@ class RRSCommands(commands.Cog):
             color=disnake.Color.dark_green(),
         )
         plasmo_members = self.bot.get_guild(settings.PlasmoRPGuild.guild_id).members
-        if all_guilds:
-            guilds = await guilds_database.get_all_guilds()
-            guilds = [self.bot.get_guild(guild.id) for guild in guilds]
-            for guild in guilds:
-                plasmo_members += guild.members
-            plasmo_members = set(plasmo_members)
+        guilds = await guilds_database.get_all_guilds()
+        guilds = [self.bot.get_guild(guild.id) for guild in guilds]
+        for guild in guilds:
+            plasmo_members += guild.members
+        plasmo_members = set(plasmo_members)
 
         rrs_core: RRSCore = self.bot.get_cog("RRSCore")
 
@@ -103,14 +98,73 @@ class RRSCommands(commands.Cog):
         dm_permission=False,
     )
     @commands.default_member_permissions(manage_roles=True)
-    async def get_registered_rrs_entries(self, inter: ApplicationCommandInteraction):
+    async def get_registered_rrs_entries(
+        self, inter: ApplicationCommandInteraction, entry_id: int = None
+    ):
         """
-        Get list of registered RRS entries
+        Get list of registered RRS entries for this guild or a list of role members if entry id is provided
         """
+        await inter.response.defer(ephemeral=True)
+        if entry_id is not None:
+            entry = await rrs_database.get_rrs_role(entry_id)
+            if entry is None:
+                await inter.edit_original_message("Entry not found")
+                return
+            if (
+                entry.structure_guild_id != inter.guild.id
+                and inter.author.id not in self.bot.owner_ids
+            ):
+                await inter.edit_original_message("You can't view this entry")
+                return
+
+            structure_guild = self.bot.get_guild(entry.structure_guild_id)
+            if structure_guild is None:
+                structure_guild = "Structure guild not found"
+                logger.warning("Structure guild not found, disabling RRS entry")
+            await entry.edit(disabled=True)
+            structure_role = structure_guild.get_role(entry.structure_role_id)
+            if structure_role is None:
+                structure_role = "Structure role not found"
+                logger.warning("Structure role not found, disabling RRS entry")
+                await entry.edit(disabled=True)
+
+            if not settings.DEBUG:
+                plasmo_role_name = (
+                    self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
+                    .get_role(entry.plasmo_role_id)
+                    .name
+                )
+            else:
+                plasmo_role_name = "debug mode is enabled"
+
+            embed = disnake.Embed(
+                title=f"RRS Entry {entry.id} | Disabled: {entry.disabled}",
+                description=f"**Structure guild:** {structure_guild} `{entry.structure_guild_id}`\n"
+                f"**Structure role:**  {structure_role} `{entry.structure_role_id}`\n"
+                f"**Plasmo role:** {plasmo_role_name} `{entry.plasmo_role_id}`\n",
+            )
+            if structure_guild and structure_role:
+                embed.add_field(
+                    name="Structure role members",
+                    value=(
+                        ", ".join(
+                            [
+                                f"{member.display_name} {member.mention}"
+                                for member in structure_role.members
+                            ]
+                        )
+                    ).replace("_", "\_"),
+                )
+
+            return await inter.edit_original_message(
+                embed=embed,
+            )
+
         entries = await rrs_database.get_rrs_roles(
             structure_guild_id=inter.guild.id
             if inter.guild.id != settings.DevServer.guild_id
-            else None
+            and inter.guild.id != settings.LogsServer.guild_id
+            else None  # Provide None for dev/logs server, so it will return all entries, not only for dev server
         )
 
         rrs_embed = disnake.Embed(
