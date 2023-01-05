@@ -123,14 +123,18 @@ class RRSCore(commands.Cog):
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if not plasmo_guild:
             logger.critical("Unable to connect to Plasmo Guild")
-            embed.description = "Не удалось подключиться к дискорду Plasmo, сбилдить профиль не удалось"
+            embed.description = (
+                "Не удалось подключиться к дискорду Plasmo, сбилдить профиль не удалось"
+            )
             return embed
         plasmo_member = plasmo_guild.get_member(user.id)
         if not plasmo_member:
             embed.description = "Игрока нет в дискорде Plasmo RP"
             return embed
 
-        active_rules_string = "`id`. `роль на plasmo` - `структура` - `роль в структуре`\n"
+        active_rules_string = (
+            "`id`. `роль на plasmo` - `структура` - `роль в структуре`\n"
+        )
         for rule in all_rrs_rules:
             if rule.disabled:
                 continue
@@ -172,7 +176,13 @@ class RRSCore(commands.Cog):
             settings.LogsServer.guild_id
             if settings.DEBUG
             else settings.PlasmoRPGuild.guild_id
-        ):  # todo: add plasmo guild listener
+        ):
+            return
+        if await guilds_database.get_guild(
+            before.guild.id
+        ) is None or not await rrs_database.get_rrs_roles(
+            structure_guild_id=before.guild.id
+        ):
             return
 
         async for entry in after.guild.audit_logs(
