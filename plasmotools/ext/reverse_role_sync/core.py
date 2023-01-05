@@ -114,6 +114,54 @@ class RRSCore(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
+    async def generate_profile_embed(self, user: disnake.Member) -> disnake.Embed:
+        all_rrs_rules = await rrs_database.get_rrs_roles()
+        embed = disnake.Embed(
+            title=f"RRS Profile - {user.display_name}",
+            color=disnake.Colour.dark_green(),
+        )
+        plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
+        if not plasmo_guild:
+            logger.critical("Unable to connect to Plasmo Guild")
+            embed.description = "Не удалось подключиться к дискорду Plasmo, сбилдить профиль не удалось"
+            return embed
+        plasmo_member = plasmo_guild.get_member(user.id)
+        if not plasmo_member:
+            embed.description = "Игрока нет в дискорде Plasmo RP"
+            return embed
+
+        active_rules_string = "`id`. `роль на plasmo` - `структура` - `роль в структуре`\n"
+        for rule in all_rrs_rules:
+            if rule.disabled:
+                continue
+            structure_guild = self.bot.get_guild(rule.structure_guild_id)
+            if not structure_guild:
+                continue
+            structure_member = structure_guild.get_member(user.id)
+            if not structure_member:
+                continue
+            structure_role = structure_guild.get_role(rule.structure_role_id)
+            if not structure_role:
+                continue
+            if structure_role in structure_member.roles:
+                plasmo_role = plasmo_guild.get_role(rule.plasmo_role_id)
+                if not plasmo_role:
+                    continue
+                active_rules_string += f"{rule.id}. {plasmo_role.name} - {structure_guild.name} - {structure_role.name}\n"
+
+        embed.add_field(
+            name="Активные роли",
+            value=active_rules_string,
+            inline=False,
+        )
+        embed.add_field(
+            name="История изменения ролей",
+            value="В разработке, предполагаемая версия релиза - 1.6.0",
+            inline=False,
+        )
+
+        return embed
+
     @commands.Cog.listener("on_member_update")
     async def on_member_update_listener(
         self, before: disnake.Member, after: disnake.Member
@@ -527,74 +575,50 @@ class RRSCore(commands.Cog):
         Syncs user roles with RRS rules
         :param user: User to sync
         :param reason: Reason for sync
-        :return: Two tuples: (roles added, roles removed)
         """
         all_rules = [
-            rule for rule in await rrs_database.get_rrs_roles() if not rule.disabled
+            rule
+            for rule in await rrs_database.get_rrs_roles()
+            if not rule.disabled
+            and rule.plasmo_role_id not in settings.disallowed_to_rrs_roles
         ]
-
         neccessary_plasmo_roles = []
         unwanted_plasmo_roles = []
-
-        is_user_player = True
         rules_to_remove = []
+        rrs_logs_channel = self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id)
 
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if not plasmo_guild:
-            logger.critical("Unable to connect to Plasmo Guild")
-            return
+            return logger.critical("Unable to connect to Plasmo Guild")
 
         plasmo_member = plasmo_guild.get_member(user.id)
-        if not plasmo_member:
-            is_user_player = False
-        elif settings.PlasmoRPGuild.player_role_id not in [
-            role.id for role in plasmo_member.roles
-        ]:
-            is_user_player = False
-
-        for rule in all_rules:
-            if rule.plasmo_role_id in settings.disallowed_to_rrs_roles:
-                logger.warning(
-                    "It is not allowed to sync player role, deleting rrs rule %s",
-                    rule.id,
-                )
-                await rule.edit(disabled=True)
-                continue
-
-            structure_guild = self.bot.get_guild(rule.structure_guild_id)
-            if not structure_guild:
-                logger.warning(
-                    "Unable to find guild with id %s", rule.structure_guild_id
-                )
-                await rule.edit(disabled=True)
-                continue
-
-            structure_role = structure_guild.get_role(rule.structure_role_id)
-            if not structure_role:
-                logger.warning("Unable to find role with id %s", rule.structure_role_id)
-                await rule.edit(disabled=True)
-                continue
-
-            structure_user = structure_guild.get_member(user.id)
-            if not structure_user:
-                unwanted_plasmo_roles.append(rule.plasmo_role_id)
-                continue
-
-            if structure_role in structure_user.roles:
-                if is_user_player:
-                    neccessary_plasmo_roles.append(rule.plasmo_role_id)
-                else:
-                    rules_to_remove.append(rule)
-            else:
-                unwanted_plasmo_roles.append(rule.plasmo_role_id)
-
-        rrs_logs_channel = self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id)
-
-        if not is_user_player:
-            for rule in rules_to_remove:
+        if (
+            not plasmo_member
+            or plasmo_guild.get_role(settings.PlasmoRPGuild.player_role_id)
+            not in plasmo_member.roles
+        ):
+            for rule in all_rules:
                 structure_guild = self.bot.get_guild(rule.structure_guild_id)
+                if not structure_guild:
+                    logger.warning(
+                        "Unable to connect to structure guild %d",
+                        rule.structure_guild_id,
+                    )
+
                 structure_role = structure_guild.get_role(rule.structure_role_id)
+                if not structure_role:
+                    logger.warning(
+                        "Unable to get role %d from guild %d",
+                        rule.structure_role_id,
+                        rule.structure_guild_id,
+                    )
+                    await rule.edit(disabled=True)
+                    continue
+
                 structure_user = structure_guild.get_member(user.id)
+                if not structure_user:
+                    continue
+
                 if structure_role in structure_user.roles:
                     try:
                         await structure_user.remove_roles(
@@ -606,9 +630,9 @@ class RRSCore(commands.Cog):
                                 title="Automated Sync Log",
                                 description=f"**Removing role bc user is not a player**\n"
                                 f"`User`: {user.display_name}({user.mention})\n"
-                                f"SG: **{structure_guild.name}** \n"
-                                f"SR: **{structure_role.name}** \n"
-                                f"Sync reason: {reason}",
+                                f"`Structure`: {structure_guild.name}\n"
+                                f"`Role`: {structure_role.name}\n"
+                                f"`Sync reason`: {reason}",
                                 color=disnake.Color.dark_red(),
                             )
                         )
@@ -623,13 +647,36 @@ class RRSCore(commands.Cog):
                                 title="UNABLE TO SYNC USER",
                                 description=f"**Unable to remove structure role**\n"
                                 f"`User`: {user.display_name}({user.mention})\n"
-                                f"SG: **{structure_guild.name}** \n"
-                                f"SR: **{structure_role.name}** \n",
+                                f"`Structure`: {structure_guild.name} \n"
+                                f"`Role`: {structure_role.name} \n",
                                 color=disnake.Color.dark_red(),
                             )
                         )
             return
 
+        for rule in all_rules:
+            structure_guild = self.bot.get_guild(rule.structure_guild_id)
+            if not structure_guild:
+                logger.warning(
+                    "Unable to find guild with id %s", rule.structure_guild_id
+                )
+                continue
+
+            structure_role = structure_guild.get_role(rule.structure_role_id)
+            if not structure_role:
+                logger.warning("Unable to find role with id %s", rule.structure_role_id)
+                await rule.edit(disabled=True)
+                continue
+
+            structure_user = structure_guild.get_member(user.id)
+            if not structure_user:
+                unwanted_plasmo_roles.append(rule.plasmo_role_id)
+                continue
+
+            if structure_role in structure_user.roles:
+                neccessary_plasmo_roles.append(rule.plasmo_role_id)
+            else:
+                unwanted_plasmo_roles.append(rule.plasmo_role_id)
 
         neccessary_plasmo_roles = set(neccessary_plasmo_roles)
         unwanted_plasmo_roles = set(unwanted_plasmo_roles) - neccessary_plasmo_roles
@@ -672,7 +719,9 @@ class RRSCore(commands.Cog):
                 )
             except disnake.Forbidden:
                 logger.warning("Unable to sync user %s", user.id)
-                await self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id).send(
+                await self.bot.get_channel(
+                    settings.LogsServer.rrs_logs_channel_id
+                ).send(
                     embed=disnake.Embed(
                         title="UNABLE TO SYNC ERROR",
                         description=f"`User`: {user.display_name}({user.mention})\n"
@@ -695,12 +744,11 @@ class RRSCore(commands.Cog):
             await self.sync_user(user, "Синхронизация всех игроков")
 
     @commands.Cog.listener("on_member_leave")
-    async def on_member_leave(self, member: disnake.Member):
+    async def guild_leave_listener(self, member: disnake.Member):
         if member.guild.id == settings.PlasmoRPGuild.guild_id:
             await self.sync_user(member, "Пользователь вышел из дискорда Plasmo RP")
-        if not await rrs_database.get_rrs_roles(structure_guild_id=member.guild.id):
-            return
-        await self.sync_user(member, "Пользователь вышел из дискорда структуры")
+        elif await rrs_database.get_rrs_roles(structure_guild_id=member.guild.id):
+            await self.sync_user(member, "Пользователь вышел из дискорда структуры")
 
     @commands.Cog.listener("on_member_update")
     async def plasmo_updates_listener(
@@ -711,11 +759,8 @@ class RRSCore(commands.Cog):
         if before.roles == after.roles:
             return
         # Check if user is a player
-        if settings.PlasmoRPGuild.player_role_id in [
-            role.id for role in before.roles
-        ] and settings.PlasmoRPGuild.player_role_id not in [
-            role.id for role in after.roles
-        ]:
+        player_role = before.guild.get_role(settings.PlasmoRPGuild.player_role_id)
+        if player_role in before.roles and player_role not in after.roles:
             await self.sync_user(
                 after, "У пользователя забрали роль игрока в дискорде Plasmo RP"
             )
@@ -788,7 +833,7 @@ class RRSCore(commands.Cog):
                                 f"`User`: {after.display_name}({after.mention})\n"
                                 f"`Structure Guild`: {structure_guild.name}\n"
                                 f"`Removed Role:` {structure_role.name}\n"
-                                f"Operation author: "
+                                f"`Operation author`: "
                                 f"{operation_author.display_name if operation_author is not None else operation_author}"
                                 f"({operation_reason})\n",
                                 color=disnake.Color.green(),
@@ -803,7 +848,7 @@ class RRSCore(commands.Cog):
                                 title="UNABLE TO SYNC ERROR",
                                 description=f"Removing structure roles bc plasmo role was removed\n"
                                 f"`User`: {after.display_name}({after.mention})\n"
-                                f"`Structure Guild`: {structure_guild.name}\n"
+                                f"`Structure`: {structure_guild.name}\n"
                                 f"`not Removed Role:` {structure_role.name}\n",
                                 color=disnake.Color.dark_red(),
                             )

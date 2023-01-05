@@ -18,13 +18,20 @@ class RRSCommands(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="rrs-sync")
-    @commands.is_owner()
     async def rrs_sync_command(
         self,
         interaction: ApplicationCommandInteraction,
         user: disnake.User = None,
         user_id: str = None,
     ):
+        """
+        Sync roles for user
+
+        Parameters
+        ----------
+        user: User to sync roles for
+        user_id: User ID to sync roles for
+        """
         await interaction.response.defer(ephemeral=True)
         if user_id is not None:
             user = await self.bot.fetch_user(int(user_id))
@@ -44,6 +51,13 @@ class RRSCommands(commands.Cog):
     async def rrs_everyone_sync_command(
         self, inter: ApplicationCommandInteraction, all_guilds: bool = False
     ):
+        """
+        Sync roles for everyone
+
+        Parameters
+        ----------
+        all_guilds: Sync roles for members in all guilds, including structure guilds
+        """
         await inter.response.defer(ephemeral=True)
 
         status_embed = disnake.Embed(
