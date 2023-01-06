@@ -29,10 +29,12 @@ class LogsServer:
     role_logs_channel_id = 935571360393068614
     messages_channel_id = 1008822105200132106
     rrs_logs_channel_id = 1033768782801420340
+    rrs_verification_channel_id = 1060912903257079878
     leave_logs_channel_id = 1057983888229670922
 
     roles_notifications_role_id = 1046524223377637416
     errors_notifications_role_id = 876056190726045716
+    rrs_verifications_notifications_role_id = 843154786726445105
 
 
 class Emojis:
