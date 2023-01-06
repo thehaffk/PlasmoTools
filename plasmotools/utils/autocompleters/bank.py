@@ -17,7 +17,12 @@ async def search_bank_cards_autocompleter(
     Returns a list of the cards for given query
     """
     if len(value) <= 2:
-        return [Localized("🔎 Request must be longer than 2 characters", key="SEARCH_CARDS_AUTOCOMPLETE_MUST_BE_MORE_THAN_2")]
+        return [
+            Localized(
+                "🔎 Request must be longer than 2 characters",
+                key="SEARCH_CARDS_AUTOCOMPLETE_MUST_BE_MORE_THAN_2",
+            )
+        ]
 
     async with ClientSession(
         headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
@@ -42,7 +47,12 @@ async def search_bank_cards_autocompleter(
                     for card in response_json["data"]
                 }
                 if len(cards) == 0:
-                    cards = [Localized("🔎 Nothing was found", key="SEARCH_CARDS_AUTOCOMPLETE_NOT_FOUND")]
+                    cards = [
+                        Localized(
+                            "🔎 Nothing was found",
+                            key="SEARCH_CARDS_AUTOCOMPLETE_NOT_FOUND",
+                        )
+                    ]
                 return cards
             else:
                 logger.error(
