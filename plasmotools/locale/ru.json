@@ -1,0 +1,18 @@
+{
+    "FIRE_COMMAND_NAME": "уволить",
+    "FIRE_COMMAND_DESCRIPTION": "Уволить игрока",
+    "FIRE_PLAYER_NAME": "игрок",
+    "FIRE_PLAYER_DESCRIPTION": "Игрок, которого вы хотите уволить",
+    "FIRE_ROLE_NAME": "роль",
+    "FIRE_ROLE_DESCRIPTION": "Роль [⚠ Выбирайте только из списка!]",
+    "FIRE_REASON_NAME": "причина",
+    "FIRE_REASON_DESCRIPTION": "Причина увольнения",
+
+    "SET_PAYOUTS_CARD_COMMAND_NAME": "установить-карту-для-выплат",
+    "SET_PAYOUTS_CARD_COMMAND_DESCRIPTION": "Установить карту для выплат гос. структур",
+    "SET_PAYOUTS_CARD_PARAM_NAME": "карта",
+    "SET_PAYOUTS_CARD_PARAM_DESCRIPTION": "Номер карты в формате 9000 или EB-9000. EB-0142 -> 142. EB-3666 -> 3666",
+
+    "SEARCH_CARDS_AUTOCOMPLETE_NOT_FOUND": "🔎 Ничего не нашлось",
+    "SEARCH_CARDS_AUTOCOMPLETE_MUST_BE_MORE_THAN_2": "🔎 Запрос должен быть длиннее 2-ух символов"
+}

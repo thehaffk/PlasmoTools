@@ -16,7 +16,7 @@ TOKEN = os.getenv("TOKEN")
 PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
 DATABASE_PATH = "./data.sqlite"
 
-__version__ = "1.5.8" + ("a" if DEBUG else "")
+__version__ = "1.5.7.2" + ("a" if DEBUG else "")
 
 # todo: update version?
 
@@ -29,10 +29,12 @@ class LogsServer:
     role_logs_channel_id = 935571360393068614
     messages_channel_id = 1008822105200132106
     rrs_logs_channel_id = 1033768782801420340
+    rrs_verification_channel_id = 1060912903257079878
     leave_logs_channel_id = 1057983888229670922
 
     roles_notifications_role_id = 1046524223377637416
     errors_notifications_role_id = 876056190726045716
+    rrs_verifications_notifications_role_id = 843154786726445105
 
 
 class Emojis:
