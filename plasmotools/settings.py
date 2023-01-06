@@ -32,6 +32,7 @@ class LogsServer:
     leave_logs_channel_id = 1057983888229670922
 
     roles_notifications_role_id = 1046524223377637416
+    errors_notifications_role_id = 876056190726045716
 
 
 class Emojis:
