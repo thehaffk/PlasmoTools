@@ -13,10 +13,10 @@ load_dotenv()
 
 DEBUG = bool(os.getenv("BOT_DEBUG", 0))
 TOKEN = os.getenv("TOKEN")
-ADMIN_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
+PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
 DATABASE_PATH = "./data.sqlite"
 
-__version__ = "1.5.8" + (" BETA ⚠" if DEBUG else "")
+__version__ = "1.5.8" + ("a" if DEBUG else "")
 
 # todo: update version?
 
@@ -110,6 +110,8 @@ class PlasmoRPGuild:
     anticheat_logs_channel_id = 959332068993679400
     server_logs_channel_id = 1008814971926364300
     logs_channel_id = 959332068993679400
+
+    messages_channel_id = 1049768431009935481
 
 
 disallowed_to_rrs_roles = [

@@ -19,7 +19,7 @@ async def _get_banker_transactions(days, to: int = 0) -> List[dict]:
     logger.debug("Running _get_banker_transactions with days=%i, to=%i", days, to)
     try:
         async with aiohttp.ClientSession(
-            headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
+            headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
         ) as session:
             transactions = []
             async with session.get(

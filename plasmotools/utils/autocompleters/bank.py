@@ -19,7 +19,7 @@ async def search_bank_cards_autocompleter(
         return {"🔎 Запрос должен быть длиннее 2-ух символов ": "NOTFOUND"}
 
     async with ClientSession(
-        headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
+        headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
     ) as session:
         async with session.get(
             "https://rp.plo.su/api/bank/search/cards",

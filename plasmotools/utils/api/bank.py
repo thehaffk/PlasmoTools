@@ -67,7 +67,7 @@ async def search_cards(token: str, query: str) -> list:
 async def get_card_data(card_id: int) -> Optional[dict]:
     # https://rp.plo.su/api/bank/cards?ids=EB-0000
     async with aiohttp.ClientSession(
-        headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
+        headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
     ) as session:
         async with session.get(
             "https://rp.plo.su/api/bank/cards",
@@ -89,7 +89,7 @@ async def get_card_data(card_id: int) -> Optional[dict]:
 async def get_penalties(tab: str = "active") -> List[dict]:
     try:
         async with aiohttp.ClientSession(
-            headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
+            headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
         ) as session:
             penalties = []
             offset = 0
@@ -135,7 +135,7 @@ async def get_penalties(tab: str = "active") -> List[dict]:
 
 
 async def cancel_penalty(
-    penalty_id: int, token: str = settings.ADMIN_PLASMO_TOKEN
+    penalty_id: int, token: str = settings.PT_PLASMO_TOKEN
 ) -> Tuple[bool, str]:
     async with aiohttp.ClientSession(
         headers={"Authorization": f"Bearer {token}"}
