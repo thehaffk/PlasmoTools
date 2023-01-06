@@ -6,14 +6,18 @@ from disnake.ext.commands.errors import (
     MissingPermissions,
     MissingRole,
     NotOwner,
-    NoPrivateMessage, )
+    NoPrivateMessage,
+)
 
 from plasmotools import settings
 
 logger = logging.getLogger(__name__)
 
+
 class GuildIsNotRegistered(commands.CheckFailure):
     pass
+
+
 class ErrorHandler(commands.Cog):
     """
     Handler for disnake errors
@@ -71,8 +75,8 @@ class ErrorHandler(commands.Cog):
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description="Сервер не зарегистрирован как официальная структура.\n"
-                                "Если вы считаете что это ошибка - обратитесь в "
-                                f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                    "Если вы считаете что это ошибка - обратитесь в "
+                    f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
                 ephemeral=True,
             )

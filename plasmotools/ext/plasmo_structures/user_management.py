@@ -480,7 +480,6 @@ class UserManagement(commands.Cog):
             ),
         )
 
-
     @commands.guild_only()
     @commands.default_member_permissions(manage_roles=True)
     @is_guild_registered()

@@ -648,9 +648,9 @@ class RRSCore(commands.Cog):
                             color=disnake.Color.dark_red(),
                         )
                         structure_logs_channel = self.bot.get_channel(
-                            (await guilds_database.get_guild(
-                                structure_guild.id
-                            )).logs_channel_id
+                            (
+                                await guilds_database.get_guild(structure_guild.id)
+                            ).logs_channel_id
                         )
                         for channel in [structure_logs_channel, rrs_logs_channel]:
                             await channel.send(embed=log_embed)
@@ -700,12 +700,14 @@ class RRSCore(commands.Cog):
         neccessary_plasmo_roles = set(neccessary_plasmo_roles)
         unwanted_plasmo_roles = set(unwanted_plasmo_roles) - neccessary_plasmo_roles
 
-        removed_plasmo_roles = set(  # todo: rename variables (roles_to_remove, roles_to_add or smth)
-            [
-                plasmo_guild.get_role(role)
-                for role in set(unwanted_plasmo_roles)
-                if role in [_.id for _ in plasmo_member.roles]
-            ]
+        removed_plasmo_roles = (
+            set(  # todo: rename variables (roles_to_remove, roles_to_add or smth)
+                [
+                    plasmo_guild.get_role(role)
+                    for role in set(unwanted_plasmo_roles)
+                    if role in [_.id for _ in plasmo_member.roles]
+                ]
+            )
         )
         added_plasmo_roles = set(
             [

@@ -354,12 +354,9 @@ class PlasmoLogger(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: disnake.Message):
-        if (
-            message.guild is None
-            or message.guild.id
-            not in [guild.discord_id for guild in settings.structure_guilds]
-            + [settings.PlasmoRPGuild.guild_id]
-        ):
+        if message.guild is None or message.guild.id not in [
+            guild.discord_id for guild in settings.structure_guilds
+        ] + [settings.PlasmoRPGuild.guild_id]:
             return False
         if message.author.id == self.bot.user.id:
             return
@@ -393,12 +390,9 @@ class PlasmoLogger(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: disnake.Message, after: disnake.Message):
-        if (
-            before.guild is None
-            or before.guild.id
-            not in [guild.discord_id for guild in settings.structure_guilds]
-            + [settings.PlasmoRPGuild.guild_id]
-        ):
+        if before.guild is None or before.guild.id not in [
+            guild.discord_id for guild in settings.structure_guilds
+        ] + [settings.PlasmoRPGuild.guild_id]:
             return False
         if before.author.id == self.bot.user.id:
             return
