@@ -448,7 +448,6 @@ class Payouts(commands.Cog):
         )
         if message != "":
             embed.add_field(name="Комментарий", value=message)
-            embed.add_field(name="Комментарий к переводу", value=transaction_message)
 
         async with ClientSession() as session:
             webhook = disnake.Webhook.from_url(project.webhook_url, session=session)
@@ -469,6 +468,9 @@ class Payouts(commands.Cog):
 
         await self.bot.get_channel(guild.logs_channel_id).send(
             embed=embed.add_field("Выплатил", interaction.author.mention, inline=False)
+            .add_field(
+                name="Комментарий к переводу", value=transaction_message, inline=False
+            )
             .add_field("Проект", project.name, inline=False)
             .add_field("С карты", formatters.format_bank_card(from_card), inline=False)
             .add_field(
