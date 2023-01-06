@@ -86,6 +86,10 @@ class RRSCommands(commands.Cog):
         edit: bool = False,
         entry_id: int = None,
     ) -> bool:
+        structure_guild_id = int(structure_guild_id)
+        structure_role_id = int(structure_role_id)
+        plasmo_role_id = int(plasmo_role_id)
+
         embed_title = (
             "RRS "
             + ("Добавление новой роли" if not edit else "Редактирование роли")
@@ -580,13 +584,9 @@ class RRSCommands(commands.Cog):
             await inter.send("Отправлено на подтверждение", ephemeral=True)
             admin_decision = await self.get_admin_confirmation(
                 inter.author,
-                int(structure_guild_id)
-                if structure_guild_id is not None
-                else entry.structure_guild_id,
-                int(structure_role_id)
-                if structure_role_id is not None
-                else entry.structure_role_id,
-                int(plasmo_role_id) if plasmo_role_id is not None else entry.plasmo_role_id,
+                structure_guild_id or entry.structure_guild_id,
+                structure_role_id or entry.structure_role_id,
+                plasmo_role_id or entry.plasmo_role_id,
                 edit=True,
                 entry_id=entry_id,
             )
