@@ -99,16 +99,16 @@ class BACSynchronization(commands.Cog):
         )
         banned_role: disnake.Role = gca_guild.get_role(settings.GCAGuild.banned_role_id)
         if has_pass:
-            await member.add_roles(has_pass_role)
-            await member.remove_roles(without_pass_role)
+            await member.add_roles(has_pass_role, reason="RRSNR", atomic=False)
+            await member.remove_roles(without_pass_role, reason="RRSNR", atomic=False)
         else:
-            await member.add_roles(without_pass_role)
-            await member.remove_roles(has_pass_role)
+            await member.add_roles(without_pass_role, reason="RRSNR", atomic=False)
+            await member.remove_roles(has_pass_role, reason="RRSNR", atomic=False)
 
         if is_banned:
-            await member.add_roles(banned_role)
+            await member.add_roles(banned_role, reason="RRSNR", atomic=False)
         else:
-            await member.remove_roles(banned_role)
+            await member.remove_roles(banned_role, reason="RRSNR", atomic=False)
 
         return True
 

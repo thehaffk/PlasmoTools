@@ -28,7 +28,7 @@ def setup() -> None:
     file_handler.setFormatter(log_format)
     root_logger.addHandler(file_handler)
 
-    logging.getLogger("disnake").setLevel(logging.INFO)
+    logging.getLogger("disnake").setLevel(logging.WARNING)
     logging.getLogger("aiosqlite").setLevel(logging.WARNING)
     logging.getLogger("asyncio").setLevel(logging.WARNING)
 

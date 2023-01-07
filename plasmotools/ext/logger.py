@@ -7,10 +7,10 @@ import random
 import re
 
 import disnake
-from aiohttp import ClientSession
 from disnake.ext import commands
 
 from plasmotools import settings
+from plasmotools.utils import api
 from plasmotools.utils.database.rrs import get_action, get_rrs_roles
 
 logger = logging.getLogger(__name__)
@@ -109,14 +109,19 @@ class PlasmoLogger(commands.Cog):
         if executed_by_rrs:
             if "Automated Sync" in audit_entry.reason:
                 sync_reason_raw = re.findall(
-                    r"RRS | Automated Sync | ([\s\S]+)", audit_entry.reason
+                    r"RRS \| Automated Sync \| ([\s\S]*)", audit_entry.reason
                 )
-                sync_reason = sync_reason_raw[0] if sync_reason_raw else "Не указана"
+                sync_reason = (
+                    sync_reason_raw[0] if sync_reason_raw else "Не указана"
+                ).strip()
+                sync_reason = (
+                    sync_reason.replace("_", "\_").replace("\n", "\\n")
+                    if sync_reason
+                    else "Не указана"
+                )
+
                 description_text += (
-                    "**"
-                    + ("Выдано " if is_role_added else "Снято ")
-                    + f"через Plasmo Tools**\n"
-                    f"Автоматическая синхронизация с дискордами структур (RRS)\n\n"
+                    f"Синхронизация со структурами (RRS)\n\n"
                     f"**Причина:** {sync_reason}"
                 )
             if "RRSID" in audit_entry.reason:
@@ -125,11 +130,7 @@ class PlasmoLogger(commands.Cog):
                 )
                 rrs_entry = await get_action(rrs_entry_id)
 
-                description_text += (
-                    "**"
-                    + ("Выдано " if is_role_added else "Снято ")
-                    + f"через Plasmo Tools** (ID: {rrs_entry.id})\n"
-                )
+                description_text += f"via Plasmo Tools (ID: {rrs_entry.id})\n"
 
                 rrs_rules = await get_rrs_roles(
                     structure_role_id=rrs_entry.structure_role_id
@@ -144,8 +145,11 @@ class PlasmoLogger(commands.Cog):
                     f"**Структура:** {structure_guild.name}\n"
                     f"**Роль:** {structure_role.name}\n"
                     f"**Автор:** <@{rrs_entry.author_id}>\n"
-                    f"**Одобрил:** <@{rrs_entry.approved_by_user_id}>"
                 )
+                if rrs_entry.approved_by_user_id != rrs_entry.author_id:
+                    description_text += (
+                        f"**Авторизовано:** <@{rrs_entry.approved_by_user_id}>\n"
+                    )
         else:
             operation_author = audit_entry.user
             description_text += (
@@ -155,9 +159,10 @@ class PlasmoLogger(commands.Cog):
                 + operation_author.display_name
                 + " "
                 + operation_author.mention
+                + "\n"
             )
 
-        description_text += f"\n\n"
+        description_text += f"\n"
         description_text += "**Роли после изменения:** " + ", ".join(
             [role.name for role in user.roles[1:]]
         )
@@ -167,7 +172,7 @@ class PlasmoLogger(commands.Cog):
             if is_role_added
             else disnake.Color.dark_red(),
             title=f"{user.display_name}  - Роль {role.name} {'добавлена' if is_role_added else 'снята'}",
-            description=description_text,
+            description=description_text.replace("_", "\_"),
         )
         logs_guild = self.bot.get_guild(settings.LogsServer.guild_id)
         log_channel = logs_guild.get_channel(settings.LogsServer.role_logs_channel_id)
@@ -189,26 +194,47 @@ class PlasmoLogger(commands.Cog):
         if guild is not None and guild.id != settings.PlasmoRPGuild.guild_id:
             return False
 
-        await asyncio.sleep(10)  # Wait for plasmo API to update
-
-        for tries in range(10):
-            async with ClientSession() as session:
-                async with session.get(
-                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=stats,teams,warns",
-                ) as response:
-                    try:
-                        user_data = (await response.json())["data"]
-                    except Exception as err:
-                        logger.warning("Could not get data from PRP API: %s", err)
-                        await asyncio.sleep(30)
-                        continue
-                    if response.status != 200:
-                        logger.warning("Could not get data from PRP API: %s", user_data)
-            break
-
         log_channel = self.bot.get_guild(settings.LogsServer.guild_id).get_channel(
             settings.LogsServer.ban_logs_channel_id
         )
+
+        chosen_emoji = random.choice(logo_emojis)
+        ban_message = await log_channel.send(
+            embed=disnake.Embed(
+                title=f"⚡ {member.display_name} получил бан",
+                color=disnake.Color.dark_red(),
+                description=f"""
+                           Причина: `Waiting for API response`
+                           Профиль [Plasmo](https://rp.plo.su/u/{member.display_name}) | {member.mention}
+
+                           Получил бан: `Waiting for API response`
+                           Наиграно за текущий сезон: `Waiting for API response`
+                           Состоит в общинах: `Waiting for API response`
+
+                           {chosen_emoji} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
+                                       """.replace(
+                    "_", "\_"
+                ),
+            ).set_thumbnail(url="https://rp.plo.su/avatar/" + member.display_name)
+        )
+
+        await asyncio.sleep(10)  # Wait for plasmo API to update
+        user_data = await api.user.get_user_data(discord_id=member.id)
+
+        # for tries in range(10):
+        # async with ClientSession() as session:
+        #     async with session.get(
+        #         url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=stats,teams,warns",
+        #     ) as response:
+        #         try:
+        #             user_data = (await response.json())["data"]
+        #         except Exception as err:
+        #             logger.warning("Could not get data from PRP API: %s", err)
+        #             await asyncio.sleep(30)
+        #             continue
+        #         if response.status != 200:
+        #             logger.warning("Could not get data from PRP API: %s", user_data)
+        # break
 
         reason: str = user_data.get("ban_reason", "Не указана")
         nickname: str = user_data.get("nick", "")
@@ -245,12 +271,14 @@ class PlasmoLogger(commands.Cog):
                                                                                   + team['url'] + ')')
                         for team in user_data.get('teams', [])])}
             
-            {random.choice(logo_emojis)} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
-                        """,
+            {chosen_emoji} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
+                        """.replace(
+                "_", "\_"
+            ),
         ).set_thumbnail(url="https://rp.plo.su/avatar/" + nickname)
 
-        msg: disnake.Message = await log_channel.send(embed=log_embed)
-        await msg.publish()
+        await ban_message.edit(embed=log_embed)
+        await ban_message.publish()
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild: disnake.Guild, member: disnake.User):
@@ -261,20 +289,22 @@ class PlasmoLogger(commands.Cog):
             return False
 
         # TODO: Rewrite with plasmo.py
-        for tries in range(10):
-            async with ClientSession() as session:
-                async with session.get(
-                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
-                ) as response:
-                    try:
-                        user_data = (await response.json())["data"]
-                    except Exception as err:
-                        logger.warning("Could not get data from PRP API: %s", err)
-                        await asyncio.sleep(10)
-                        continue
-                    if response.status != 200:
-                        logger.warning("Could not get data from PRP API: %s", user_data)
-            break
+        await asyncio.sleep(10)  # Wait for plasmo API to update
+        user_data = await api.user.get_user_data(discord_id=member.id)
+        # for tries in range(10):
+        #     async with ClientSession() as session:
+        #         async with session.get(
+        #             url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
+        #         ) as response:
+        #             try:
+        #                 user_data = (await response.json())["data"]
+        #             except Exception as err:
+        #                 logger.warning("Could not get data from PRP API: %s", err)
+        #                 await asyncio.sleep(10)
+        #                 continue
+        #             if response.status != 200:
+        #                 logger.warning("Could not get data from PRP API: %s", user_data)
+        #     break
 
         nickname = user_data.get("nick", "")
         if nickname == "":
@@ -304,11 +334,9 @@ class PlasmoLogger(commands.Cog):
         ):
             warned_user = message.mentions[0]
             try:
+                await warned_user.send("https://imgur.com/5pdZQMi")  # komar v ahue
                 await warned_user.send(
-                    "https://media.discordapp.net/"
-                    "attachments/899202029656895518/971525622297931806/ezgif-7-17469e0166d2.gif"
-                )
-                await warned_user.send(
+                    content=f"{settings.GCAGuild.invite_url}",
                     embed=disnake.Embed(
                         title="⚠ Вам выдали предупреждение на Plasmo RP",
                         color=disnake.Color.dark_red(),
@@ -316,29 +344,28 @@ class PlasmoLogger(commands.Cog):
                         f"модерации или снять варн можно "
                         f"только тут - {settings.GCAGuild.invite_url}\n\n\n"
                         f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",
-                    )
-                )
-                await warned_user.send(
-                    content=f"{settings.GCAGuild.invite_url}",
+                    ),
                 )
             except disnake.Forbidden as err:
-                logger.warning(err)
+                logger.warning(
+                    "Unable to notify %d about warn: %s", (warned_user.id, err)
+                )
                 return False
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: disnake.Message):
-        if (
-            message.author.bot
-            or message.guild is None
-            or message.guild.id
-            not in [guild.discord_id for guild in settings.structure_guilds]
-            + [settings.PlasmoRPGuild.guild_id]
-        ):
+        if message.guild is None or message.guild.id not in [
+            guild.discord_id for guild in settings.structure_guilds
+        ] + [settings.PlasmoRPGuild.guild_id]:
             return False
         if message.author.id == self.bot.user.id:
             return
 
-        logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
+        logs_channel = self.bot.get_channel(
+            settings.PlasmoRPGuild.messages_channel_id
+            if not settings.DEBUG
+            else settings.LogsServer.messages_channel_id
+        )
         embed = (
             disnake.Embed(
                 description=f"Guild: **{message.guild}**\n\n"
@@ -363,20 +390,20 @@ class PlasmoLogger(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: disnake.Message, after: disnake.Message):
-        if (
-            before.author.bot
-            or before.guild is None
-            or before.guild.id
-            not in [guild.discord_id for guild in settings.structure_guilds]
-            + [settings.PlasmoRPGuild.guild_id]
-        ):
+        if before.guild is None or before.guild.id not in [
+            guild.discord_id for guild in settings.structure_guilds
+        ] + [settings.PlasmoRPGuild.guild_id]:
             return False
         if before.author.id == self.bot.user.id:
             return
         if before.content == after.content:
             return False
 
-        logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
+        logs_channel = self.bot.get_channel(
+            settings.PlasmoRPGuild.messages_channel_id
+            if not settings.DEBUG
+            else settings.LogsServer.messages_channel_id
+        )
         embed = (
             disnake.Embed(
                 description=f"Guild: **{before.guild}**  \n\n{before.author.mention} edited "

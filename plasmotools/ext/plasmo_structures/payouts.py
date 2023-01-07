@@ -3,7 +3,7 @@ from typing import Optional
 
 import disnake
 from aiohttp import ClientSession
-from disnake import ApplicationCommandInteraction
+from disnake import ApplicationCommandInteraction, Localized
 from disnake.ext import commands
 
 from plasmotools import settings
@@ -448,7 +448,6 @@ class Payouts(commands.Cog):
         )
         if message != "":
             embed.add_field(name="Комментарий", value=message)
-            embed.add_field(name="Комментарий к переводу", value=transaction_message)
 
         async with ClientSession() as session:
             webhook = disnake.Webhook.from_url(project.webhook_url, session=session)
@@ -469,6 +468,9 @@ class Payouts(commands.Cog):
 
         await self.bot.get_channel(guild.logs_channel_id).send(
             embed=embed.add_field("Выплатил", interaction.author.mention, inline=False)
+            .add_field(
+                name="Комментарий к переводу", value=transaction_message, inline=False
+            )
             .add_field("Проект", project.name, inline=False)
             .add_field("С карты", formatters.format_bank_card(from_card), inline=False)
             .add_field(
@@ -554,20 +556,25 @@ class Payouts(commands.Cog):
             return
         await self.payout(inter, user, amount, db_project, message)
 
-    @commands.slash_command(name="установить-карту-для-выплат")
+    @commands.slash_command(
+        name=Localized("set-payout-card", key="SET_PAYOUTS_CARD_COMMAND_NAME"),
+        description=Localized(key="SET_PAYOUTS_CARD_COMMAND_DESCRIPTION"),
+    )
     async def set_saved_card(
         self,
         inter: disnake.ApplicationCommandInteraction,
         card: str = commands.Param(
+            name=Localized(key="SET_PAYOUTS_CARD_PARAM_NAME"),
+            description=Localized(key="SET_PAYOUTS_CARD_PARAM_DESCRIPTION"),
             autocomplete=autocompleters.search_bank_cards_autocompleter,
         ),
     ):
         """
-        Установить карту для выплат гос. структур
+        Set up your card for payouts
 
         Parameters
         ----------
-        card: Номер карты в формате 9000 или EB-9000. EB-0142 -> 142. EB-3666 -> 3666
+        card: Card number, format: 9000 or EB-9000. EB-0142 -> 142. EB-3666 -> 3666
         """
         await inter.response.defer(ephemeral=True)
         await inter.edit_original_message(

@@ -2,6 +2,7 @@ import logging
 
 import disnake
 from aiohttp import ClientSession
+from disnake import Localized
 
 from plasmotools import settings
 from plasmotools.utils import formatters
@@ -16,10 +17,15 @@ async def search_bank_cards_autocompleter(
     Returns a list of the cards for given query
     """
     if len(value) <= 2:
-        return {"🔎 Запрос должен быть длиннее 2-ух символов ": "NOTFOUND"}
+        return [
+            Localized(
+                "🔎 Request must be longer than 2 characters",
+                key="SEARCH_CARDS_AUTOCOMPLETE_MUST_BE_MORE_THAN_2",
+            )
+        ]
 
     async with ClientSession(
-        headers={"Authorization": f"Bearer {settings.ADMIN_PLASMO_TOKEN}"}
+        headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
     ) as session:
         async with session.get(
             "https://rp.plo.su/api/bank/search/cards",
@@ -41,7 +47,12 @@ async def search_bank_cards_autocompleter(
                     for card in response_json["data"]
                 }
                 if len(cards) == 0:
-                    cards = {"🔎 Ничего не нашлось": "NOTFOUND"}
+                    cards = [
+                        Localized(
+                            "🔎 Nothing was found",
+                            key="SEARCH_CARDS_AUTOCOMPLETE_NOT_FOUND",
+                        )
+                    ]
                 return cards
             else:
                 logger.error(

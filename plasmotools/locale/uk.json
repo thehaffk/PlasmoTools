@@ -1,0 +1,17 @@
+{
+"FIRE_COMMAND_NAME": "звільнити",
+"FIRE_COMMAND_DESCRIPTION": "Звільнити гравця",
+"FIRE_PLAYER_NAME": "гравець",
+"FIRE_ROLE_NAME": "роль",
+"FIRE_REASON_NAME": "причина",
+"FIRE_PLAYER_DESCRIPTION": "Гравець, якого ви хочете звільнити",
+"FIRE_ROLE_DESCRIPTION": "Роль [⚠️ вибирайте тільки зі списку!]",
+"FIRE_REASON_DESCRIPTION": "Причина звільнення",
+
+"SET_PAYOUTS_CARD_COMMAND_NAME": "встановити-карту-для-виплат",
+"SET_PAYOUTS_CARD_COMMAND_DESCRIPTION": "Встановити карту для виплат структур",
+"SET_PAYOUTS_CARD_PARAM_NAME":"карта",
+"SET_PAYOUTS_CARD_PARAM_DESCRIPTION": "Номер картки у форматі 9000 або EB-9000. EB-0142 -> 142. EB-3666 -> 3666",
+"SEARCH_CARDS_AUTOCOMPLETE_NOT_FOUND": "🔎 Нічого не знайшлося",
+  "SEARCH_CARDS_AUTOCOMPLETE_MUST_BE_MORE_THAN_2": "🔎 Запит має містити більше 2 символів"
+}

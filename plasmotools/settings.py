@@ -13,10 +13,10 @@ load_dotenv()
 
 DEBUG = bool(os.getenv("BOT_DEBUG", 0))
 TOKEN = os.getenv("TOKEN")
-ADMIN_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
+PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
 DATABASE_PATH = "./data.sqlite"
 
-__version__ = "1.5.7" + (" BETA ⚠" if DEBUG else "")
+__version__ = "1.5.7.2" + ("a" if DEBUG else "")
 
 # todo: update version?
 
@@ -29,9 +29,12 @@ class LogsServer:
     role_logs_channel_id = 935571360393068614
     messages_channel_id = 1008822105200132106
     rrs_logs_channel_id = 1033768782801420340
+    rrs_verification_channel_id = 1060912903257079878
     leave_logs_channel_id = 1057983888229670922
 
     roles_notifications_role_id = 1046524223377637416
+    errors_notifications_role_id = 876056190726045716
+    rrs_verifications_notifications_role_id = 843154786726445105
 
 
 class Emojis:
@@ -110,6 +113,8 @@ class PlasmoRPGuild:
     anticheat_logs_channel_id = 959332068993679400
     server_logs_channel_id = 1008814971926364300
     logs_channel_id = 959332068993679400
+
+    messages_channel_id = 1049768431009935481
 
 
 disallowed_to_rrs_roles = [
