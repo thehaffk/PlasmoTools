@@ -16,7 +16,7 @@ TOKEN = os.getenv("TOKEN")
 PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
 DATABASE_PATH = "./data.sqlite"
 
-__version__ = "1.5.7.2" + ("a" if DEBUG else "")
+__version__ = "1.5.7.3" + ("a" if DEBUG else "")
 
 # todo: update version?
 
