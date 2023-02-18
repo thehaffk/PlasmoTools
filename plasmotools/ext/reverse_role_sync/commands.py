@@ -282,7 +282,7 @@ class RRSCommands(commands.Cog):
             if structure_guild is None:
                 structure_guild = "Structure guild not found"
                 logger.warning("Structure guild not found, disabling RRS entry")
-            await entry.edit(disabled=True)
+                await entry.edit(disabled=True)
             structure_role = structure_guild.get_role(entry.structure_role_id)
             if structure_role is None:
                 structure_role = "Structure role not found"
@@ -494,31 +494,6 @@ class RRSCommands(commands.Cog):
             disabled=disabled,
         )
 
-    # @commands.is_owner()
-    # @commands.command(name="rrs-add", hidden=True)
-    # async def register_rrs_entry_text_command(
-    #     self,
-    #     ctx: commands.Context,
-    #     srid: str,
-    #     prid: str,
-    # ):
-    #     """
-    #     Register RRS entry
-    #
-    #     Parameters
-    #     ----------
-    #     srid: structure role id
-    #     prid: plasmo role id
-    #     """
-    #     await ctx.message.delete()
-    #     await rrs_database.register_rrs_role(
-    #         structure_guild_id=ctx.guild.id,
-    #         structure_role_id=int(srid),
-    #         plasmo_role_id=int(prid),
-    #     )
-    #
-    #     await ctx.send("⚠ RRS rule was registered without verification ⚠")
-
     @commands.is_owner()
     @commands.slash_command(
         name="rrs-remove",
@@ -600,6 +575,16 @@ class RRSCommands(commands.Cog):
             structure_role_id=int(structure_role_id) if structure_role_id else None,
             plasmo_role_id=int(plasmo_role_id) if plasmo_role_id else None,
         )
+        await inter.edit_original_response(embed=disnake.Embed(
+            title="RRS Rule updated",
+            description=f"""raw data: 
+        `entry_id = {entry_id},
+        disabled = {disabled},
+        structure_guild_id = {structure_guild_id},
+        structure_role_id = {structure_role_id},
+        plasmo_role_id = {plasmo_role_id},`
+        """
+        ))
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
