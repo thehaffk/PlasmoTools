@@ -17,6 +17,7 @@
     "FIRE_ROLE_DESCRIPTION": "Роль [⚠ Выбирайте только из списка!]",
     "FIRE_REASON_NAME": "причина",
     "FIRE_REASON_DESCRIPTION": "Причина увольнения",
+    "FIRE_PLAYER_NAME": "игрок",
 
     "EVERYONE_SYNC_COMMAND_NAME": "синхронизировать-весь-сервер",
     "EVERYONE_SYNC_COMMAND_DESCRIPTION": "синхронизировать-весь-сервер",

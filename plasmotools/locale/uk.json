@@ -17,6 +17,7 @@
     "FIRE_ROLE_DESCRIPTION": "Роль [⚠️ Обирайте тільки зі списку!]",
     "FIRE_REASON_NAME": "причина",
     "FIRE_REASON_DESCRIPTION": "Причина звільнення",
+    "FIRE_PLAYER_NAME": "гравець",
 
     "EVERYONE_SYNC_COMMAND_NAME": "синхронизувати-увесь-сервер",
     "EVERYONE_SYNC_COMMAND_DESCRIPTION": "синхронизувати-увесь-сервер",
