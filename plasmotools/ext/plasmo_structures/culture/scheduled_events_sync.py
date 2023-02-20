@@ -44,15 +44,6 @@ class ScheduledEventsSync(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-    """
-        - :func:`on_guild_scheduled_event_create`
-        - :func:`on_guild_scheduled_event_delete`
-        - :func:`on_guild_scheduled_event_update`
-        - :func:`on_guild_scheduled_event_subscribe`
-        - :func:`on_guild_scheduled_event_unsubscribe`
-        - :func:`on_raw_guild_scheduled_event_subscribe`
-        - :func:`on_raw_guild_scheduled_event_unsubscribe`
-    """
 
     @commands.Cog.listener("on_guild_scheduled_event_create")
     async def on_guild_scheduled_event_create(self, event: disnake.GuildScheduledEvent):
