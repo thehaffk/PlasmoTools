@@ -166,11 +166,8 @@ class ScheduledEventsSync(commands.Cog):
             and after.status == disnake.GuildScheduledEventStatus.active
         ):
             return
-        print(before, after)
 
         async for user in after.fetch_users():
-            print(user)
-            # send every user mc message 'Ивент {after.name} начинается. Место проведения: {event.entity_metadata.location}'
             await messenger.send_mc_message(
                 f"Ивент {after.name} начинается. Место проведения: {after.entity_metadata.location}",
                 discord_id=user.id,
