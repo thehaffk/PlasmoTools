@@ -7,7 +7,7 @@ import logging
 import aiohttp.client_exceptions
 import disnake
 from aiohttp import ClientSession
-from disnake import HTTPException
+from disnake import HTTPException, Localized
 from disnake.ext import commands
 
 from plasmotools import settings
@@ -163,9 +163,7 @@ class BACSynchronization(commands.Cog):
         if not guild.id == settings.PlasmoRPGuild.guild_id:
             return False
         try:
-            await member.send(
-                "https://tenor.com/view/est_slova_i_emozii_tozhe-gif-25247683"
-            )
+            await member.send(settings.Gifs.est_slova)
             await member.send(
                 embed=disnake.Embed(
                     title="Вас разбанили на Plasmo RP",
@@ -193,7 +191,7 @@ class BACSynchronization(commands.Cog):
         return await self.sync(member)
 
     @commands.slash_command(
-        name="everyone-sync",
+        name=Localized("everyone-sync", key="EVERYONE_SYNC_COMMAND_NAME"),
         guild_ids=[settings.GCAGuild.guild_id],
         dm_permission=False,
     )

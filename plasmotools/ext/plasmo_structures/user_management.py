@@ -311,44 +311,51 @@ class UserManagement(commands.Cog):
             ephemeral=True,
         )
 
-    @commands.slash_command(name="нанять", dm_permission=False)
+    @commands.slash_command(
+        name=Localized("hire", key="HIRE_COMMAND_NAME"),
+        description=Localized(key="HIRE_COMMAND_DESCRIPTION"),
+        dm_permission=False,
+    )
     @commands.guild_only()
     @commands.default_member_permissions(manage_roles=True)
     @is_guild_registered()
     async def hire_user_command(
         self,
         inter: ApplicationCommandInteraction,
-        user: disnake.Member,
+        user: disnake.Member = commands.Param(
+            name=Localized("player", key="PLAYER_PARAM"),
+            description=Localized(key="HIRE_PLAYER_DESCRIPTION"),
+        ),
         role: str = commands.Param(
+            name=Localized(key="HIRE_ROLE_NAME"),
+            description=Localized(key="HIRE_ROLE_DESCRIPTION"),
             autocomplete=role_autocompleter,
         ),
         comment: Optional[str] = None,
     ):
         """
-        Нанять пользователя на роль
+        Hire user.
 
         Parameters
         ----------
-        user: Игрок для найма
-        role: Role [⚠ Выбирайте только из списка выше!]
-        comment: Комментарий к найму
-
+        user: Player
+        role: Role [⚠ Choose from list!]
+        comment: Comment
         """
+        await inter.response.defer(ephemeral=True)
         try:
-            guild, db_role = await database.get_guild(
-                inter.guild.id
-            ), await database.get_role(role_discord_id=int(role))
+            role = int(role)
         except ValueError:
             return await inter.send(
-                "https://tenor.com/view/%D0%B2%D0%B4%D1%83%D1%80%D0%BA%D1%83"
-                "-%D0%B4%D1%83%D1%80%D0%BA%D0%B0-%D0%BA%D0%BE%D1%82-%D0%BA%D0%BE%D1%82%D1%8D-gif-25825159",
+                settings.Gifs.v_durku,
                 ephemeral=True,
             )
+        guild, db_role = await database.get_guild(
+            inter.guild.id
+        ), await database.get_role(role_discord_id=int(role))
         if not await check_role(inter, guild, db_role):
             return
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
-        if plasmo_guild is None and not settings.DEBUG:
-            raise RuntimeError("Plasmo RP guild not found")
         plasmo_user = plasmo_guild.get_member(user.id) if plasmo_guild else None
         structure_role = inter.guild.get_role(db_role.role_discord_id)
         if structure_role is None:
@@ -375,15 +382,36 @@ class UserManagement(commands.Cog):
                 ),
                 ephemeral=True,
             )
+        hire_anyway = False
         if db_role.role_discord_id in [role.id for role in user.roles]:
-            return await inter.send(
+            await inter.edit_original_message(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Error",
-                    description=f"This user already has <@&{db_role.role_discord_id}> role.",
+                    description=f"User already has <@&{db_role.role_discord_id}> role.",
                 ),
-                ephemeral=True,
+                components=[
+                    disnake.ui.Button(
+                        label="Просто отправить уведомление",
+                        style=disnake.ButtonStyle.red,
+                        custom_id=f"hire_anyway.{user.id}.{db_role.role_discord_id}",
+                    )
+                ],
             )
+            try:
+
+                await self.bot.wait_for(
+                    "button_click",
+                    check=lambda i: (
+                        i.component.custom_id
+                        == f"hire_anyway.{user.id}.{db_role.role_discord_id}"
+                    ),
+                    timeout=300,
+                )
+            except asyncio.TimeoutError:
+                return await inter.edit_original_message(components=[])
+            hire_anyway = True
+            await inter.edit_original_message(components=[])
 
         # Check for permissions
         if inter.author.top_role.position <= structure_role.position:
@@ -397,7 +425,6 @@ class UserManagement(commands.Cog):
             )
 
         plasmo_user: disnake.Member
-        await inter.response.defer(ephemeral=True)
         embed = disnake.Embed(
             color=disnake.Color.green(),
             description=f"{user.mention} был принят на должность **{db_role.name}**",
@@ -406,30 +433,33 @@ class UserManagement(commands.Cog):
             icon_url="https://rp.plo.su/avatar/"
             + (plasmo_user.display_name if plasmo_user else user.display_name),
         )
-        if comment is not None:
+        if comment is not None and comment.strip() != "":
             embed.add_field(name="Комментарий", value=comment)
 
-        rrs_cog: core.RRSCore = self.bot.get_cog("RRSCore")
-        if rrs_cog is not None:
-            await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.green(), description="Проверка правил RRS..."
-                )
-            )
-            rrs_result = await rrs_cog.process_structure_role_change(
-                member=user,
-                role=structure_role,
-                operation_author=inter.author,
-                role_is_added=True,
-            )
-            if rrs_result is False:
-                return await inter.edit_original_message(
+        rrs_cog: Optional[core.RRSCore] = None
+        if not hire_anyway:
+            rrs_cog: Optional[core.RRSCore] = self.bot.get_cog("RRSCore")
+            if rrs_cog is not None:
+                await inter.edit_original_message(
                     embed=disnake.Embed(
-                        color=disnake.Color.red(),
-                        title="Error",
-                        description="Operation was cancelled by RRS.",
+                        color=disnake.Color.green(),
+                        description="Проверка правил RRS...",
                     )
                 )
+                rrs_result = await rrs_cog.process_structure_role_change(
+                    member=user,
+                    role=structure_role,
+                    operation_author=inter.author,
+                    role_is_added=True,
+                )
+                if rrs_result is False:
+                    return await inter.edit_original_message(
+                        embed=disnake.Embed(
+                            color=disnake.Color.red(),
+                            title="Error",
+                            description="Operation was cancelled by RRS.",
+                        )
+                    )
 
         try:
             await user.add_roles(
@@ -492,7 +522,7 @@ class UserManagement(commands.Cog):
         self,
         inter: ApplicationCommandInteraction,
         user: disnake.Member = commands.Param(
-            name=Localized("player", key="FIRE_PLAYER_NAME"),
+            name=Localized("player", key="PLAYER_PARAM"),
             description=Localized(key="FIRE_PLAYER_DESCRIPTION"),
         ),
         role: str = commands.Param(
@@ -522,9 +552,7 @@ class UserManagement(commands.Cog):
             ), await database.get_role(role_discord_id=int(role))
         except ValueError:
             return await inter.edit_original_message(
-                "https://tenor.com/view/%D0%B2%D0%B4%D1%83%D1%80%D0%BA%D1%83"
-                "-%D0%B4%D1%83%D1%80%D0%BA%D0%B0-%D0%BA%D0%BE%D1%82-%D0%BA%D0%BE%D1%82%D1%8D"
-                "-gif-25825159",
+                settings.Gifs.v_durku,
             )
         if not await check_role(inter, guild, db_role):
             return
@@ -555,6 +583,8 @@ class UserManagement(commands.Cog):
                     description="You cant fire this user.",
                 ),
             )
+
+        fire_anyway = False
         if db_role.role_discord_id not in [role.id for role in user.roles]:
             await inter.edit_original_message(
                 embed=disnake.Embed(
@@ -582,6 +612,7 @@ class UserManagement(commands.Cog):
                 )
             except asyncio.TimeoutError:
                 return await inter.edit_original_message(components=[])
+            fire_anyway = True
             await inter.edit_original_message(components=[])
         # Check for permissions
         if inter.author.top_role.position <= structure_role.position:
@@ -604,30 +635,33 @@ class UserManagement(commands.Cog):
             icon_url="https://rp.plo.su/avatar/"
             + (plasmo_user.display_name if plasmo_user else user.display_name),
         )
-        if reason is not None:
+        if reason is not None and reason.strip() != "":
             embed.add_field(name="Причина", value=reason)
 
-        rrs_cog: core.RRSCore = self.bot.get_cog("RRSCore")
-        if rrs_cog is not None:
-            await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.green(), description="Проверка правил RRS..."
-                )
-            )
-            rrs_result = await rrs_cog.process_structure_role_change(
-                member=user,
-                role=structure_role,
-                operation_author=inter.author,
-                role_is_added=False,
-            )
-            if rrs_result is False:
-                return await inter.edit_original_message(
+        rrs_cog: Optional[core.RRSCore] = None
+        if not fire_anyway:
+            rrs_cog: Optional[core.RRSCore] = self.bot.get_cog("RRSCore")
+            if rrs_cog is not None:
+                await inter.edit_original_message(
                     embed=disnake.Embed(
-                        color=disnake.Color.red(),
-                        title="Error",
-                        description="Operation was cancelled by RRS.",
+                        color=disnake.Color.green(),
+                        description="Проверка правил RRS...",
                     )
                 )
+                rrs_result = await rrs_cog.process_structure_role_change(
+                    member=user,
+                    role=structure_role,
+                    operation_author=inter.author,
+                    role_is_added=False,
+                )
+                if rrs_result is False:
+                    return await inter.edit_original_message(
+                        embed=disnake.Embed(
+                            color=disnake.Color.red(),
+                            title="Error",
+                            description="Operation was cancelled by RRS.",
+                        )
+                    )
 
         try:
             await user.remove_roles(

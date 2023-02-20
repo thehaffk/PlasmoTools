@@ -1,7 +1,8 @@
 import logging
+from typing import Optional
 
 import disnake
-from disnake import ApplicationCommandInteraction
+from disnake import ApplicationCommandInteraction, Localized
 from disnake.ext import commands
 
 from plasmotools import settings
@@ -20,8 +21,40 @@ class FastInfrastructurePayouts(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
+    async def checks(
+        self, message: disnake.Message, inter: disnake.Interaction
+    ) -> bool:
+        if message.author == inter.author:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Нельзя выплачивать самому себе",
+                ),
+                ephemeral=True,
+            )
+            return False
+        reacted_users = [
+            await _.users().flatten() for _ in message.reactions if _.emoji == "✅"
+        ]
+        reacted_users.append([])
+        if self.bot.user in reacted_users[0]:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="На сообщении стоит реакция ✅ от PlasmoTools, нельзя выплатить второй раз.\n\n"
+                    "Администраторы могут убрать эту реакцию и выплата будет вновь доступна",
+                ),
+                ephemeral=True,
+            )
+            return False
+
+        return True
+
     @commands.message_command(
-        name="Вызов", guild_ids=[settings.infrastructure_guild.discord_id]
+        name=Localized("Call", key="CALL_INFRASTUCTURE_BUTTON_NAME"),
+        guild_ids=[settings.infrastructure_guild.discord_id],
     )
     @commands.default_member_permissions(administrator=True)
     async def fast_call_payout_button(
@@ -29,7 +62,10 @@ class FastInfrastructurePayouts(commands.Cog):
     ):
         await inter.response.defer(ephemeral=True)
 
-        payouts_cog = self.bot.get_cog("Payouts")
+        if not await self.checks(message, inter):
+            return
+
+        payouts_cog: Optional[Payouts] = self.bot.get_cog("Payouts")
         if payouts_cog is None:
             await inter.send(
                 embed=disnake.Embed(
@@ -51,12 +87,15 @@ class FastInfrastructurePayouts(commands.Cog):
             transaction_message=f"Автоматическая выплата за вызов",
         )
         if result:
+            for reaction in message.reactions:
+                await reaction.remove(user=self.bot.user)
             await message.add_reaction("✅")
         else:
             await message.add_reaction("⚠")
 
     @commands.message_command(
-        name="Поломка", guild_ids=[settings.infrastructure_guild.discord_id]
+        name=Localized("Breakage", key="BREAKAGE_INFRASTUCTURE_BUTTON_NAME"),
+        guild_ids=[settings.infrastructure_guild.discord_id],
     )
     @commands.default_member_permissions(administrator=True)
     async def damage_payout_button(
@@ -64,7 +103,10 @@ class FastInfrastructurePayouts(commands.Cog):
     ):
         await inter.response.defer(ephemeral=True)
 
-        payouts_cog = self.bot.get_cog("Payouts")
+        if not await self.checks(message, inter):
+            return
+
+        payouts_cog: Optional[Payouts] = self.bot.get_cog("Payouts")
         if payouts_cog is None:
             await inter.send(
                 embed=disnake.Embed(
@@ -83,9 +125,11 @@ class FastInfrastructurePayouts(commands.Cog):
             amount=4,
             project=await database.projects.get_project(damage_project_id),
             message=f"За [починку поломки]({message.jump_url})",
-            transaction_message="Автоматическая выплата за починку поломки"
+            transaction_message="Автоматическая выплата за починку поломки",
         )
         if result:
+            for reaction in message.reactions:
+                await reaction.remove(user=self.bot.user)
             await message.add_reaction("✅")
         else:
             await message.add_reaction("⚠")

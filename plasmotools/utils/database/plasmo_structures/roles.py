@@ -114,7 +114,7 @@ async def add_role(
                                                 name, guild_discord_id, role_discord_id, available, webhook_url
                                             ) VALUES (?, ?, ?, ?, ?)""",
             (name, guild_discord_id, role_discord_id, available, webhook_url),
-        ) as cursor:
+        ):
             await db.commit()
             return await get_role(role_discord_id)
 
