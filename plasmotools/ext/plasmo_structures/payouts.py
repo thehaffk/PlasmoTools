@@ -23,9 +23,14 @@ class Payouts(commands.Cog):
         self.bot = bot
 
     # TODO:  payouts statistics
+    # TODO: remove create/read/update/delete commands and combine it to /projects
 
     @commands.guild_only()
-    @commands.slash_command(name="проекты", dm_permission=False)
+    @commands.slash_command(
+        name=Localized("projects", key="PROJECTS_COMMAND_NAME"),
+        description=Localized(key="PROJECTS_COMMAND_DESCRIPTION"),
+        dm_permission=False,
+    )
     async def projects(self, inter: ApplicationCommandInteraction):
         """
         Помощь по проектам и выплатам
@@ -58,7 +63,7 @@ class Payouts(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="проекты-создать", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
-    async def projects_create(
+    async def projects_create(  # todo: remove
         self,
         inter: ApplicationCommandInteraction,
         name: str,
@@ -137,7 +142,7 @@ class Payouts(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="проекты-редактировать", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
-    async def projects_edit(
+    async def projects_edit(  # todo: remove
         self,
         inter: ApplicationCommandInteraction,
         project_id: int,
@@ -200,7 +205,7 @@ class Payouts(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="проекты-удалить", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
-    async def projects_delete(
+    async def projects_delete(  # todo: remove
         self,
         inter: ApplicationCommandInteraction,
         project_id: int,
@@ -246,7 +251,7 @@ class Payouts(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="проекты-список", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
-    async def roles_list(self, inter: ApplicationCommandInteraction):
+    async def projects_list(self, inter: ApplicationCommandInteraction):  # todo: remove
         """
         Получить список проектов на сервере
         """
@@ -509,27 +514,42 @@ class Payouts(commands.Cog):
         return True
 
     @commands.guild_only()
-    @commands.slash_command(name="выплата", dm_permission=False)
+    @commands.slash_command(
+        name=Localized("payout", key="PAYOUT_COMMAND_NAME"),
+        description=Localized(key="PAYOUT_COMMAND_DESCRIPTION"),
+        dm_permission=False,
+    )
     @commands.default_member_permissions(administrator=True)
     async def payout_command(
         self,
         inter: ApplicationCommandInteraction,
-        user: disnake.Member,
-        amount: int,
-        project: str = commands.Param(
-            autocomplete=autocompleters.payouts_projects_autocompleter
+        user: disnake.Member = commands.Param(
+            name=Localized("player", key="PLAYER_PARAM"),
+            description=Localized(key="PAYOUT_PLAYER_DESCRIPTION"),
         ),
-        message: str = "",
+        amount: int = commands.Param(
+            name=Localized("amount", key="PAYOUT_AMOUNT_NAME"),
+            description=Localized(key="PAYOUT_AMOUNT_DESCRIPTION"),
+        ),
+        project: str = commands.Param(
+            name=Localized("project", key="PAYOUT_PROJECT_NAME"),
+            description=Localized(key="PAYOUT_PROJECT_DESCRIPTION"),
+            autocomplete=autocompleters.payouts_projects_autocompleter,
+        ),
+        message: str = commands.Param(
+            name=Localized("message", key="PAYOUT_MESSAGE_NAME"),
+            description=Localized(key="PAYOUT_MESSAGE_DESCRIPTION"),
+        ),
     ):
         """
-        Выплатить игроку алмазы
+        Payout diamonds to player
 
         Parameters
         ----------
-        user: Игрок, которому нужно выплатить алмазы
-        amount: Количество алмазов, которое нужно выплатить
-        project: Проект, от имени которого производится выплата
-        message: Сообщение, которое будет отправлено игроку
+        user: Player to pay
+        amount: Amount of diamonds to payout
+        project: Payout project
+        message: Comment to payout
         """
         await inter.response.defer(ephemeral=True)
         try:

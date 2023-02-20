@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 import disnake
 from disnake import ApplicationCommandInteraction
@@ -200,7 +201,7 @@ class RRSCommands(commands.Cog):
         if user is None:
             await interaction.edit_original_message("Please provide a user")
             return
-        rrs_core: RRSCore = self.bot.get_cog("RRSCore")
+        rrs_core: Optional[RRSCore] = self.bot.get_cog("RRSCore")
         await rrs_core.sync_user(user, reason=f"Индивидуальная синхронизация")
         await interaction.edit_original_message(
             f"Синхронизация {user.mention} завершена"
@@ -228,7 +229,7 @@ class RRSCommands(commands.Cog):
             plasmo_members += guild.members
         plasmo_members = set(plasmo_members)
 
-        rrs_core: RRSCore = self.bot.get_cog("RRSCore")
+        rrs_core: Optional[RRSCore] = self.bot.get_cog("RRSCore")
 
         lazy_update_members_count = len(plasmo_members) // 10
         for counter, member in enumerate(plasmo_members):
@@ -575,16 +576,18 @@ class RRSCommands(commands.Cog):
             structure_role_id=int(structure_role_id) if structure_role_id else None,
             plasmo_role_id=int(plasmo_role_id) if plasmo_role_id else None,
         )
-        await inter.edit_original_response(embed=disnake.Embed(
-            title="RRS Rule updated",
-            description=f"""raw data: 
+        await inter.edit_original_response(
+            embed=disnake.Embed(
+                title="RRS Rule updated",
+                description=f"""raw data: 
         `entry_id = {entry_id},
         disabled = {disabled},
         structure_guild_id = {structure_guild_id},
         structure_role_id = {structure_role_id},
         plasmo_role_id = {plasmo_role_id},`
-        """
-        ))
+        """,
+            )
+        )
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)

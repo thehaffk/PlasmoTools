@@ -11,6 +11,7 @@ from disnake.ext import commands
 
 from plasmotools import settings
 from plasmotools.utils import api
+from plasmotools.utils.api import messenger
 from plasmotools.utils.database.rrs import get_action, get_rrs_roles
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ class PlasmoLogger(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_member_leave(self, member: disnake.Member):
+    async def on_member_remove(self, member: disnake.Member):
         if member.guild.id != settings.PlasmoRPGuild.guild_id:
             return
 
@@ -178,6 +179,10 @@ class PlasmoLogger(commands.Cog):
         log_channel = logs_guild.get_channel(settings.LogsServer.role_logs_channel_id)
         await log_channel.send(embed=log_embed)
 
+        mc_message = (
+            "Вам " + ("выдали" if is_role_added else "сняли") + " роль " + role.name
+        )
+        await messenger.send_mc_message(discord_id=user.id, message=mc_message)
         logs_guild_member = logs_guild.get_member(user.id)
         if logs_guild_member:
             if (
@@ -334,7 +339,7 @@ class PlasmoLogger(commands.Cog):
         ):
             warned_user = message.mentions[0]
             try:
-                await warned_user.send("https://imgur.com/5pdZQMi")  # komar v ahue
+                await warned_user.send(settings.Gifs.amazed)  # komar v ahue
                 await warned_user.send(
                     content=f"{settings.GCAGuild.invite_url}",
                     embed=disnake.Embed(
@@ -361,11 +366,12 @@ class PlasmoLogger(commands.Cog):
         if message.author.id == self.bot.user.id:
             return
 
-        logs_channel = self.bot.get_channel(
+        plasmo_logs_channel = self.bot.get_channel(
             settings.PlasmoRPGuild.messages_channel_id
             if not settings.DEBUG
             else settings.LogsServer.messages_channel_id
         )
+        # dd_logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
         embed = (
             disnake.Embed(
                 description=f"Guild: **{message.guild}**\n\n"
@@ -374,7 +380,7 @@ class PlasmoLogger(commands.Cog):
             )
             .add_field(
                 name="Raw message",
-                value=f"```{message.content}```" if message.content else "empty",
+                value=f"```{message.content[:1000]}```" if message.content else "empty",
             )
             .set_footer(
                 text=f"Message ID: {message.id} / Author ID: {message.author.id} / Guild ID : {message.guild.id}"
@@ -386,7 +392,10 @@ class PlasmoLogger(commands.Cog):
                 name="Attachments",
                 value="\n".join([attachment.url for attachment in message.attachments]),
             )
-        await logs_channel.send(embed=embed)
+
+        if not settings.DEBUG:
+            await plasmo_logs_channel.send(embed=embed)
+        # await dd_logs_channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: disnake.Message, after: disnake.Message):
@@ -399,11 +408,13 @@ class PlasmoLogger(commands.Cog):
         if before.content == after.content:
             return False
 
-        logs_channel = self.bot.get_channel(
+        plasmo_logs_channel = self.bot.get_channel(
             settings.PlasmoRPGuild.messages_channel_id
             if not settings.DEBUG
             else settings.LogsServer.messages_channel_id
         )
+        # dd_logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
+
         embed = (
             disnake.Embed(
                 description=f"Guild: **{before.guild}**  \n\n{before.author.mention} edited "
@@ -412,12 +423,12 @@ class PlasmoLogger(commands.Cog):
             )
             .add_field(
                 name="Raw old message",
-                value=f"```{before.content}```" if before.content else "empty",
+                value=f"```{before.content[:1000]}```" if before.content else "empty",
                 inline=False,
             )
             .add_field(
                 name="Raw new message",
-                value=f"```{after.content}```" if after.content else "empty",
+                value=f"```{after.content[:1000]}```" if after.content else "empty",
             )
             .set_footer(
                 text=f"Message ID: {before.id} / Author ID: {before.author.id} / Guild ID : {before.guild.id}"
@@ -429,7 +440,9 @@ class PlasmoLogger(commands.Cog):
                 value=f"{[attachment.url for attachment in before.attachments]}\n\n"
                 f"{[attachment.url for attachment in after.attachments]}",
             )
-        await logs_channel.send(embed=embed)
+        if not settings.DEBUG:
+            await plasmo_logs_channel.send(embed=embed)
+        # await dd_logs_channel.send(embed=embed)
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)

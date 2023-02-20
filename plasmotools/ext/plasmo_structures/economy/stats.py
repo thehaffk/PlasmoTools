@@ -2,6 +2,7 @@ import logging
 from typing import List
 
 import disnake
+from disnake import Localized
 from disnake.ext import tasks, commands
 
 from plasmotools import settings
@@ -12,30 +13,23 @@ logger = logging.getLogger(__name__)
 
 async def generate_bankers_stats_embeds(days=7) -> List[disnake.Embed]:
     transactions = await banker.get_banker_transactions(days)
-    main_statistics_embed = disnake.Embed(
-        title=f"Bank statistics for last {days} days",
-        description=f"Total transactions: {len(transactions)}",
-        color=disnake.Color.green(),
-    )
+
     bankers = {}
     for transaction in transactions:
         if transaction["banker"] not in bankers:
             bankers[transaction["banker"]] = 0
         bankers[transaction["banker"]] += 1
     bankers = sorted(bankers.items(), key=lambda x: x[1], reverse=True)
-    bankers_top = ""
-    for index, _banker in enumerate(bankers):
-        bankers_top += (
-            f"**{index + 1}**. {_banker[0]} - "
-            f"{_banker[1]} transaction{'s' if _banker[1] % 10 != 1 else ''}\n"
-        )
-    if len(bankers_top) > 1024:  # TODO: fix this
-        logger.debug(bankers_top)
-        bankers_top = bankers_top[:1024]
-        main_statistics_embed.set_footer(
-            text="Bankers top is too long, only first 1024 characters are shown"
-        )
-    main_statistics_embed.add_field(name="Bankers top", value=bankers_top, inline=False)
+    bankers_top = "\n`№. transactions` - user\n"
+    for index, _banker in enumerate(bankers[:99]):
+        bankers_top += f"`{index + 1}. {' ' * (3 - len(str(_banker[1])) + 2 - len(str(index + 1)))}{_banker[1]}` - {_banker[0]} \n"
+    if len(bankers) > 100:
+        bankers_top += f"100 - {len(bankers) + 1} hidden"
+    main_statistics_embed = disnake.Embed(
+        title=f"Bank statistics for last {days} days",
+        description=f"Total transactions: {len(transactions)}\n" + bankers_top,
+        color=disnake.Color.green(),
+    )
     return [main_statistics_embed]
 
 
@@ -105,24 +99,39 @@ class BankerStats(commands.Cog):
         logger.info("%s Ready", __name__)
 
     @commands.slash_command(
-        name="статистика-банкиров",
+        name=Localized("banker-stats", key="BANKER_STATS_COMMAND_NAME"),
+        description=Localized(key="BANKER_STATS_COMMAND_DESCRIPTION"),
         dm_permission=False,
-        guild_ids=[settings.economy_guild.discord_id],
+        guild_ids=[
+            settings.economy_guild.discord_id,
+            settings.DevServer.guild_id,
+            settings.LogsServer.guild_id,
+        ],
     )
     @commands.default_member_permissions(administrator=True)
     async def bankers_stats(
         self,
         inter: disnake.ApplicationCommandInteraction,
-        days: int = commands.Param(gt=0, lt=366, default=7),
-        user: disnake.Member = None,
+        days: int = commands.Param(
+            gt=0,
+            lt=366,
+            default=7,
+            name=Localized(key="BANKER_STATS_DAYS_NAME"),
+            description=Localized(key="BANKER_STATS_DAYS_DESCRIPTION"),
+        ),
+        user: disnake.Member = commands.Param(
+            default=None,
+            name=Localized(key="BANKER_STATS_USER_NAME"),
+            description=Localized(key="BANKER_STATS_USER_DESCRIPTION"),
+        ),
     ):
         """
-        Get bankers statistics
+        Show statistics of all bankers / detailed by one employee
 
         Parameters
         ----------
-        days: количество дней, за которые нужно получить статистику
-        user: пользователь, статистику которого нужно получить
+        days: Number of days for which you need to get statistics
+        user: The user whose statistics you want to get
         """
         await inter.send(
             embed=disnake.Embed(

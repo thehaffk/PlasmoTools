@@ -14,10 +14,9 @@
 
     "FIRE_PLAYER_DESCRIPTION": "Игрок, которого вы хотите уволить",
     "FIRE_ROLE_NAME": "роль",
-    "FIRE_ROLE_DESCRIPTION": "Роль [⚠ Выбирайте только из списка!]",
+    "FIRE_ROLE_DESCRIPTION": "Роль [⚠️ Выбирайте только из списка!]",
     "FIRE_REASON_NAME": "причина",
     "FIRE_REASON_DESCRIPTION": "Причина увольнения",
-    "FIRE_PLAYER_NAME": "игрок",
 
     "EVERYONE_SYNC_COMMAND_NAME": "синхронизировать-весь-сервер",
     "EVERYONE_SYNC_COMMAND_DESCRIPTION": "синхронизировать-весь-сервер",
@@ -26,7 +25,7 @@
     "HIRE_COMMAND_DESCRIPTION": "Нанять пользователя на роль",
     "HIRE_PLAYER_DESCRIPTION": "Игрок, которого вы хотите нанять",
     "HIRE_ROLE_NAME": "роль",
-    "HIRE_ROLE_DESCRIPTION": "Роль [⚠ Выбирайте только из списка!]",
+    "HIRE_ROLE_DESCRIPTION": "Роль [⚠️ Выбирайте только из списка!]",
     "HIRE_REASON_NAME": "комментарий",
     "HIRE_REASON_DESCRIPTION": "Комментарий для принятия",
 
@@ -52,10 +51,44 @@
     "HELP_COMMAND_NAME": "помощь",
     "HELP_COMMAND_DESCRIPTION": "Помощь по боту",
 
+    "ROLE_STATS_COMMAND_NAME": "статистика-по-роли",
+    "ROLE_STATS_COMMAND_DESCRIPTION": "Показывает статистику наигранных часов по роли",
+    "ROLE_STATS_ROLE_NAME": "роль",
+    "ROLE_STATS_ROLE_DESCRIPTION": "Роль, участников с которой нужно вывести",
+
+    "BANKER_STATS_COMMAND_NAME": "статистика-банкиров",
+    "BANKER_STATS_COMMAND_DESCRIPTION": "Вывести статистику всех банкиров / подробную одного работника",
+    "BANKER_STATS_DAYS_NAME": "количество-дней",
+    "BANKER_STATS_DAYS_DESCRIPTION": "Количество дней, за которые нужно получить статистику",
+    "BANKER_STATS_USER_NAME": "игрок",
+    "BANKER_STATS_USER_DESCRIPTION": "Пользователь, статистику которого нужно получить",
+
+    "EMBED_COMMAND_NAME": "отправить-эмбед",
+    "EMBED_COMMAND_DESCRIPTION": "Отправить эмбед с кастомным текстом",
+    "EMBED_TITLE_NAME": "тайтл-эмбеда",
+    "EMBED_TITLE_DESCRIPTION": "Заголовок",
+    "EMBED_DESCRIPTION_NAME": "описание",
+    "EMBED_DESCRIPTION_DESCRIPTION": "Основной текст эмбеда",
+    "EMBED_COLOR_NAME": "цвет",
+    "EMBED_COLOR_DESCRIPTION": "Цвет рамки эмбеда",
+    "EMBED_MESSAGE_CONTENT_NAME": "сообщение",
+    "EMBED_MESSAGE_CONTENT_DESCRIPTION": "Текст, который нужно написать вне эмбеда",
+    "EMBED_COLOR_RED": "Красный",
+    "EMBED_COLOR_DARK_RED": "Тёмно-красный",
+    "EMBED_COLOR_GREEN": "Зелёный",
+    "EMBED_COLOR_DARK_GREEN": "Тёмно-зелёный",
+    "EMBED_COLOR_NO_COLOR": "Без цвета",
+    "EMBED_COLOR_DARK_PURPLE": "Тёмно-фиолетовый",
+    "EMBED_COLOR_DARK_GRAY": "Серый",
+
+    "TREASURY_BALANCE_COMMAND_NAME": "баланс-казны",
+    "TREASURY_BALANCE_COMMAND_DESCRIPTION": "Вывести список актуальных балансов казны сервера + госструктур",
+
     "PROFILE_BUTTON_NAME": "Профиль",
     "EVENT_INTERPOL_BUTTON_NAME": "Ивент",
     "FAKE_CALL_INTERPOL_BUTTON_NAME": "Ложный вызов",
     "TEN_PENALTIES_INTERPOL_BUTTON_NAME": "10 Штрафов",
+
 
     "CALL_INFRASTUCTURE_BUTTON_NAME": "Вызов",
     "BREAKAGE_INFRASTUCTURE_BUTTON_NAME": "Поломка"

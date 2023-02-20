@@ -34,6 +34,9 @@ class PenaltyUtilities(commands.Cog):
         await api.bank.cancel_penalty(penalty["id"])
 
     @tasks.loop(hours=12)
+    async def penalties_task(self):
+        await self.check_all_penalties()
+
     async def check_all_penalties(self):
         """
         Check all penalties and cancel them if user is banned
@@ -43,6 +46,7 @@ class PenaltyUtilities(commands.Cog):
         expired_penalties = await api.bank.get_penalties("expired")
         on_check_penalties = await api.bank.get_penalties("check")
 
+        # todo: alert when helper cannot manage penalty
         banned_players: List[str] = []
         active_players: List[str] = []
         for penalty in active_penalties + expired_penalties + on_check_penalties:

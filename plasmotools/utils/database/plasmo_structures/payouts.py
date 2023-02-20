@@ -177,7 +177,7 @@ async def set_saved_card(user_id: int, card_id: Optional[int] = None):
             """ INSERT INTO structure_saved_cards (user_id, card_id) VALUES (?, ?) 
                             ON CONFLICT(user_id) DO UPDATE SET card_id = ? """,
             (user_id, card_id, card_id),
-        ) as cursor:
+        ):
             await db.commit()
 
 

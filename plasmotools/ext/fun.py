@@ -3,6 +3,7 @@ import logging
 from random import choice, randint
 
 import disnake
+from disnake import StageInstance
 from disnake.ext import tasks, commands
 
 from plasmotools import settings
@@ -37,6 +38,10 @@ class Fun(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
+    @commands.command("самоуничтожение")
+    async def four_command(self, ctx: commands.Context):
+        await ctx.message.reply("https://imgur.com/8t9M1K9", mention_author=False)
+
     @commands.Cog.listener()
     async def on_message(self, message: disnake.Message):
         if message.content == self.bot.user.mention:
@@ -47,9 +52,8 @@ class Fun(commands.Cog):
                     await message.add_reaction("😡")
 
                 if randint(1, 10) == 1:
-                    await message.reply(
-                        "https://tenor.com/view/discord-komaru-gif-26032653"
-                    )
+                    await message.reply(settings.Gifs.dont_ping_me)
+
             except disnake.Forbidden:
                 pass
         elif self.bot.user.id in [user.id for user in message.mentions]:
@@ -57,13 +61,24 @@ class Fun(commands.Cog):
                 await asyncio.sleep(1)
                 if randint(1, 1000) == 1:
                     await message.reply("пошел нахуй")
+
         if " комар " in (" " + message.content + " ").lower():
             if randint(1, 10) == 1:
                 await message.channel.send(content=choice(komaru_gifs))
         if randint(0, 1) == 1:
             for word in settings.word_emojis:
                 if word == message.content:
-                    await message.add_reaction(settings.word_emojis[word])
+                    try:
+                        await message.add_reaction(settings.word_emojis[word])
+                    except disnake.Forbidden:
+                        pass
+
+    @commands.Cog.listener()
+    async def on_stage_instance_create(self, stage_instance: StageInstance):
+        stage: disnake.StageChannel = stage_instance.channel
+        voice_client: disnake.VoiceProtocol = await stage.connect()
+        await asyncio.sleep(600)
+        await voice_client.disconnect(force=True)
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
