@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 import disnake
 from disnake import ApplicationCommandInteraction
@@ -200,7 +201,7 @@ class RRSCommands(commands.Cog):
         if user is None:
             await interaction.edit_original_message("Please provide a user")
             return
-        rrs_core: RRSCore = self.bot.get_cog("RRSCore")
+        rrs_core: Optional[RRSCore] = self.bot.get_cog("RRSCore")
         await rrs_core.sync_user(user, reason=f"Индивидуальная синхронизация")
         await interaction.edit_original_message(
             f"Синхронизация {user.mention} завершена"
@@ -228,7 +229,7 @@ class RRSCommands(commands.Cog):
             plasmo_members += guild.members
         plasmo_members = set(plasmo_members)
 
-        rrs_core: RRSCore = self.bot.get_cog("RRSCore")
+        rrs_core: Optional[RRSCore] = self.bot.get_cog("RRSCore")
 
         lazy_update_members_count = len(plasmo_members) // 10
         for counter, member in enumerate(plasmo_members):
@@ -282,7 +283,7 @@ class RRSCommands(commands.Cog):
             if structure_guild is None:
                 structure_guild = "Structure guild not found"
                 logger.warning("Structure guild not found, disabling RRS entry")
-            await entry.edit(disabled=True)
+                await entry.edit(disabled=True)
             structure_role = structure_guild.get_role(entry.structure_role_id)
             if structure_role is None:
                 structure_role = "Structure role not found"
@@ -494,31 +495,6 @@ class RRSCommands(commands.Cog):
             disabled=disabled,
         )
 
-    # @commands.is_owner()
-    # @commands.command(name="rrs-add", hidden=True)
-    # async def register_rrs_entry_text_command(
-    #     self,
-    #     ctx: commands.Context,
-    #     srid: str,
-    #     prid: str,
-    # ):
-    #     """
-    #     Register RRS entry
-    #
-    #     Parameters
-    #     ----------
-    #     srid: structure role id
-    #     prid: plasmo role id
-    #     """
-    #     await ctx.message.delete()
-    #     await rrs_database.register_rrs_role(
-    #         structure_guild_id=ctx.guild.id,
-    #         structure_role_id=int(srid),
-    #         plasmo_role_id=int(prid),
-    #     )
-    #
-    #     await ctx.send("⚠ RRS rule was registered without verification ⚠")
-
     @commands.is_owner()
     @commands.slash_command(
         name="rrs-remove",
@@ -599,6 +575,18 @@ class RRSCommands(commands.Cog):
             structure_guild_id=int(structure_guild_id) if structure_guild_id else None,
             structure_role_id=int(structure_role_id) if structure_role_id else None,
             plasmo_role_id=int(plasmo_role_id) if plasmo_role_id else None,
+        )
+        await inter.edit_original_response(
+            embed=disnake.Embed(
+                title="RRS Rule updated",
+                description=f"""raw data: 
+        `entry_id = {entry_id},
+        disabled = {disabled},
+        structure_guild_id = {structure_guild_id},
+        structure_role_id = {structure_role_id},
+        plasmo_role_id = {plasmo_role_id},`
+        """,
+            )
         )
 
     async def cog_load(self):

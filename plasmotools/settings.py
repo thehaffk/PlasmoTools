@@ -2,6 +2,7 @@
 Config file for Plasmo Tools
 """
 
+import logging
 import os
 from builtins import bool
 from dataclasses import dataclass
@@ -10,15 +11,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 
 DEBUG = bool(os.getenv("BOT_DEBUG", 0))
 TOKEN = os.getenv("TOKEN")
-PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN")
+PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN", None)
+PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
 DATABASE_PATH = "./data.sqlite"
 
-__version__ = "1.5.7.3" + ("a" if DEBUG else "")
+if PT_PLASMO_TOKEN is None:
+    logger.critical("Plasmo oauth2 token not found")
+if PT_PLASMO_COOKIES is None:
+    logger.critical("Plasmo rp_token not found")
+
+__version__ = "1.5.8" + ("a" if DEBUG else "")
 
 # todo: update version?
+
+help_url = "https://thfk.notion.site/Plasmo-Tools-help-a5874f7c3a56433ea2c3816527740fa0"
 
 
 class LogsServer:
@@ -31,10 +42,12 @@ class LogsServer:
     rrs_logs_channel_id = 1033768782801420340
     rrs_verification_channel_id = 1060912903257079878
     leave_logs_channel_id = 1057983888229670922
+    moderators_channel_id = 1073654991417507931
 
     roles_notifications_role_id = 1046524223377637416
     errors_notifications_role_id = 876056190726045716
     rrs_verifications_notifications_role_id = 843154786726445105
+    moderator_role_id = 875736652977418292
 
 
 class Emojis:
@@ -53,6 +66,17 @@ class Emojis:
     komaru = "<:KOMAP:995730375504568361>"
     diana = "<:DIANA:1053604789147160656>"
     ru_flag = "🇷🇺"
+
+
+class Gifs:
+    v_durku = (
+        "https://tenor.com/view/%D0%B2%D0%B4%D1%83%D1%80%D0%BA%D1%83-"
+        "%D0%B4%D1%83%D1%80%D0%BA%D0%B0-%D0%BA%D0%BE%D1%82-"
+        "%D0%BA%D0%BE%D1%82%D1%8D-gif-25825159"
+    )
+    amazed = "https://imgur.com/5pdZQMi"
+    est_slova = "https://tenor.com/view/est_slova_i_emozii_tozhe-gif-25247683"
+    dont_ping_me = "https://tenor.com/view/discord-komaru-gif-26032653"
 
 
 word_emojis = {
@@ -96,6 +120,7 @@ class PlasmoRPGuild:
     ne_komar_role_id = 956884028533919774
     fusion_role_id = 751722994170331136
     helper_role_id = 1023622804794527805
+    moderator_role_id = 813670327376805889
 
     monitored_roles = [
         admin_role_id,
@@ -113,6 +138,7 @@ class PlasmoRPGuild:
     anticheat_logs_channel_id = 959332068993679400
     server_logs_channel_id = 1008814971926364300
     logs_channel_id = 959332068993679400
+    moderators_channel_id = 860449950726881341
 
     messages_channel_id = 1049768431009935481
 

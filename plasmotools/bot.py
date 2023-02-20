@@ -20,15 +20,8 @@ class PlasmoTools(commands.Bot):
     @classmethod
     def create(cls) -> "PlasmoTools":
         """Create and return an instance of a Bot"""
-        _intents = disnake.Intents.none()
-        _intents.members = True
-        _intents.bans = True
-        _intents.messages = True
-        _intents.message_content = True
-        _intents.guilds = True
-        _intents.guild_messages = True
-        _intents.guild_scheduled_events = True
-
+        _intents = disnake.Intents.all()
+        _intents.presences = False
         return cls(
             owner_ids=[
                 737501414141591594,  # /h#9140
@@ -43,6 +36,8 @@ class PlasmoTools(commands.Bot):
             help_command=None,
             description="Plasmo Tools",
             case_insensitive=True,
+            reload=settings.DEBUG,
+            strip_after_prefix=True,
         )
 
     async def on_ready(self):

@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import logging
 from typing import List, Union
@@ -151,7 +152,7 @@ class RRSCore(commands.Cog):
                 plasmo_role = plasmo_guild.get_role(rule.plasmo_role_id)
                 if not plasmo_role:
                     continue
-                active_rules_string += f"{rule.id}. {plasmo_role.name} - {structure_guild.name} - {structure_role.name}\n"
+                active_rules_string += f"{rule.id}. `{plasmo_role.name}` - `{structure_guild.name}` - `{structure_role.name}`\n"
 
         embed.add_field(
             name="Активные роли",
@@ -765,7 +766,7 @@ class RRSCore(commands.Cog):
         for user in plasmo_guild.members:
             await self.sync_user(user, "Синхронизация всех игроков")
 
-    @commands.Cog.listener("on_member_leave")
+    @commands.Cog.listener("on_member_remove")
     async def guild_leave_listener(self, member: disnake.Member):
         if member.guild.id == settings.PlasmoRPGuild.guild_id:
             await self.sync_user(member, "Пользователь вышел из дискорда Plasmo RP")
@@ -783,6 +784,8 @@ class RRSCore(commands.Cog):
             return
         if before.roles == after.roles:
             return
+        await asyncio.sleep(3)
+
         # Check if user is a player
         player_role = before.guild.get_role(settings.PlasmoRPGuild.player_role_id)
         if player_role in before.roles and player_role not in after.roles:
@@ -832,7 +835,7 @@ class RRSCore(commands.Cog):
 
                 structure_role = structure_guild.get_role(rule.structure_role_id)
                 if not structure_role:
-                    logger.critical(
+                    logger.warning(
                         "Unable to found structure role %d, disabling rrs rule",
                         rule.structure_role_id,
                     )
@@ -880,9 +883,15 @@ class RRSCore(commands.Cog):
                         )
                         continue
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        try:
+            await self.sync_all_players.start()
+        except RuntimeError:
+            pass
+
     async def cog_load(self):
         logger.info("%s Ready", __name__)
-        await self.sync_all_players.start()
 
 
 def setup(client):
