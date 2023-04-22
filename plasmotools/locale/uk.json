@@ -18,8 +18,8 @@
     "FIRE_REASON_NAME": "причина",
     "FIRE_REASON_DESCRIPTION": "Причина звільнення",
 
-    "EVERYONE_SYNC_COMMAND_NAME": "синхронизувати-увесь-сервер",
-    "EVERYONE_SYNC_COMMAND_DESCRIPTION": "синхронизувати-увесь-сервер",
+    "EVERYONE_SYNC_NAME": "синхронизувати-увесь-сервер",
+    "EVERYONE_SYNC_DESCRIPTION": "синхронизувати-увесь-сервер",
 
     "HIRE_COMMAND_NAME": "найняти",
     "HIRE_COMMAND_DESCRIPTION": "Найняти гравця на роль",

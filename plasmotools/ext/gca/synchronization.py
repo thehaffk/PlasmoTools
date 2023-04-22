@@ -1,16 +1,12 @@
-"""
-Cog-file for synchronization nicknames and roles at BAC discord guild
-"""
-import asyncio
 import logging
 
-import aiohttp.client_exceptions
 import disnake
-from aiohttp import ClientSession
-from disnake import HTTPException, Localized
-from disnake.ext import commands
+from disnake import HTTPException
+from disnake.ext import commands, tasks
 
 from plasmotools import settings
+from plasmotools.utils import api
+from plasmotools.utils import formatters
 
 logger = logging.getLogger(__name__)
 
@@ -22,75 +18,40 @@ class BACSynchronization(commands.Cog):
 
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
+        self.everyone_sync_task.start()
 
-    async def sync(self, member: disnake.Member) -> bool:
+    async def _sync(self, user: disnake.User | disnake.Member) -> bool:
         """
-        Synchronizes given member
-
-        :param member: member to sync
-        :return: bool - success or failed
+        Synchronize given member
         """
-        if (
-            member not in self.bot.get_guild(settings.GCAGuild.guild_id).members
-            or member.bot
-            or not isinstance(member, disnake.Member)
-        ):
+        gca_guild = self.bot.get_guild(settings.GCAGuild.guild_id)
+        member = gca_guild.get_member(user.id)
+        if member is None or member.bot:
             return False
+
         logger.debug("Syncing %s (%s)", member, member.display_name)
-        member = self.bot.get_guild(settings.GCAGuild.guild_id).get_member(member.id)
 
-        # TODO: Rewrite with plasmo.py
-        for _ in range(10):
-            async with ClientSession() as session:
-                async with session.get(
-                    url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}",
-                ) as response:
-                    try:
-                        response_json = await response.json()
-                    except aiohttp.client_exceptions.ContentTypeError as e:
-                        logger.warning("Could not get data from PRP API %s", e)
-                        return False
+        plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
+        plasmo_member = plasmo_guild.get_member(user.id)
+        if plasmo_member:
+            user_data = {
+                "banned": False,
+                "has_access": plasmo_guild.get_role(
+                    settings.PlasmoRPGuild.player_role_id
+                )
+                in plasmo_member.roles,
+                "nick": plasmo_member.display_name,
+            }
+        else:
+            user_data = await api.user.get_user_data(discord_id=member.id)
 
-                    if response.status != 200:
-                        logger.warning(
-                            "Could not get data from PRP API: %s",
-                            await response_json,
-                        )
-                        return False
-                    status = response_json.get("status")
-                    user_data = response_json.get("data", None)
-
-                    if not status:
-                        logger.warning(
-                            "Could not get data from PRP API: %s",
-                            response_json,
-                        )
-                        return False
-
-                    if user_data is None:
-                        logger.warning(
-                            "Could not get data from PRP API: \n %s \n %s",
-                            response.status,
-                            await response.text(),
-                        )
-                        await asyncio.sleep(10)
-                        continue
-
-            break
-
-        if user_data is None:
-            return False
+            if user_data is None:
+                return False
 
         is_banned: bool = user_data.get("banned", False)
         has_pass: bool = user_data.get("has_access", False)
         nickname: str = user_data.get("nick", "")
 
-        if member.display_name != nickname:
-            try:
-                await member.edit(nick=nickname)
-            except HTTPException:
-                pass
-        gca_guild: disnake.Guild = self.bot.get_guild(settings.GCAGuild.guild_id)
         has_pass_role: disnake.Role = gca_guild.get_role(
             settings.GCAGuild.has_pass_role_id
         )
@@ -98,37 +59,40 @@ class BACSynchronization(commands.Cog):
             settings.GCAGuild.without_pass_role_id
         )
         banned_role: disnake.Role = gca_guild.get_role(settings.GCAGuild.banned_role_id)
-        if has_pass:
-            await member.add_roles(has_pass_role, reason="RRSNR", atomic=False)
-            await member.remove_roles(without_pass_role, reason="RRSNR", atomic=False)
-        else:
-            await member.add_roles(without_pass_role, reason="RRSNR", atomic=False)
-            await member.remove_roles(has_pass_role, reason="RRSNR", atomic=False)
+
+        if member.display_name != nickname:
+            try:
+                await member.edit(nick=nickname)
+            except HTTPException:
+                pass
+
+        await member.add_roles(
+            has_pass_role if has_pass else without_pass_role,
+            reason="GCA Sync | RRSNR",
+            atomic=False,
+        )
+        await member.remove_roles(
+            without_pass_role if has_pass else has_pass_role,
+            reason="GCA Sync | RRSNR",
+            atomic=False,
+        )
 
         if is_banned:
-            await member.add_roles(banned_role, reason="RRSNR", atomic=False)
+            await member.add_roles(banned_role, reason="GCA Sync | RRSNR", atomic=False)
         else:
-            await member.remove_roles(banned_role, reason="RRSNR", atomic=False)
+            await member.remove_roles(
+                banned_role, reason="GCA Sync | RRSNR", atomic=False
+            )
 
         return True
 
-    @commands.Cog.listener()
-    async def on_member_update(self, before: disnake.Member, after: disnake.Member):
-        """
-        Discord event, called when member has been updated
-        """
-        if before.guild.id != settings.PlasmoRPGuild.guild_id:
-            return False
-        if before.display_name != after.display_name or before.roles != after.roles:
-            return await self.sync(after)
+    # Plasmo Sync is now in charge of handling nick changes
 
-    @commands.Cog.listener()
+    @commands.Cog.listener()  # todo: move somewhere else
     async def on_member_ban(self, guild: disnake.Guild, member: disnake.Member):
-        """
-        Called on discord event when user is banned, sends user DM to join BAC guild
-        """
-        if not guild.id == settings.PlasmoRPGuild.guild_id:
-            return False
+        if guild.id != settings.PlasmoRPGuild.guild_id:
+            return
+
         try:
             await member.send(
                 "https://media.discordapp.net/"
@@ -149,19 +113,18 @@ class BACSynchronization(commands.Cog):
             )
         except HTTPException as err:
             logger.warning(err)
-            return False
-        else:
-            return await self.sync(member)
+
+        await self._sync(member)
+        return
 
     @commands.Cog.listener()
     async def on_member_unban(
         self, guild: disnake.Guild, member: disnake.Member
     ) -> bool:
-        """
-        Called on discord event when user is unbanned, sends user DM to join PRP guild
-        """
-        if not guild.id == settings.PlasmoRPGuild.guild_id:
+
+        if guild.id != settings.PlasmoRPGuild.guild_id:
             return False
+
         try:
             await member.send(settings.Gifs.est_slova)
             await member.send(
@@ -179,27 +142,21 @@ class BACSynchronization(commands.Cog):
         except HTTPException as err:
             logger.warning(err)
             return False
-        return await self.sync(member)
+        return await self._sync(member)
 
     @commands.Cog.listener()
-    async def on_member_join(self, member: disnake.Member) -> bool:
-        """
-        Called on discord event when user join the guild, used for automatically sync user
-        """
-        if not member.guild.id == settings.GCAGuild.guild_id:
-            return False
-        return await self.sync(member)
+    async def on_member_join(self, member: disnake.Member):
+        if member.guild.id == settings.GCAGuild.guild_id:
+            await self._sync(member)
 
     @commands.slash_command(
-        name=Localized("everyone-sync", key="EVERYONE_SYNC_COMMAND_NAME"),
+        name="everyone-sync",
         guild_ids=[settings.GCAGuild.guild_id],
-        dm_permission=False,
     )
     @commands.has_permissions(manage_roles=True)
     async def everyone_sync(self, inter: disnake.ApplicationCommandInteraction):
-        # Docstring is in russian because disnake automatically puts in slash-command description
         """
-        Синхронизировать всех пользователей на сервере.
+        Синхронизировать всех пользователей на сервере. {{EVERYONE_SYNC}}
         """
 
         members = inter.guild.members
@@ -215,25 +172,27 @@ class BACSynchronization(commands.Cog):
 
         await inter.response.send_message(embed=embed_counter, ephemeral=True)
 
+        lazy_update_members_count = inter.guild.member_count // 10
         for counter, member in enumerate(members):
             embed_counter.clear_fields()
-            progress_bar = (
-                f'[**-{"-" * (counter // (len(members) // 30))}**'
-                f'{"-" * (30 - (counter // (len(members) // 30)))}]'
-            )
+            if not member.bot:
+                await self._sync(member)
             embed_counter.add_field(
-                name="🔃 Синхронизация",
-                value=f"{counter} / {len(members)}\n {member}\n{progress_bar}",
+                name=f"Прогресс...",
+                value=formatters.build_progressbar(counter + 1, len(members)),
             )
-            await inter.edit_original_message(embed=embed_counter)
-            await self.sync(member)
 
-        await inter.edit_original_message(
-            embed=disnake.Embed(
-                title="✅ Синхронизация завершена",
-                color=disnake.Color.dark_green(),
-            )
+            if counter % lazy_update_members_count == 0:
+                await inter.edit_original_message(embed=embed_counter)
+            continue
+
+        embed_counter.clear_fields()
+        embed_counter.add_field(
+            name=f"Синхронизировано пользователей: {len(members)}/{len(members)}",
+            value=formatters.build_progressbar(1, 1),
+            inline=False,
         )
+        await inter.edit_original_message(embed=embed_counter)
 
     @commands.slash_command(
         name="sync", guild_ids=[settings.GCAGuild.guild_id], dm_permission=False
@@ -242,13 +201,12 @@ class BACSynchronization(commands.Cog):
     async def sync_user(
         self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
     ):
-        # Docstring is in russian because disnake automatically puts in command description
-
-        """
+        """  # todo: localization
         Синхронизировать пользователя.
 
         Parameters
         ----------
+        inter
         user: Пользователь которого нужно синхронизировать
 
         """
@@ -260,7 +218,7 @@ class BACSynchronization(commands.Cog):
             ),
             ephemeral=True,
         )
-        if await self.sync(user):
+        if await self._sync(user):
             await inter.edit_original_message(
                 embed=disnake.Embed(
                     title="✅ Синхронизация завершена",
@@ -273,28 +231,35 @@ class BACSynchronization(commands.Cog):
         return False
 
     @disnake.ext.commands.user_command(
-        name="Синхронизировать",
+        name="Sync",
         guild_ids=[settings.GCAGuild.guild_id],
     )
     async def sync_button(
         self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
     ):
         """
-        Button that appears when you click on a member in Discord
+        Button that appears when you click on a member
         """
         await inter.response.defer(ephemeral=True)
-        await self.sync(user)
+        await self._sync(user)
         embed_counter = disnake.Embed(
-            title=(f"Синхронизировал {user} | " + str(inter.guild))
+            title=(f"Синхронизировал {user} | " + str(inter.guild)),
+            color=disnake.Color.dark_green(),
         )
 
         await inter.edit_original_message(embed=embed_counter)
 
-    async def cog_load(self):
-        """
-        Called when disnake bot object is ready
-        """
+    @tasks.loop(hours=12)
+    async def everyone_sync_task(self):
+        gca_guild = self.bot.get_guild(settings.GCAGuild.guild_id)
+        for member in gca_guild.members:
+            await self._sync(member)
 
+    @everyone_sync_task.before_loop
+    async def before_everyone_sync_task(self):
+        await self.bot.wait_until_ready()
+
+    async def cog_load(self):
         logger.info("%s Ready", __name__)
 
 

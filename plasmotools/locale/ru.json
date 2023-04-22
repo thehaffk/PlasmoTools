@@ -18,8 +18,8 @@
     "FIRE_REASON_NAME": "причина",
     "FIRE_REASON_DESCRIPTION": "Причина увольнения",
 
-    "EVERYONE_SYNC_COMMAND_NAME": "синхронизировать-весь-сервер",
-    "EVERYONE_SYNC_COMMAND_DESCRIPTION": "синхронизировать-весь-сервер",
+    "EVERYONE_SYNC_NAME": "синхронизировать-весь-сервер",
+    "EVERYONE_SYNC_DESCRIPTION": "синхронизировать-весь-сервер",
 
     "HIRE_COMMAND_NAME": "нанять",
     "HIRE_COMMAND_DESCRIPTION": "Нанять пользователя на роль",
@@ -88,7 +88,6 @@
     "EVENT_INTERPOL_BUTTON_NAME": "Ивент",
     "FAKE_CALL_INTERPOL_BUTTON_NAME": "Ложный вызов",
     "TEN_PENALTIES_INTERPOL_BUTTON_NAME": "10 Штрафов",
-
 
     "CALL_INFRASTUCTURE_BUTTON_NAME": "Вызов",
     "BREAKAGE_INFRASTUCTURE_BUTTON_NAME": "Поломка"
