@@ -12,7 +12,6 @@ from plasmotools.utils.database import plasmo_structures as database
 
 logger = logging.getLogger(__name__)
 
-# todo: Rewrite with buttons
 
 interpol_ranks = {
     935606863075090503: {

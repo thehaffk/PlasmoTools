@@ -18,6 +18,6 @@ asyncio.run(rrs.roles.setup_database())
 asyncio.run(rrs.actions.setup_database())
 asyncio.run(banker.setup_database())
 
-bot.load_extensions("plasmotools/ext")
 bot.i18n.load("plasmotools/locale/")
+bot.load_extensions("plasmotools/ext")
 bot.run(settings.TOKEN)

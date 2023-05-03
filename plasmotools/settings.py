@@ -25,7 +25,7 @@ if PT_PLASMO_TOKEN is None:
 if PT_PLASMO_COOKIES is None:
     logger.critical("Plasmo rp_token not found")
 
-__version__ = "1.5.8" + ("a" if DEBUG else "")
+__version__ = "1.5.9" + ("a" if DEBUG else "")
 
 # todo: update version?
 

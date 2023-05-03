@@ -11,8 +11,6 @@ from plasmotools.utils.database import plasmo_structures as database
 
 logger = logging.getLogger(__name__)
 
-# todo: Rewrite with buttons
-
 fake_call_project_id = 1 if settings.DEBUG else 5
 damage_project_id = 1 if settings.DEBUG else 5
 
