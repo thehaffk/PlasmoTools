@@ -120,7 +120,6 @@ class BACSynchronization(commands.Cog):
     async def on_member_unban(
         self, guild: disnake.Guild, member: disnake.Member
     ) -> bool:
-
         if guild.id != settings.PlasmoRPGuild.guild_id:
             return False
 
@@ -200,7 +199,7 @@ class BACSynchronization(commands.Cog):
     async def sync_user(
         self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
     ):
-        """  # todo: localization
+        """# todo: localization
         Синхронизировать пользователя.
 
         Parameters
@@ -260,7 +259,8 @@ class BACSynchronization(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.everyone_sync_task.start()
+        if not self.everyone_sync_task.is_running() and not settings.DEBUG:
+            self.everyone_sync_task.start()
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
