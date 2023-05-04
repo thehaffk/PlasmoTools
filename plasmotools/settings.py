@@ -49,6 +49,8 @@ class LogsServer:
     rrs_verifications_notifications_role_id = 843154786726445105
     moderator_role_id = 875736652977418292
 
+    pride_month_event_id = 1103678285570904204
+
 
 class Emojis:
     plasmo_sync_logo = "<:PlasmoSync:996079144825794560>"
