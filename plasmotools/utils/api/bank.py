@@ -77,7 +77,6 @@ async def get_card_data(card_id: int) -> Optional[dict]:
             if resp.status != 200 or not (response_json := await resp.json()).get(
                 "status", False
             ):
-
                 logger.warning(
                     "Could not get card data: %s",
                     response_json.get("error", {}).get("msg", ""),

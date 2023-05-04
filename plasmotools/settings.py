@@ -215,7 +215,7 @@ interpol_guild = PlasmoStructureGuild(
     public_chat_channel_id=813451608871796770,
     pt_logs_channel_id=957050026100666428,
     pride_avatar_url="https://i.imgur.com/44sIPuM.jpg",
-    original_avatar_url="https://i.imgur.com/lpUKyvx.png"
+    original_avatar_url="https://i.imgur.com/lpUKyvx.png",
 )
 structure_guilds.append(interpol_guild)
 
@@ -229,7 +229,7 @@ economy_guild = PlasmoStructureGuild(
     public_chat_channel_id=866310422066757672,
     pt_logs_channel_id=996269148738945064,
     pride_avatar_url="https://i.imgur.com/ihVxTA5.jpg",
-    original_avatar_url="https://i.imgur.com/uFDbkB4.png"
+    original_avatar_url="https://i.imgur.com/uFDbkB4.png",
 )
 structure_guilds.append(economy_guild)
 
@@ -243,7 +243,7 @@ infrastructure_guild = PlasmoStructureGuild(
     public_chat_channel_id=810985283532488714,
     pt_logs_channel_id=996263550324588644,
     pride_avatar_url="https://i.imgur.com/xegaYV4.jpg",
-    original_avatar_url="https://i.imgur.com/p1xzKXD.png"
+    original_avatar_url="https://i.imgur.com/p1xzKXD.png",
 )
 structure_guilds.append(infrastructure_guild)
 
@@ -257,7 +257,7 @@ court_guild = PlasmoStructureGuild(
     public_chat_channel_id=971004067885236264,
     pt_logs_channel_id=996268192349569066,
     pride_avatar_url="https://i.imgur.com/DpDpfLx.jpg",
-    original_avatar_url="https://i.imgur.com/nsB3iXj.png"
+    original_avatar_url="https://i.imgur.com/nsB3iXj.png",
 )
 structure_guilds.append(court_guild)
 
@@ -271,7 +271,7 @@ culture_guild = PlasmoStructureGuild(
     public_chat_channel_id=841395461222432848,
     pt_logs_channel_id=922174128675504148,  # чердак
     pride_avatar_url="https://i.imgur.com/fp5sBhv.jpg",
-    original_avatar_url="https://i.imgur.com/Rivylr8.png"
+    original_avatar_url="https://i.imgur.com/Rivylr8.png",
 )
 structure_guilds.append(culture_guild)
 
@@ -285,7 +285,7 @@ mko_guild = PlasmoStructureGuild(
     public_chat_channel_id=874736383279919144,
     pt_logs_channel_id=1005216573419696218,
     pride_avatar_url="https://i.imgur.com/qEy8KuP.jpg",
-    original_avatar_url="https://i.imgur.com/Mssu73W.png"
+    original_avatar_url="https://i.imgur.com/Mssu73W.png",
 )
 structure_guilds.append(mko_guild)
 
@@ -299,6 +299,6 @@ gca_guild = PlasmoStructureGuild(
     public_chat_channel_id=860511686490325042,
     pt_logs_channel_id=960901660970987590,
     pride_avatar_url="https://i.imgur.com/LlN1gIU.jpg",
-    original_avatar_url="https://i.imgur.com/N66WYog.png"
+    original_avatar_url="https://i.imgur.com/N66WYog.png",
 )
 structure_guilds.append(gca_guild)

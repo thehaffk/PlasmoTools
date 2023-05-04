@@ -462,7 +462,6 @@ class Payouts(commands.Cog):
                     embed=embed,
                 )
             except disnake.errors.NotFound:
-
                 await interaction.edit_original_message(
                     embed=disnake.Embed(
                         color=disnake.Color.red(),
