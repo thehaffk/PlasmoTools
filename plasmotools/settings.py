@@ -203,9 +203,6 @@ class PlasmoStructureGuild:
     original_avatar_url: str
 
 
-# todo: add pride/original server avatar urls
-# todo: add pt logs channel id
-# todo: add name
 structure_guilds = []
 
 interpol_guild = PlasmoStructureGuild(
@@ -224,45 +221,84 @@ structure_guilds.append(interpol_guild)
 
 economy_guild = PlasmoStructureGuild(
     alias="economy",
+    name="Экономика",
     discord_id=866301587525861376,
     invite_url="https://discord.gg/6sKKGPuhRk",
     player_role_id=866308194992128040,
     structure_head_role_id=866586305830715412,
     public_chat_channel_id=866310422066757672,
+    pt_logs_channel_id=996269148738945064,
+    pride_avatar_url="https://i.imgur.com/ihVxTA5.jpg",
+    original_avatar_url="https://i.imgur.com/uFDbkB4.png"
 )
 structure_guilds.append(economy_guild)
 
 infrastructure_guild = PlasmoStructureGuild(
     alias="infrastructure",
+    name="Инфраструктура",
     discord_id=756750263351771146,
     invite_url="https://discord.gg/BGvWMkdTV7",
     player_role_id=810985435903557685,
     structure_head_role_id=810975933888200795,
     public_chat_channel_id=810985283532488714,
+    pt_logs_channel_id=996263550324588644,
+    pride_avatar_url="https://i.imgur.com/xegaYV4.jpg",
+    original_avatar_url="https://i.imgur.com/p1xzKXD.png"
 )
 structure_guilds.append(infrastructure_guild)
 
 court_guild = PlasmoStructureGuild(
     alias="court",
+    name="Суд",
     discord_id=923224449728274492,
     invite_url="https://discord.gg/qySEyGhehx",
     player_role_id=953578699075256361,
     structure_head_role_id=923238538160517141,
     public_chat_channel_id=971004067885236264,
+    pt_logs_channel_id=996268192349569066,
+    pride_avatar_url="https://i.imgur.com/DpDpfLx.jpg",
+    original_avatar_url="https://i.imgur.com/nsB3iXj.png"
 )
 structure_guilds.append(court_guild)
 
 culture_guild = PlasmoStructureGuild(
     alias="culture",
+    name="Культура",
     discord_id=841392525499826186,
     invite_url="https://discord.gg/vS6hzZzMFw",
     player_role_id=841403623639351316,
     structure_head_role_id=841403071887966230,
     public_chat_channel_id=841395461222432848,
+    pt_logs_channel_id=922174128675504148,  # чердак
+    pride_avatar_url="https://i.imgur.com/fp5sBhv.jpg",
+    original_avatar_url="https://i.imgur.com/Rivylr8.png"
 )
-
-# mko_guild = 
-
-# gca_guild =
-
 structure_guilds.append(culture_guild)
+
+mko_guild = PlasmoStructureGuild(
+    alias="mko",
+    name="МКО",
+    discord_id=814490777526075433,
+    invite_url="https://discord.gg/yTzj56CXpp",
+    player_role_id=874736916686319718,
+    structure_head_role_id=1046142021343137802,
+    public_chat_channel_id=874736383279919144,
+    pt_logs_channel_id=1005216573419696218,
+    pride_avatar_url="https://i.imgur.com/qEy8KuP.jpg",
+    original_avatar_url="https://i.imgur.com/Mssu73W.png"
+)
+structure_guilds.append(mko_guild)
+
+gca_guild = PlasmoStructureGuild(
+    alias="gca",
+    name="Большой Апелляционный Суд",
+    discord_id=855532780187156501,
+    invite_url="https://discord.gg/6A9AtFKz8b",
+    player_role_id=860799590721388574,
+    structure_head_role_id=928698857666269305,
+    public_chat_channel_id=860511686490325042,
+    pt_logs_channel_id=960901660970987590,
+    pride_avatar_url="https://i.imgur.com/LlN1gIU.jpg",
+    original_avatar_url="https://i.imgur.com/N66WYog.png"
+)
+structure_guilds.append(gca_guild)
