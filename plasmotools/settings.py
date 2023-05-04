@@ -190,44 +190,35 @@ class GCAGuild:
 @dataclass()
 class PlasmoStructureGuild:
     alias: str
+    name: str
     discord_id: int
     invite_url: str
     player_role_id: int
     structure_head_role_id: int
     public_chat_channel_id: int
+    pt_logs_channel_id: int
+    pride_avatar_url: str
+    original_avatar_url: str
 
 
+# todo: add pride/original server avatar urls
+# todo: add pt logs channel id
+# todo: add name
 structure_guilds = []
-
-court_guild = PlasmoStructureGuild(
-    alias="court",
-    discord_id=923224449728274492,
-    invite_url="https://discord.gg/qySEyGhehx",
-    player_role_id=953578699075256361,
-    structure_head_role_id=923238538160517141,
-    public_chat_channel_id=971004067885236264,
-)
-structure_guilds.append(court_guild)
 
 interpol_guild = PlasmoStructureGuild(
     alias="interpol",
+    name="Интерпол",
     discord_id=813451608871796766,
     invite_url="https://discord.gg/asuwsDe6FY",
     player_role_id=878987593482657833,
     structure_head_role_id=813451633085120563,
     public_chat_channel_id=813451608871796770,
+    pt_logs_channel_id=957050026100666428,
+    pride_avatar_url="https://i.imgur.com/44sIPuM.jpg",
+    original_avatar_url="https://i.imgur.com/lpUKyvx.png"
 )
 structure_guilds.append(interpol_guild)
-
-infrastructure_guild = PlasmoStructureGuild(
-    alias="infrastructure",
-    discord_id=756750263351771146,
-    invite_url="https://discord.gg/BGvWMkdTV7",
-    player_role_id=810985435903557685,
-    structure_head_role_id=810975933888200795,
-    public_chat_channel_id=810985283532488714,
-)
-structure_guilds.append(infrastructure_guild)
 
 economy_guild = PlasmoStructureGuild(
     alias="economy",
@@ -239,6 +230,26 @@ economy_guild = PlasmoStructureGuild(
 )
 structure_guilds.append(economy_guild)
 
+infrastructure_guild = PlasmoStructureGuild(
+    alias="infrastructure",
+    discord_id=756750263351771146,
+    invite_url="https://discord.gg/BGvWMkdTV7",
+    player_role_id=810985435903557685,
+    structure_head_role_id=810975933888200795,
+    public_chat_channel_id=810985283532488714,
+)
+structure_guilds.append(infrastructure_guild)
+
+court_guild = PlasmoStructureGuild(
+    alias="court",
+    discord_id=923224449728274492,
+    invite_url="https://discord.gg/qySEyGhehx",
+    player_role_id=953578699075256361,
+    structure_head_role_id=923238538160517141,
+    public_chat_channel_id=971004067885236264,
+)
+structure_guilds.append(court_guild)
+
 culture_guild = PlasmoStructureGuild(
     alias="culture",
     discord_id=841392525499826186,
@@ -247,4 +258,9 @@ culture_guild = PlasmoStructureGuild(
     structure_head_role_id=841403071887966230,
     public_chat_channel_id=841395461222432848,
 )
+
+# mko_guild = 
+
+# gca_guild =
+
 structure_guilds.append(culture_guild)
