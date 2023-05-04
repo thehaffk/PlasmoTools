@@ -77,7 +77,6 @@ class Guild:
         await self.push()
 
     async def delete(self):
-
         async with aiosqlite.connect(PATH) as db:
             await db.execute(
                 """DELETE FROM structure_guilds WHERE discord_id = ?""",
