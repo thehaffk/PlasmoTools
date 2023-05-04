@@ -68,7 +68,6 @@ class BankerPatents(commands.Cog):
     )
     @commands.is_owner()
     async def patent_alpha(self, inter: disnake.ApplicationCommandInteraction):
-
         await inter.response.defer(ephemeral=True)
 
         """

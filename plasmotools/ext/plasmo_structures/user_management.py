@@ -399,7 +399,6 @@ class UserManagement(commands.Cog):
                 ],
             )
             try:
-
                 await self.bot.wait_for(
                     "button_click",
                     check=lambda i: (
@@ -601,7 +600,6 @@ class UserManagement(commands.Cog):
                 ],
             )
             try:
-
                 await self.bot.wait_for(
                     "button_click",
                     check=lambda i: (

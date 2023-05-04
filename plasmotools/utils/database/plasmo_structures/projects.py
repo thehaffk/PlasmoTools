@@ -81,7 +81,6 @@ class Project:
         await self.push()
 
     async def delete(self):
-
         async with aiosqlite.connect(PATH) as db:
             await db.execute(
                 """DELETE FROM structure_projects WHERE id = ?""",

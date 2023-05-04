@@ -70,7 +70,6 @@ class Role:
         await self.push()
 
     async def delete(self):
-
         async with aiosqlite.connect(PATH) as db:
             await db.execute(
                 """DELETE FROM structure_roles WHERE role_discord_id = ?""",

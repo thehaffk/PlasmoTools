@@ -296,7 +296,6 @@ class PlasmoLogger(commands.Cog):
         await asyncio.sleep(10)  # Wait for plasmo API to update
         user_data = await api.user.get_user_data(discord_id=member.id)
 
-
         nickname = user_data.get("nick", "")
         if nickname == "":
             return
