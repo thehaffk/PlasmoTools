@@ -18,7 +18,6 @@ class BACSynchronization(commands.Cog):
 
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
-        self.everyone_sync_task.start()
 
     async def _sync(self, user: disnake.User | disnake.Member) -> bool:
         """
@@ -258,6 +257,10 @@ class BACSynchronization(commands.Cog):
     @everyone_sync_task.before_loop
     async def before_everyone_sync_task(self):
         await self.bot.wait_until_ready()
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.everyone_sync_task.start()
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
