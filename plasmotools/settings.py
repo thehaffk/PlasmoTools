@@ -25,7 +25,7 @@ if PT_PLASMO_TOKEN is None:
 if PT_PLASMO_COOKIES is None:
     logger.critical("Plasmo rp_token not found")
 
-__version__ = "1.5.9" + ("a" if DEBUG else "")
+__version__ = "1.5.8-pride" + ("-a" if DEBUG else "")
 
 # todo: update version?
 
@@ -85,6 +85,7 @@ word_emojis = {
     "симпл": Emojis.s1mple,
     "ДИАНА": Emojis.diana,
     "помидоры": Emojis.ru_flag,
+    "комар": Emojis.komaru,
 }
 
 
@@ -199,7 +200,6 @@ class PlasmoStructureGuild:
     structure_head_role_id: int
     public_chat_channel_id: int
     pt_logs_channel_id: int
-    pride_avatar_url: str
     original_avatar_url: str
 
 
@@ -214,7 +214,6 @@ interpol_guild = PlasmoStructureGuild(
     structure_head_role_id=813451633085120563,
     public_chat_channel_id=813451608871796770,
     pt_logs_channel_id=957050026100666428,
-    pride_avatar_url="https://i.imgur.com/44sIPuM.jpg",
     original_avatar_url="https://i.imgur.com/lpUKyvx.png",
 )
 structure_guilds.append(interpol_guild)
@@ -228,7 +227,6 @@ economy_guild = PlasmoStructureGuild(
     structure_head_role_id=866586305830715412,
     public_chat_channel_id=866310422066757672,
     pt_logs_channel_id=996269148738945064,
-    pride_avatar_url="https://i.imgur.com/ihVxTA5.jpg",
     original_avatar_url="https://i.imgur.com/uFDbkB4.png",
 )
 structure_guilds.append(economy_guild)
@@ -242,7 +240,6 @@ infrastructure_guild = PlasmoStructureGuild(
     structure_head_role_id=810975933888200795,
     public_chat_channel_id=810985283532488714,
     pt_logs_channel_id=996263550324588644,
-    pride_avatar_url="https://i.imgur.com/xegaYV4.jpg",
     original_avatar_url="https://i.imgur.com/p1xzKXD.png",
 )
 structure_guilds.append(infrastructure_guild)
@@ -256,7 +253,6 @@ court_guild = PlasmoStructureGuild(
     structure_head_role_id=923238538160517141,
     public_chat_channel_id=971004067885236264,
     pt_logs_channel_id=996268192349569066,
-    pride_avatar_url="https://i.imgur.com/DpDpfLx.jpg",
     original_avatar_url="https://i.imgur.com/nsB3iXj.png",
 )
 structure_guilds.append(court_guild)
@@ -270,7 +266,6 @@ culture_guild = PlasmoStructureGuild(
     structure_head_role_id=841403071887966230,
     public_chat_channel_id=841395461222432848,
     pt_logs_channel_id=922174128675504148,  # чердак
-    pride_avatar_url="https://i.imgur.com/fp5sBhv.jpg",
     original_avatar_url="https://i.imgur.com/Rivylr8.png",
 )
 structure_guilds.append(culture_guild)
@@ -284,7 +279,6 @@ mko_guild = PlasmoStructureGuild(
     structure_head_role_id=1046142021343137802,
     public_chat_channel_id=874736383279919144,
     pt_logs_channel_id=1005216573419696218,
-    pride_avatar_url="https://i.imgur.com/qEy8KuP.jpg",
     original_avatar_url="https://i.imgur.com/Mssu73W.png",
 )
 structure_guilds.append(mko_guild)
@@ -298,7 +292,6 @@ gca_guild = PlasmoStructureGuild(
     structure_head_role_id=928698857666269305,
     public_chat_channel_id=860511686490325042,
     pt_logs_channel_id=960901660970987590,
-    pride_avatar_url="https://i.imgur.com/LlN1gIU.jpg",
     original_avatar_url="https://i.imgur.com/N66WYog.png",
 )
 structure_guilds.append(gca_guild)

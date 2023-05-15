@@ -47,6 +47,9 @@ class ScheduledEventsSync(commands.Cog):
 
     @commands.Cog.listener("on_guild_scheduled_event_create")
     async def on_guild_scheduled_event_create(self, event: disnake.GuildScheduledEvent):
+        if event.creator.bot:
+            return
+
         monitored_guild_id = settings.culture_guild.discord_id
         target_guild_id = settings.PlasmoRPGuild.guild_id
         mod_channel_id = settings.PlasmoRPGuild.moderators_channel_id
