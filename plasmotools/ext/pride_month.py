@@ -152,7 +152,6 @@ class PrideMonthManager(commands.Cog):
             except disnake.Forbidden:
                 logger.warning("Unable to update avatar in %s", current_guild)
 
-
     @tasks.loop(minutes=5)
     async def pride_event_check_task(self):
 

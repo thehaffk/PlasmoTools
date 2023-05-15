@@ -44,7 +44,6 @@ class ScheduledEventsSync(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-
     @commands.Cog.listener("on_guild_scheduled_event_create")
     async def on_guild_scheduled_event_create(self, event: disnake.GuildScheduledEvent):
         if event.creator.bot:
