@@ -1,5 +1,4 @@
 import asyncio
-import datetime
 import logging
 from random import choice, randint
 
@@ -38,7 +37,6 @@ komaru_gifs = [
 class Fun(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
-        self.pride_changes_made = False
 
     @commands.command("самоуничтожение")
     async def four_command(self, ctx: commands.Context):
@@ -82,19 +80,8 @@ class Fun(commands.Cog):
         await asyncio.sleep(600)
         await voice_client.disconnect(force=True)
 
-    # todo: sync pride events in 23:50 may 31
-    @tasks.loop(minutes=5)
-    async def pride_checker(self):
-        time_now = datetime.datetime.now()
-        if time_now.month != 6 or time_now.day != 1 or self.pride_changes_made:
-            return
 
-        # todo: set pride avatars
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        if not self.pride_checker.is_running() and not settings.DEBUG:
-            self.pride_checker.start()
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)

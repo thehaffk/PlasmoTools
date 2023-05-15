@@ -312,7 +312,7 @@ class PlasmoLogger(commands.Cog):
             settings.LogsServer.ban_logs_channel_id
         )
         msg: disnake.Message = await log_channel.send(
-            content=f"<@{member.id}>", embed=log_embed
+            content=member.mention, embed=log_embed
         )
         await msg.publish()
 
