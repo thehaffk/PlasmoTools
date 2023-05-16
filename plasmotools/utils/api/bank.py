@@ -56,7 +56,7 @@ async def search_cards(token: str, query: str, silent: bool = False) -> list:
                     if not silent:
                         logger.warning(
                             "Could not search cards: %s",
-                            (await resp.json(),
+                            (await resp.json()),
                         )
                     return []
                 return (await resp.json()).get("data", [])
