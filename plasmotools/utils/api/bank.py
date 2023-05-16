@@ -55,7 +55,7 @@ async def search_cards(token: str, query: str) -> list:
                 if resp.status != 200 or not (await resp.json()).get("status", False):
                     logger.warning(
                         "Could not search cards: %s",
-                        (await resp.json()).get("error", {}).get("msg", ""),
+                        (await resp.json(),
                     )
                     return []
                 return (await resp.json()).get("data", [])
@@ -80,7 +80,7 @@ async def get_card_data(card_id: int) -> Optional[dict]:
             ) and resp.status != 404:
                 logger.warning(
                     "Could not get card data: %s",
-                    response_json.get("error", {}).get("msg", ""),
+                    response_json,
                 )
                 return None
             if len(response_json.get("data", [])) == 0:
@@ -105,7 +105,7 @@ async def get_penalties(tab: str = "active") -> List[dict]:
                 ):
                     logger.warning(
                         "Could not get penalties: %s",
-                        response_json.get("error", {}).get("msg", ""),
+                        response_json,
                     )
                     return []
                 penalties += (
@@ -123,7 +123,7 @@ async def get_penalties(tab: str = "active") -> List[dict]:
                     ).get("status", False):
                         logger.warning(
                             "Could not get penalties: %s",
-                            response_json.get("error", {}).get("msg", ""),
+                            response_json,
                         )
                         return []
                     penalties += (
