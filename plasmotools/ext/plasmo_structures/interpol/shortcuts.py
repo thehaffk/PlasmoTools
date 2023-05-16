@@ -12,7 +12,6 @@ from plasmotools.utils.database import plasmo_structures as database
 
 logger = logging.getLogger(__name__)
 
-# todo: Rewrite with buttons
 
 interpol_ranks = {
     935606863075090503: {
@@ -224,7 +223,7 @@ class FastInterpolPayouts(commands.Cog):
         # find data in message_text via regex
 
         finded_groups = re.findall(
-            r"1[. ]*([\s\S]+)2[. ]*([0-9]{1,2}):([0-9]{2})[ ]*-[ ]*([0-9]{1,2}):([0-9]{2})",
+            r"1\.[ ]*([\s\S]+)2\.[ ]*([0-9]{1,2}):([0-9]{2})[ ]*-[ ]*([0-9]{1,2}):([0-9]{2})",
             message_text,
         )
         if len(finded_groups) == 0:

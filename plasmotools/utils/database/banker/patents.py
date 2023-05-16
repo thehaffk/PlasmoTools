@@ -90,7 +90,6 @@ class Patent:
         await self.push()
 
     async def delete(self):
-
         async with aiosqlite.connect(PATH) as db:
             await db.execute(
                 """DELETE FROM patents WHERE id = ?""",

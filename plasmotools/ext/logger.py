@@ -293,23 +293,8 @@ class PlasmoLogger(commands.Cog):
         if guild.id != settings.PlasmoRPGuild.guild_id:
             return False
 
-        # TODO: Rewrite with plasmo.py
         await asyncio.sleep(10)  # Wait for plasmo API to update
         user_data = await api.user.get_user_data(discord_id=member.id)
-        # for tries in range(10):
-        #     async with ClientSession() as session:
-        #         async with session.get(
-        #             url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=warns",
-        #         ) as response:
-        #             try:
-        #                 user_data = (await response.json())["data"]
-        #             except Exception as err:
-        #                 logger.warning("Could not get data from PRP API: %s", err)
-        #                 await asyncio.sleep(10)
-        #                 continue
-        #             if response.status != 200:
-        #                 logger.warning("Could not get data from PRP API: %s", user_data)
-        #     break
 
         nickname = user_data.get("nick", "")
         if nickname == "":
@@ -327,7 +312,7 @@ class PlasmoLogger(commands.Cog):
             settings.LogsServer.ban_logs_channel_id
         )
         msg: disnake.Message = await log_channel.send(
-            content=f"<@{member.id}>", embed=log_embed
+            content=member.mention, embed=log_embed
         )
         await msg.publish()
 

@@ -53,7 +53,7 @@ async def search_bank_cards_autocompleter(
                             key="SEARCH_CARDS_AUTOCOMPLETE_NOT_FOUND",
                         )
                     ]
-                return cards
+                return cards[:25]
             else:
                 logger.error(
                     f"Error while searching bank cards: {response.status} {response.reason}"

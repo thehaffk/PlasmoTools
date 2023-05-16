@@ -74,10 +74,10 @@ async def get_card_data(card_id: int) -> Optional[dict]:
             params={"ids": formatters.format_bank_card(card_id)},
         ) as resp:
             response_json = {}
-            if resp.status != 200 or not (response_json := await resp.json()).get(
-                "status", False
-            ):
-
+            if (
+                resp.status != 200
+                or not (response_json := await resp.json()).get("status", False)
+            ) and resp.status != 404:
                 logger.warning(
                     "Could not get card data: %s",
                     response_json.get("error", {}).get("msg", ""),
