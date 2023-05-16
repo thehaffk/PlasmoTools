@@ -4,12 +4,12 @@ from typing import Optional
 
 import disnake
 from disnake import ApplicationCommandInteraction, Localized
-from disnake.ext import tasks, commands
+from disnake.ext import commands
 
 from plasmotools import settings
 from plasmotools.ext.reverse_role_sync.core import RRSCore
 from plasmotools.utils import formatters
-from plasmotools.utils.api import messenger, bank
+from plasmotools.utils.api import bank, messenger
 from plasmotools.utils.api.user import get_user_data
 
 logger = logging.getLogger(__name__)

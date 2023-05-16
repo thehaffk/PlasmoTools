@@ -4,7 +4,7 @@ from typing import Optional
 
 import aiohttp
 import disnake
-from disnake import ApplicationCommandInteraction, Webhook, Localized
+from disnake import ApplicationCommandInteraction, Localized, Webhook
 from disnake.ext import commands
 
 from plasmotools import settings

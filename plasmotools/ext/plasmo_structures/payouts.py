@@ -7,7 +7,7 @@ from disnake import ApplicationCommandInteraction, Localized
 from disnake.ext import commands
 
 from plasmotools import settings
-from plasmotools.utils import formatters, autocompleters, api
+from plasmotools.utils import api, autocompleters, formatters
 from plasmotools.utils.api import bank
 from plasmotools.utils.api.tokens import get_token_scopes
 from plasmotools.utils.database import plasmo_structures as database

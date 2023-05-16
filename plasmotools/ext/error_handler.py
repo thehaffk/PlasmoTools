@@ -2,12 +2,8 @@ import logging
 
 import disnake
 from disnake.ext import commands
-from disnake.ext.commands.errors import (
-    MissingPermissions,
-    MissingRole,
-    NotOwner,
-    NoPrivateMessage,
-)
+from disnake.ext.commands.errors import (MissingPermissions, MissingRole,
+                                         NoPrivateMessage, NotOwner)
 
 from plasmotools import settings
 

@@ -1,12 +1,9 @@
 import asyncio
 import logging
 
-from plasmotools import log
-from plasmotools import settings
+from plasmotools import log, settings
 from plasmotools.bot import PlasmoTools
-from plasmotools.utils.database import banker
-from plasmotools.utils.database import plasmo_structures
-from plasmotools.utils.database import rrs
+from plasmotools.utils.database import banker, plasmo_structures, rrs
 
 log.setup()
 

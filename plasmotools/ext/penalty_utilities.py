@@ -2,7 +2,7 @@ import logging
 from typing import List
 
 import disnake
-from disnake.ext import tasks, commands
+from disnake.ext import commands, tasks
 
 from plasmotools import settings
 from plasmotools.utils import api

@@ -5,8 +5,7 @@ from disnake import HTTPException
 from disnake.ext import commands, tasks
 
 from plasmotools import settings
-from plasmotools.utils import api
-from plasmotools.utils import formatters
+from plasmotools.utils import api, formatters
 
 logger = logging.getLogger(__name__)
 

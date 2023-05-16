@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple, Optional, List
+from typing import List, Optional, Tuple
 
 import aiohttp
 from aiohttp import ClientOSError

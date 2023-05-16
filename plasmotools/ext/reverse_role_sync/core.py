@@ -4,11 +4,12 @@ import logging
 from typing import List, Union
 
 import disnake
-from disnake.ext import tasks, commands
+from disnake.ext import commands, tasks
 
 from plasmotools import settings
 from plasmotools.utils.database import rrs as rrs_database
-from plasmotools.utils.database.plasmo_structures import guilds as guilds_database
+from plasmotools.utils.database.plasmo_structures import \
+    guilds as guilds_database
 
 logger = logging.getLogger(__name__)
 

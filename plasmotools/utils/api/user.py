@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, List
+from typing import Optional
 
 import aiohttp
 from aiohttp import ClientOSError

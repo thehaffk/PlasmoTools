@@ -2,7 +2,8 @@ import logging
 
 import disnake
 
-from plasmotools.utils.database.plasmo_structures import get_roles, get_projects
+from plasmotools.utils.database.plasmo_structures import (get_projects,
+                                                          get_roles)
 
 logger = logging.getLogger(__name__)
 

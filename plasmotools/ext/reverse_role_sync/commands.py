@@ -3,13 +3,13 @@ from typing import Optional
 
 import disnake
 from disnake import ApplicationCommandInteraction
-from disnake.ext import tasks, commands
+from disnake.ext import commands
 
-from plasmotools import settings
-from plasmotools import utils
+from plasmotools import settings, utils
 from plasmotools.ext.reverse_role_sync.core import RRSCore
 from plasmotools.utils.database import rrs as rrs_database
-from plasmotools.utils.database.plasmo_structures import guilds as guilds_database
+from plasmotools.utils.database.plasmo_structures import \
+    guilds as guilds_database
 
 logger = logging.getLogger(__name__)
 

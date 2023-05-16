@@ -4,7 +4,7 @@ from random import choice, randint
 
 import disnake
 from disnake import StageInstance
-from disnake.ext import tasks, commands
+from disnake.ext import commands
 
 from plasmotools import settings
 
