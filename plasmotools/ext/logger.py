@@ -356,7 +356,7 @@ class PlasmoLogger(commands.Cog):
             if not settings.DEBUG
             else settings.LogsServer.messages_channel_id
         )
-        dd_logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
+        # dd_logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
         embed = (
             disnake.Embed(
                 description=f"Guild: **{message.guild}**\n\n"
@@ -380,7 +380,7 @@ class PlasmoLogger(commands.Cog):
 
         if not settings.DEBUG:
             await plasmo_logs_channel.send(embed=embed)
-        await dd_logs_channel.send(embed=embed)
+        # await dd_logs_channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: disnake.Message, after: disnake.Message):
@@ -398,7 +398,7 @@ class PlasmoLogger(commands.Cog):
             if not settings.DEBUG
             else settings.LogsServer.messages_channel_id
         )
-        dd_logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
+        # dd_logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
 
         embed = (
             disnake.Embed(
@@ -427,7 +427,7 @@ class PlasmoLogger(commands.Cog):
             )
         if not settings.DEBUG:
             await plasmo_logs_channel.send(embed=embed)
-        await dd_logs_channel.send(embed=embed)
+        # await dd_logs_channel.send(embed=embed)
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)

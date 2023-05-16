@@ -1,6 +1,3 @@
-"""
-Cog-file for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
-"""
 import logging
 
 import disnake
@@ -46,16 +43,6 @@ class ScheduledEventsSync(commands.Cog):
 
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
-
-    """
-        - :func:`on_guild_scheduled_event_create`
-        - :func:`on_guild_scheduled_event_delete`
-        - :func:`on_guild_scheduled_event_update`
-        - :func:`on_guild_scheduled_event_subscribe`
-        - :func:`on_guild_scheduled_event_unsubscribe`
-        - :func:`on_raw_guild_scheduled_event_subscribe`
-        - :func:`on_raw_guild_scheduled_event_unsubscribe`
-    """
 
     @commands.Cog.listener("on_guild_scheduled_event_create")
     async def on_guild_scheduled_event_create(self, event: disnake.GuildScheduledEvent):
@@ -169,11 +156,8 @@ class ScheduledEventsSync(commands.Cog):
             and after.status == disnake.GuildScheduledEventStatus.active
         ):
             return
-        print(before, after)
 
         async for user in after.fetch_users():
-            print(user)
-            # send every user mc message 'Ивент {after.name} начинается. Место проведения: {event.entity_metadata.location}'
             await messenger.send_mc_message(
                 f"Ивент {after.name} начинается. Место проведения: {after.entity_metadata.location}",
                 discord_id=user.id,
