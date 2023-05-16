@@ -278,7 +278,7 @@ Plasmo Tools - многофункциональный бот для дискор
         summary_balance = 0
         for card in list(range(1, 30)):
             card_formatted = formatters.format_bank_card(card)
-            card_data = await bank.get_card_data(card)
+            card_data = await bank.get_card_data(card, silent=True)
             if card_data is None:
                 continue
             summary_balance += card_data["value"]
