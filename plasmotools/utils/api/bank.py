@@ -52,11 +52,13 @@ async def search_cards(token: str, query: str, silent: bool = False) -> list:
                     "Authorization": f"Bearer {token}",
                 },
             ) as resp:
-                if (resp.status != 200 or not (await resp.json()).get("status", False)) and resp.status != 404:
+                if (
+                    resp.status != 200 or not (await resp.json()).get("status", False)
+                ) and resp.status != 404:
                     if not silent:
                         logger.warning(
                             "Could not search cards: %s",
-                            (await resp.json(),
+                            await resp.json(),
                         )
                     return []
                 return (await resp.json()).get("data", [])
@@ -107,7 +109,7 @@ async def get_penalties(tab: str = "active") -> List[dict]:
                 ):
                     logger.warning(
                         "Could not get penalties: %s",
-                        response_json,
+                        await resp.json(),
                     )
                     return []
                 penalties += (
@@ -125,7 +127,7 @@ async def get_penalties(tab: str = "active") -> List[dict]:
                     ).get("status", False):
                         logger.warning(
                             "Could not get penalties: %s",
-                            response_json,
+                            await resp.json(),
                         )
                         return []
                     penalties += (

@@ -80,9 +80,6 @@ class Fun(commands.Cog):
         await asyncio.sleep(600)
         await voice_client.disconnect(force=True)
 
-
-
-
     async def cog_load(self):
         logger.info("%s Ready", __name__)
 
