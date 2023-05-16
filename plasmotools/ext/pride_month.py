@@ -109,19 +109,14 @@ guilds_to_edit.append(
 class PrideMonthManager(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
-        self.up_to_date_avatars_guild_ids = []  # for ratelimits
-        self.up_to_date_events_guild_ids = []  # for ratelimits
+        self.up_to_date_avatars_guild_ids = []
+        self.up_to_date_events_guild_ids = []
 
     @tasks.loop(minutes=1)
     async def pride_avatars_check_task(self):
         datetime_now = datetime.datetime.now()
         if not (datetime_now.day == 1 and datetime_now.month == 6):
             return
-
-        if len(self.up_to_date_avatars_guild_ids) == len(guilds_to_edit):
-            logger.info("All avatars are up to date, disabling check")
-
-            self.pride_avatars_check_task.stop()
 
         for guild in guilds_to_edit:
             if guild.id in self.up_to_date_avatars_guild_ids:
@@ -133,7 +128,6 @@ class PrideMonthManager(commands.Cog):
                 logger.warning("Unable to get %i guild", guild.id)
                 continue
             logger.info('Updating pride avatar for "%s" guild', current_guild)
-
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.get(guild.pride_avatar_url) as resp:
@@ -146,13 +140,17 @@ class PrideMonthManager(commands.Cog):
                             continue
                         contents = await resp.read()
                 await current_guild.edit(
-                    icon=contents, reason="Welcome to Pride Month 2023!"
+                    icon=contents, reason="WELCOME TO PRIDE MONTH"
                 )
                 self.up_to_date_avatars_guild_ids.append(guild.id)
             except disnake.Forbidden:
                 logger.warning("Unable to update avatar in %s", current_guild)
 
-
+            if len(self.up_to_date_avatars_guild_ids) == len(guilds_to_edit):
+                logger.info("All avatars are up to date, disabling check")
+                self.pride_avatars_check_task.stop()
+                
+         
     @tasks.loop(minutes=5)
     async def pride_event_check_task(self):
 
@@ -160,9 +158,6 @@ class PrideMonthManager(commands.Cog):
         if not (datetime_now.day == 31 and datetime_now.month == 5):
             return
 
-        if len(self.up_to_date_events_guild_ids) == len(guilds_to_edit) + 1:
-            logger.info("All events are up to date, disabling check")
-            self.pride_event_check_task.stop()
 
         for guild in [
             *guilds_to_edit,
@@ -202,8 +197,13 @@ class PrideMonthManager(commands.Cog):
                     reason="WELCOME TO PRIDE MONTH",
                 )
                 self.up_to_date_events_guild_ids.append(guild.id)
-            except disnake.Forbidden:
-                logger.warning("Unable to create scheduled event in %s", current_guild)
+            except disnake.Forbidden as e:
+                logger.warning("Unable to create scheduled event in %s: %s", current_guild, str(e))
+
+                
+            if len(self.up_to_date_events_guild_ids) == len(guilds_to_edit) + 1:
+                logger.info("All events are synced, disabling check")
+                self.up_to_date_events_guild_ids.stop()
 
     @pride_avatars_check_task.before_loop
     async def before_pride_avatars_check_task(self):

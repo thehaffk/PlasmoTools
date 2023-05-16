@@ -39,7 +39,7 @@ async def transfer(
             return True, ""
 
 
-async def search_cards(token: str, query: str) -> list:
+async def search_cards(token: str, query: str, silent: bool = False) -> list:
     """
     Search cards by query.
     """
@@ -52,11 +52,12 @@ async def search_cards(token: str, query: str) -> list:
                     "Authorization": f"Bearer {token}",
                 },
             ) as resp:
-                if resp.status != 200 or not (await resp.json()).get("status", False):
-                    logger.warning(
-                        "Could not search cards: %s",
-                        (await resp.json()).get("error", {}).get("msg", ""),
-                    )
+                if (resp.status != 200 or not (await resp.json()).get("status", False)) and resp.status != 404:
+                    if not silent:
+                        logger.warning(
+                            "Could not search cards: %s",
+                            (await resp.json(),
+                        )
                     return []
                 return (await resp.json()).get("data", [])
         except ClientOSError:
@@ -64,7 +65,7 @@ async def search_cards(token: str, query: str) -> list:
             return []
 
 
-async def get_card_data(card_id: int) -> Optional[dict]:
+async def get_card_data(card_id: int, silent: bool = False) -> Optional[dict]:
     # https://rp.plo.su/api/bank/cards?ids=EB-0000
     async with aiohttp.ClientSession(
         headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
@@ -78,10 +79,11 @@ async def get_card_data(card_id: int) -> Optional[dict]:
                 resp.status != 200
                 or not (response_json := await resp.json()).get("status", False)
             ) and resp.status != 404:
-                logger.warning(
-                    "Could not get card data: %s",
-                    response_json.get("error", {}).get("msg", ""),
-                )
+                if not silent:
+                    logger.warning(
+                        "Could not get card data: %s",
+                        response_json,
+                    )
                 return None
             if len(response_json.get("data", [])) == 0:
                 return None
@@ -105,7 +107,7 @@ async def get_penalties(tab: str = "active") -> List[dict]:
                 ):
                     logger.warning(
                         "Could not get penalties: %s",
-                        response_json.get("error", {}).get("msg", ""),
+                        response_json,
                     )
                     return []
                 penalties += (
@@ -123,7 +125,7 @@ async def get_penalties(tab: str = "active") -> List[dict]:
                     ).get("status", False):
                         logger.warning(
                             "Could not get penalties: %s",
-                            response_json.get("error", {}).get("msg", ""),
+                            response_json,
                         )
                         return []
                     penalties += (
