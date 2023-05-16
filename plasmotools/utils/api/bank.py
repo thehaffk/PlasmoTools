@@ -39,7 +39,7 @@ async def transfer(
             return True, ""
 
 
-async def search_cards(token: str, query: str) -> list:
+async def search_cards(token: str, query: str, silent: bool = False) -> list:
     """
     Search cards by query.
     """
@@ -52,11 +52,12 @@ async def search_cards(token: str, query: str) -> list:
                     "Authorization": f"Bearer {token}",
                 },
             ) as resp:
-                if resp.status != 200 or not (await resp.json()).get("status", False):
-                    logger.warning(
-                        "Could not search cards: %s",
-                        (await resp.json(),
-                    )
+                if (resp.status != 200 or not (await resp.json()).get("status", False)) and resp.status != 404:
+                    if not silent:
+                        logger.warning(
+                            "Could not search cards: %s",
+                            (await resp.json(),
+                        )
                     return []
                 return (await resp.json()).get("data", [])
         except ClientOSError:
