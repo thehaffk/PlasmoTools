@@ -14,7 +14,7 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 
-DEBUG = bool(os.getenv("BOT_DEBUG", 0))
+DEBUG = bool(int(os.getenv("BOT_DEBUG", "0")))
 TOKEN = os.getenv("TOKEN")
 PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN", None)
 PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
