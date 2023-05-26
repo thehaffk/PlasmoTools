@@ -30,77 +30,77 @@ guilds_to_edit = list()
 guilds_to_edit.append(
     Guild(
         id=813451608871796766,  # Интерпол
-        pride_avatar_url="https://i.imgur.com/44sIPuM.jpg",
+        pride_avatar_url="https://cdn.discordapp.com/attachments/939520105874858014/1108044362945929236/44sIPuM.png",
         original_avatar_url="https://i.imgur.com/lpUKyvx.png",
     )
 )
 guilds_to_edit.append(
     Guild(
         id=866301587525861376,  # Экономика
-        pride_avatar_url="https://i.imgur.com/ihVxTA5.jpg",
+        pride_avatar_url="https://cdn.discordapp.com/attachments/939520105874858014/1108044622015504404/ihVxTA5.png",
         original_avatar_url="https://i.imgur.com/uFDbkB4.png",
     )
 )
 guilds_to_edit.append(
     Guild(
         id=756750263351771146,  # Инфраструктура
-        pride_avatar_url="https://i.imgur.com/xegaYV4.jpg",
+        pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044652046712954/xegaYV4.png",
         original_avatar_url="https://i.imgur.com/p1xzKXD.png",
     )
 )
 guilds_to_edit.append(
     Guild(
         id=923224449728274492,  # Суд
-        pride_avatar_url="https://i.imgur.com/DpDpfLx.jpg",
+        pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044667423047711/DpDpfLx.png",
         original_avatar_url="https://i.imgur.com/nsB3iXj.png",
     )
 )
 guilds_to_edit.append(
     Guild(
         id=855532780187156501,  # БАС
-        pride_avatar_url="https://i.imgur.com/LlN1gIU.jpg",
+        pride_avatar_url="https://cdn.discordapp.com/attachments/939520105874858014/1108044686112866314/LlN1gIU.png",
         original_avatar_url="https://i.imgur.com/N66WYog.png",
     )
 )
 guilds_to_edit.append(
     Guild(
         id=814490777526075433,  # МКО
-        pride_avatar_url="https://i.imgur.com/qEy8KuP.jpg",
+        pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044704601350224/qEy8KuP.png",
         original_avatar_url="https://i.imgur.com/Mssu73W.png",
     )
 )
 guilds_to_edit.append(
     Guild(
         id=841392525499826186,  # Культура
-        pride_avatar_url="https://i.imgur.com/fp5sBhv.jpg",
+        pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044721839951912/fp5sBhv.png",
         original_avatar_url="https://i.imgur.com/Rivylr8.png",
     )
 )
 guilds_to_edit.append(
     Guild(
         id=872877081774657536,  # Бидрилс e
-        pride_avatar_url="https://i.imgur.com/4KQ7uO9.png",
+        pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044735559512225/4KQ7uO9.png",
         original_avatar_url="https://imgur.com/nIk4s4x.png",
     )
 )
 guilds_to_edit.append(
     Guild(
         id=1007717949743829112,  # Порт 3
-        pride_avatar_url="https://i.imgur.com/TpYqb34.png",
+        pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044753406275634/TpYqb34.png",
         original_avatar_url="https://i.imgur.com/2Ify7JA.png",
     )
 )
 guilds_to_edit.append(
     Guild(
         id=828683007635488809,  # ДД
-        pride_avatar_url="https://i.imgur.com/hBG3r5J.png",
+        pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044767117451384/hBG3r5J.png",
         original_avatar_url="https://i.imgur.com/kw0Kafw.png",
     )
 )
 guilds_to_edit.append(
     Guild(
         id=966785796902363188,  # ДДТ
-        pride_avatar_url="https://i.imgur.com/B6rCBQz.png",
+        pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044781248073728/B6rCBQz.png",
         original_avatar_url="https://i.imgur.com/0gQE4Ac.png",
     )
 )
@@ -110,7 +110,6 @@ class PrideMonthManager(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
         self.up_to_date_avatars_guild_ids = []
-        self.up_to_date_events_guild_ids = []
 
     @tasks.loop(minutes=1)
     async def pride_avatars_check_task(self):
@@ -139,25 +138,21 @@ class PrideMonthManager(commands.Cog):
                             )
                             continue
                         contents = await resp.read()
-                await current_guild.edit(
-                    icon=contents, reason="WELCOME TO PRIDE MONTH"
-                )
+                await current_guild.edit(icon=contents, reason="WELCOME TO PRIDE MONTH")
                 self.up_to_date_avatars_guild_ids.append(guild.id)
             except disnake.Forbidden:
                 logger.warning("Unable to update avatar in %s", current_guild)
 
-            if len(self.up_to_date_avatars_guild_ids) == len(guilds_to_edit):
-                logger.info("All avatars are up to date, disabling check")
-                self.pride_avatars_check_task.stop()
-                
-         
-    @tasks.loop(minutes=5)
-    async def pride_event_check_task(self):
+        if len(self.up_to_date_avatars_guild_ids) == len(guilds_to_edit):
+            logger.info("All avatars are up to date, disabling check")
+            self.pride_avatars_check_task.stop()
+
+    @commands.command("sync-pride-events")
+    @commands.is_owner()
+    async def pride_event_sync_command(self, ctx: commands.Context):
+        await ctx.message.add_reaction("🔁")
 
         datetime_now = datetime.datetime.now()
-        if not (datetime_now.day == 31 and datetime_now.month == 5):
-            return
-
 
         for guild in [
             *guilds_to_edit,
@@ -167,9 +162,6 @@ class PrideMonthManager(commands.Cog):
                 original_avatar_url="",
             ),
         ]:
-            if guild.id in self.up_to_date_events_guild_ids:
-                continue
-
             current_guild: Optional[disnake.Guild] = self.bot.get_guild(guild.id)
 
             if not current_guild:
@@ -180,10 +172,11 @@ class PrideMonthManager(commands.Cog):
             pride_month_event = self.bot.get_guild(
                 settings.LogsServer.guild_id
             ).get_scheduled_event(pride_month_event_id)
+
             if pride_month_event.guild_id == guild.id:
                 continue
             try:
-                logger.info("Creating pride month event in %s", current_guild)
+                logger.debug("Creating pride month event in %s", current_guild)
                 await current_guild.create_scheduled_event(
                     name=pride_month_event.name,
                     entity_type=pride_month_event.entity_type,
@@ -196,27 +189,23 @@ class PrideMonthManager(commands.Cog):
                     image=pride_month_event.image,
                     reason="WELCOME TO PRIDE MONTH",
                 )
-                self.up_to_date_events_guild_ids.append(guild.id)
-            except disnake.Forbidden as e:
-                logger.warning("Unable to create scheduled event in %s: %s", current_guild, str(e))
+                logger.info('Synced pride event for "%s"', current_guild)
 
-                
-            if len(self.up_to_date_events_guild_ids) == len(guilds_to_edit) + 1:
-                logger.info("All events are synced, disabling check")
-                self.up_to_date_events_guild_ids.stop()
+            except disnake.Forbidden as e:
+                logger.warning(
+                    "Unable to create scheduled event in %s: %s", current_guild, str(e)
+                )
+
+        logger.info("All events are synced")
+        await ctx.message.add_reaction("✅")
+        await ctx.reply(f"{len(guilds_to_edit)} Events synced")
 
     @pride_avatars_check_task.before_loop
     async def before_pride_avatars_check_task(self):
         await self.bot.wait_until_ready()
 
-    @pride_event_check_task.before_loop
-    async def before_pride_event_check_task(self):
-        await self.bot.wait_until_ready()
-
     @commands.Cog.listener()
     async def on_ready(self):
-        if not self.pride_event_check_task.is_running():
-            self.pride_event_check_task.start()
         if not self.pride_avatars_check_task.is_running():
             self.pride_avatars_check_task.start()
 
