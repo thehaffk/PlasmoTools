@@ -153,8 +153,6 @@ class PrideMonthManager(commands.Cog):
         await ctx.message.add_reaction("🔁")
 
         datetime_now = datetime.datetime.now()
-        if not (datetime_now.day == 31 and datetime_now.month == 5):
-            return await ctx.reply("It's not 31.05 yet")
 
         for guild in [
             *guilds_to_edit,
