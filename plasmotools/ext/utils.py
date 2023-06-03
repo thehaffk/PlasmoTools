@@ -154,7 +154,7 @@ class Utils(commands.Cog):
         Parameters
         ----------
         inter
-        title: Title field in embed {{EMBED_TITLE}
+        title: Title field in embed {{EMBED_TITLE}}
         description: Description field in embed {{EMBED_DESCRIPTION}}
         message_content: Content beyond the embed {{EMBED_MESSAGE_CONTENT}}
         color: Embed color {{EMBED_COLOR}}
@@ -175,14 +175,14 @@ class Utils(commands.Cog):
                 disnake.ui.Button(
                     style=disnake.ButtonStyle.green,
                     label="Опубликовать",
-                    custom_id="publish",
+                    custom_id=f"publish_{inter.author.id}",
                 )
             ],
         )
         try:
             await self.bot.wait_for(
                 "button_click",
-                check=lambda i: (i.component.custom_id == f"publish"),
+                check=lambda i: (i.component.custom_id == f"publish_{inter.author.id}"),
                 timeout=300,
             )
         except asyncio.TimeoutError:
