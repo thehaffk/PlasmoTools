@@ -237,9 +237,9 @@ class FastInterpolPayouts(commands.Cog):
                 components=[
                     disnake.ui.Button(
                         label="Оповестить юзера",
-                        custom_id=f"interpol_shortcut_events_{message.id}"
+                        custom_id=f"interpol_shortcut_events_{message.id}",
                     )
-                ]
+                ],
             )
             try:
                 await self.bot.wait_for(
@@ -254,13 +254,13 @@ class FastInterpolPayouts(commands.Cog):
                     embed=disnake.Embed(
                         title="",
                         description="⚠️ Сообщение написано не по форме, выплата отменена.\n"
-                                    "Напишите новый лог об ивенте в формате:\n"
-                                    "```1. Релиз Plasmo Tools 1.5.10\n"
-                                    "2. 17:10 - 17:30\n"
-                                    "[1-2 Прикрепленных изображения]```",
-                        color=disnake.Color.dark_red()
+                        "Напишите новый лог об ивенте в формате:\n"
+                        "```1. Релиз Plasmo Tools 1.5.10\n"
+                        "2. 17:10 - 17:30\n"
+                        "[1-2 Прикрепленных изображения]```",
+                        color=disnake.Color.dark_red(),
                     ).set_footer(text="This message will be deleted in 15 minutes"),
-                    delete_after=900
+                    delete_after=900,
                 )
             except asyncio.TimeoutError:
                 ...
@@ -333,7 +333,6 @@ class FastInterpolPayouts(commands.Cog):
             await message.add_reaction("✅")
         else:
             await message.add_reaction("⚠")
-
 
     async def cog_load(self):
         """
