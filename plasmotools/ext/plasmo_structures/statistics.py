@@ -1,12 +1,11 @@
 import logging
 
 import disnake
-from disnake import Localized
 from disnake.ext import commands
 
-from plasmotools import settings
+import plasmotools.utils.database.plasmo_structures.guilds as guilds_db
+from plasmotools import checks, settings
 from plasmotools.utils import api
-from plasmotools.utils.database import plasmo_structures as database
 
 logger = logging.getLogger(__name__)
 
@@ -17,24 +16,20 @@ class StructureStatictics(commands.Cog):
 
     @commands.guild_only()
     @commands.default_member_permissions(manage_roles=True)
-    @commands.slash_command(
-        name=Localized("role-stats", key="ROLE_STATS_COMMAND_NAME"),
-        description=Localized(key="ROLE_STATS_COMMAND_DESCRIPTION"),
-    )
+    @commands.slash_command()
+    @checks.blocked_users_slash_command_check()
     async def role_stats_command(
         self,
         inter: disnake.ApplicationCommandInteraction,
-        role: disnake.Role = commands.Param(
-            name=Localized(key="ROLE_STATS_ROLE_NAME"),
-            description=Localized(key="ROLE_STATS_ROLE_DESCRIPTION"),
-        ),
+        role: disnake.Role,
     ):
         """
-        Shows stats for all users with specified role
+        Shows stats for all users with specified role {{ROLE_STATS_COMMAND}}
 
         Parameters
         ----------
-        role: Role from which participants need to be shown
+        inter
+        role: Role from which participants need to be shown {{ROLE_STATS_ROLE}}
         """
         await inter.send(
             embed=disnake.Embed(
@@ -44,7 +39,7 @@ class StructureStatictics(commands.Cog):
             ),
             ephemeral=True,
         )
-        guild = await database.get_guild(inter.guild.id)
+        guild = await guilds_db.get_guild(inter.guild.id)
         if guild is None:
             return await inter.edit_original_message(
                 embed=disnake.Embed(
