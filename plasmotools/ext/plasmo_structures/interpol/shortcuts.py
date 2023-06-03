@@ -291,7 +291,8 @@ class FastInterpolPayouts(commands.Cog):
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description=f"Многовато минут, такое вручную выплачивайте ⚠\n"
-                    f"Лимит - 180 минут. Если что, выплата должна быть такой:\n"
+                    f"Чтобы не выплатить миллион алмазов из-за бага, в боте установлен лимит - 180 минут. "
+                    f"Если что, выплата должна быть такой:\n"
                     f"**{rank['event_10min_payout'] * ((event_duration + 3) // 10)} "
                     f"= {rank['event_10min_payout']} * (({event_duration} + 3)/ 10)**",
                 ),

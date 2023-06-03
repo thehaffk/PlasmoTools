@@ -11,10 +11,10 @@ from plasmotools import checks, settings
 from plasmotools.utils import api, formatters
 from plasmotools.utils.api import bank
 from plasmotools.utils.api.tokens import get_token_scopes
-from plasmotools.utils.autocompleters.bank import \
-    search_bank_cards_autocompleter
-from plasmotools.utils.autocompleters.plasmo_structures import \
-    payouts_projects_autocompleter
+from plasmotools.utils.autocompleters.bank import search_bank_cards_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import (
+    payouts_projects_autocompleter,
+)
 from plasmotools.utils.database import plasmo_structures as database
 
 logger = logging.getLogger(__name__)
