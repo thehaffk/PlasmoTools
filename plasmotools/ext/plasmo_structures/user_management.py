@@ -4,14 +4,15 @@ from typing import Optional
 
 import aiohttp
 import disnake
-from disnake import ApplicationCommandInteraction, Localized, Webhook
+from disnake import ApplicationCommandInteraction, Webhook
 from disnake.ext import commands
 
-from plasmotools import settings
+import plasmotools.utils.database.plasmo_structures.guilds as guilds_db
+import plasmotools.utils.database.plasmo_structures.roles as roles_db
+from plasmotools import settings, checks
 from plasmotools.ext.error_handler import GuildIsNotRegistered
 from plasmotools.ext.reverse_role_sync import core
-from plasmotools.utils.autocompleters import role_autocompleter
-from plasmotools.utils.database import plasmo_structures as database
+from plasmotools.utils.autocompleters.plasmo_structures import role_autocompleter
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def is_guild_registered():
     async def predicate(inter):
-        if (await database.get_guild(inter.guild.id)) is None:
+        if (await guilds_db.get_guild(inter.guild.id)) is None:
             raise GuildIsNotRegistered()
         return True
 
@@ -29,9 +30,9 @@ def is_guild_registered():
 
 
 async def check_role(
-    inter, guild: database.Guild, role: Optional[database.Role]
+    inter, guild: guilds_db.Guild, role: Optional[roles_db.Role]
 ) -> bool:
-    guild: database.Guild
+    guild: guilds_db.Guild
     if role is None or role.guild_discord_id != guild.id:
         await inter.send(
             embed=disnake.Embed(
@@ -42,7 +43,7 @@ async def check_role(
             ephemeral=True,
         )
         return False
-    role: database.Role
+    role: roles_db.Role
     if role.available is False:
         await inter.send(
             embed=disnake.Embed(
@@ -65,11 +66,12 @@ class UserManagement(commands.Cog):
     @commands.slash_command(name="роли-список", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     @is_guild_registered()
+    @checks.blocked_users_slash_command_check()
     async def roles_list(self, inter: ApplicationCommandInteraction):
         """
         Получить список ролей в сервере
         """
-        roles = await database.get_roles(inter.guild.id)
+        roles = await roles_db.get_roles(inter.guild.id)
         embed = disnake.Embed(
             color=disnake.Color.green(),
             title=f"Все роли {inter.guild.name}",
@@ -98,6 +100,7 @@ class UserManagement(commands.Cog):
     @commands.slash_command(name="роли-добавить", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     @is_guild_registered()
+    @checks.blocked_users_slash_command_check()
     async def roles_add(
         self,
         inter: ApplicationCommandInteraction,
@@ -111,6 +114,7 @@ class UserManagement(commands.Cog):
 
         Parameters
         ----------
+        inter
         role: Роль
         webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/api/webhooks/...)
         available: Доступна ли роль для найма и снятия
@@ -118,7 +122,7 @@ class UserManagement(commands.Cog):
 
         """
 
-        guild = await database.get_guild(inter.guild.id)
+        guild = await guilds_db.get_guild(inter.guild.id)
         if role.id == guild.player_role_id or role.id == guild.head_role_id:
             await inter.send(
                 embed=disnake.Embed(
@@ -155,7 +159,7 @@ class UserManagement(commands.Cog):
                 )
                 return
 
-        db_role = await database.get_role(role.id)
+        db_role = await roles_db.get_role(role.id)
         if db_role is not None:
             await db_role.edit(
                 name=name,
@@ -170,7 +174,7 @@ class UserManagement(commands.Cog):
                 ),
             )
         else:
-            await database.add_role(
+            await roles_db.add_role(
                 guild_discord_id=inter.guild.id,
                 role_discord_id=role.id,
                 name=name,
@@ -189,6 +193,7 @@ class UserManagement(commands.Cog):
     @commands.slash_command(name="роли-удалить", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     @is_guild_registered()
+    @checks.blocked_users_slash_command_check()
     async def roles_delete(
         self,
         inter: ApplicationCommandInteraction,
@@ -197,7 +202,7 @@ class UserManagement(commands.Cog):
         """
         Удалить роль из базы данных
         """
-        db_role = await database.get_role(role.id)
+        db_role = await roles_db.get_role(role.id)
         if db_role is None:
             await inter.send(
                 embed=disnake.Embed(
@@ -232,6 +237,7 @@ class UserManagement(commands.Cog):
     @commands.slash_command(name="роли-редактировать", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
     @is_guild_registered()
+    @checks.blocked_users_slash_command_check()
     async def roles_edit(
         self,
         inter: ApplicationCommandInteraction,
@@ -245,13 +251,14 @@ class UserManagement(commands.Cog):
 
         Parameters
         ----------
+        inter
         role: Роль
         webhook_url: Ссылка на вебхук для отправки уведомлений (https://discord.com/api/webhooks/...)
         available: Доступна ли роль для найма и снятия
         name: Название роли, например "Интерпол"
 
         """
-        db_role = await database.get_role(role.id)
+        db_role = await roles_db.get_role(role.id)
         if db_role is None:
             await inter.send(
                 embed=disnake.Embed(
@@ -312,35 +319,30 @@ class UserManagement(commands.Cog):
         )
 
     @commands.slash_command(
-        name=Localized("hire", key="HIRE_COMMAND_NAME"),
-        description=Localized(key="HIRE_COMMAND_DESCRIPTION"),
         dm_permission=False,
     )
     @commands.guild_only()
     @commands.default_member_permissions(manage_roles=True)
     @is_guild_registered()
+    @checks.blocked_users_slash_command_check()
     async def hire_user_command(
         self,
         inter: ApplicationCommandInteraction,
-        user: disnake.Member = commands.Param(
-            name=Localized("player", key="PLAYER_PARAM"),
-            description=Localized(key="HIRE_PLAYER_DESCRIPTION"),
-        ),
+        user: disnake.Member,
         role: str = commands.Param(
-            name=Localized(key="HIRE_ROLE_NAME"),
-            description=Localized(key="HIRE_ROLE_DESCRIPTION"),
             autocomplete=role_autocompleter,
         ),
         comment: Optional[str] = None,
     ):
         """
-        Hire user.
+        Hire user. {{HIRE_COMMAND}}
 
         Parameters
         ----------
-        user: Player
-        role: Role [⚠ Choose from list!]
-        comment: Comment
+        inter
+        user: Player {{HIRE_PLAYER}}
+        role: Role [⚠ Choose from list!] {{HIRE_ROLE}}
+        comment: Comment  {{HIRE_REASON}}
         """
         await inter.response.defer(ephemeral=True)
         try:
@@ -350,9 +352,9 @@ class UserManagement(commands.Cog):
                 settings.Gifs.v_durku,
                 ephemeral=True,
             )
-        guild, db_role = await database.get_guild(
+        guild, db_role = await guilds_db.get_guild(
             inter.guild.id
-        ), await database.get_role(role_discord_id=int(role))
+        ), await roles_db.get_role(role_discord_id=int(role))
         if not await check_role(inter, guild, db_role):
             return
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
@@ -513,42 +515,35 @@ class UserManagement(commands.Cog):
     @commands.default_member_permissions(manage_roles=True)
     @is_guild_registered()
     @commands.slash_command(
-        name=Localized("fire", key="FIRE_COMMAND_NAME"),
-        description=Localized(key="FIRE_COMMAND_DESCRIPTION"),
         dm_permission=False,
     )
+    @checks.blocked_users_slash_command_check()
     async def fire_user_command(
         self,
         inter: ApplicationCommandInteraction,
-        user: disnake.Member = commands.Param(
-            name=Localized("player", key="PLAYER_PARAM"),
-            description=Localized(key="FIRE_PLAYER_DESCRIPTION"),
-        ),
+        user: disnake.Member = commands.Param(),
         role: str = commands.Param(
-            name=Localized(key="FIRE_ROLE_NAME"),
-            description=Localized(key="FIRE_ROLE_DESCRIPTION"),
             autocomplete=role_autocompleter,
         ),
         reason: Optional[str] = commands.Param(
-            name=Localized(key="FIRE_REASON_NAME"),
-            description=Localized(key="FIRE_REASON_DESCRIPTION"),
             default="",
         ),
     ):
         """
-        Fire user.
+        Fire user. {{FIRE_COMMAND}}
 
         Parameters
         ----------
-        reason: Reason
-        user: Player
-        role: Role [⚠ Choose from autocomplete!]
+        inter
+        reason: Reason{{FIRE_PLAYER}}
+        user: Player {{FIRE_ROLE}}
+        role: Role [⚠ Choose from autocomplete!] {{FIRE_REASON}}
         """
         await inter.response.defer(ephemeral=True)
         try:
-            guild, db_role = await database.get_guild(
+            guild, db_role = await guilds_db.get_guild(
                 inter.guild.id
-            ), await database.get_role(role_discord_id=int(role))
+            ), await roles_db.get_role(role_discord_id=int(role))
         except ValueError:
             return await inter.edit_original_message(
                 settings.Gifs.v_durku,

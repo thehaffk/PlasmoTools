@@ -12,7 +12,8 @@ from disnake.ext import commands
 from plasmotools import settings
 from plasmotools.utils import api
 from plasmotools.utils.api import messenger
-from plasmotools.utils.database.rrs import get_action, get_rrs_roles
+from plasmotools.utils.database.rrs.actions import get_action
+from plasmotools.utils.database.rrs.roles import get_rrs_roles
 
 logger = logging.getLogger(__name__)
 
@@ -321,6 +322,7 @@ class PlasmoLogger(commands.Cog):
         if (
             message.channel.id == settings.PlasmoRPGuild.notifications_channel_id
             and message.author.name == "Предупреждения"
+            and message.mentions == 0
         ):
             warned_user = message.mentions[0]
             try:

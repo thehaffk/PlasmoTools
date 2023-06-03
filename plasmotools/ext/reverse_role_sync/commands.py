@@ -5,11 +5,10 @@ import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
-from plasmotools import settings, utils
+from plasmotools import settings, utils, checks
 from plasmotools.ext.reverse_role_sync.core import RRSCore
 from plasmotools.utils.database import rrs as rrs_database
-from plasmotools.utils.database.plasmo_structures import \
-    guilds as guilds_database
+from plasmotools.utils.database.plasmo_structures import guilds as guilds_database
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +98,7 @@ class RRSCommands(commands.Cog):
         embed_text = ""
         if edit and entry_id is not None:
             embed_text += "Entry ID: " + str(entry_id) + "\n"
-            entry = await rrs_database.get_rrs_role(entry_id)
+            entry = await rrs_database.roles.get_rrs_role(entry_id)
             new_structure_guild = self.bot.get_guild(structure_guild_id)
             if entry.structure_guild_id != structure_guild_id:
                 old_structure_guild = self.bot.get_guild(entry.structure_guild_id)
@@ -181,6 +180,7 @@ class RRSCommands(commands.Cog):
 
     @commands.slash_command(name="rrs-sync")
     @commands.default_member_permissions(manage_roles=True)
+    @checks.blocked_users_slash_command_check()
     async def rrs_sync_command(
         self,
         interaction: ApplicationCommandInteraction,
@@ -192,6 +192,7 @@ class RRSCommands(commands.Cog):
 
         Parameters
         ----------
+        interaction
         user: User to sync roles for
         user_id: User ID to sync roles for
         """
@@ -211,6 +212,7 @@ class RRSCommands(commands.Cog):
         name="rrs-everyone-sync",
         guild_ids=[settings.DevServer.guild_id, settings.LogsServer.guild_id],
     )
+    @checks.blocked_users_slash_command_check()
     @commands.is_owner()
     async def rrs_everyone_sync_command(self, inter: ApplicationCommandInteraction):
         """
@@ -240,7 +242,9 @@ class RRSCommands(commands.Cog):
             )
             status_embed.add_field(
                 name=f"Прогресc",
-                value=utils.build_progressbar(counter + 1, len(plasmo_members)),
+                value=utils.formatters.build_progressbar(
+                    counter + 1, len(plasmo_members)
+                ),
             )
 
             if counter % lazy_update_members_count == 0:
@@ -250,7 +254,7 @@ class RRSCommands(commands.Cog):
         status_embed.clear_fields()
         status_embed.add_field(
             name=f"Синхронизировано пользователей: {len(plasmo_members)}/{len(plasmo_members)}",
-            value=utils.build_progressbar(1, 1),
+            value=utils.formatters.build_progressbar(1, 1),
             inline=False,
         )
         await inter.edit_original_message(embed=status_embed)
@@ -260,6 +264,7 @@ class RRSCommands(commands.Cog):
         dm_permission=False,
     )
     @commands.default_member_permissions(manage_roles=True)
+    @checks.blocked_users_slash_command_check()
     async def get_registered_rrs_entries(
         self, inter: ApplicationCommandInteraction, entry_id: int = None
     ):
@@ -268,7 +273,7 @@ class RRSCommands(commands.Cog):
         """
         await inter.response.defer(ephemeral=True)
         if entry_id is not None:
-            entry = await rrs_database.get_rrs_role(entry_id)
+            entry = await rrs_database.roles.get_rrs_role(entry_id)
             if entry is None:
                 await inter.edit_original_message("Entry not found")
                 return
@@ -322,7 +327,7 @@ class RRSCommands(commands.Cog):
                 embed=embed,
             )
 
-        entries = await rrs_database.get_rrs_roles(
+        entries = await rrs_database.roles.get_rrs_roles(
             structure_guild_id=inter.guild.id
             if inter.guild.id != settings.DevServer.guild_id
             and inter.guild.id != settings.LogsServer.guild_id
@@ -377,6 +382,7 @@ class RRSCommands(commands.Cog):
         dm_permission=False,
         guild_ids=[settings.DevServer.guild_id, settings.LogsServer.guild_id],
     )
+    @checks.blocked_users_slash_command_check()
     async def register_rrs_entry(
         self,
         inter: ApplicationCommandInteraction,
@@ -390,6 +396,7 @@ class RRSCommands(commands.Cog):
 
         Parameters
         ----------
+        inter
         sgid: structure guild id
         srid: structure role id
         prid: plasmo role id
@@ -488,7 +495,7 @@ class RRSCommands(commands.Cog):
         if not admin_decision:
             return
 
-        entry = await rrs_database.register_rrs_role(
+        entry = await rrs_database.roles.register_rrs_role(
             structure_guild_id=int(sgid),
             structure_role_id=int(srid),
             plasmo_role_id=int(prid),
@@ -501,6 +508,7 @@ class RRSCommands(commands.Cog):
         dm_permission=False,
         guild_ids=[settings.DevServer.guild_id, settings.LogsServer.guild_id],
     )
+    @checks.blocked_users_slash_command_check()
     async def delete_rrs_entry(
         self,
         inter: ApplicationCommandInteraction,
@@ -511,9 +519,10 @@ class RRSCommands(commands.Cog):
 
         Parameters
         ----------
+        inter
         entry_id: entry id
         """
-        entry = await rrs_database.get_rrs_role(entry_id)
+        entry = await rrs_database.roles.get_rrs_role(entry_id)
         if entry is None:
             await inter.send("Entry not found", ephemeral=True)
             return
@@ -531,6 +540,7 @@ class RRSCommands(commands.Cog):
         dm_permission=False,
         guild_ids=[settings.DevServer.guild_id, settings.LogsServer.guild_id],
     )
+    @checks.blocked_users_slash_command_check()
     async def edit_rrs_entry(
         self,
         inter: ApplicationCommandInteraction,
@@ -545,13 +555,14 @@ class RRSCommands(commands.Cog):
 
         Parameters
         ----------
+        inter
         entry_id: entry id
         disabled: is disabled
         structure_guild_id: structure guild id
         structure_role_id: structure role id
         plasmo_role_id: plasmo role id
         """
-        entry = await rrs_database.get_rrs_role(entry_id)
+        entry = await rrs_database.roles.get_rrs_role(entry_id)
         if entry is None:
             await inter.send("Entry not found", ephemeral=True)
             return

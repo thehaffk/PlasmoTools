@@ -12,11 +12,13 @@ logger = logging.getLogger(__name__)
 
 async def search_bank_cards_autocompleter(
     inter: disnake.ApplicationCommandInteraction, value: str
-) -> dict[str, str]:
+):
     """
     Returns a list of the cards for given query
     """
-    if len(value) <= 2:
+    if len(value) == 0:
+        value = inter.author.display_name or inter.author.name
+    elif len(value) <= 2:
         return [
             Localized(
                 "🔎 Request must be longer than 2 characters",
@@ -35,6 +37,7 @@ async def search_bank_cards_autocompleter(
                 response.status == 200
                 and (response_json := await response.json())["status"]
             ):
+                response_cards = response_json["data"][:25]
                 cards = {
                     (
                         "💳 "
@@ -44,7 +47,7 @@ async def search_bank_cards_autocompleter(
                         + " - "
                         + card["name"]
                     ): str(card["id"])
-                    for card in response_json["data"]
+                    for card in response_cards
                 }
                 if len(cards) == 0:
                     cards = [
@@ -53,11 +56,14 @@ async def search_bank_cards_autocompleter(
                             key="SEARCH_CARDS_AUTOCOMPLETE_NOT_FOUND",
                         )
                     ]
-                return cards[:25]
+                return cards
             else:
                 logger.error(
                     f"Error while searching bank cards: {response.status} {response.reason}"
                 )
-                return {
-                    "🔎 Не удалось получить карты из банка, введите номер карты вручную": "NOTFOUND"
-                }
+                return [
+                    Localized(
+                        "🔎 Nothing was found",
+                        key="SEARCH_CARDS_AUTOCOMPLETE_NOT_FOUND",
+                    )
+                ]

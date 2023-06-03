@@ -2,8 +2,13 @@ import logging
 
 import disnake
 from disnake.ext import commands
-from disnake.ext.commands.errors import (MissingPermissions, MissingRole,
-                                         NoPrivateMessage, NotOwner)
+from disnake.ext.commands.errors import (
+    MissingPermissions,
+    MissingRole,
+    NoPrivateMessage,
+    NotOwner,
+    CheckFailure,
+)
 
 from plasmotools import settings
 
@@ -77,6 +82,18 @@ class ErrorHandler(commands.Cog):
                 ephemeral=True,
             )
             return
+        elif isinstance(error, CheckFailure):
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ой, а що трапилось?",
+                    description="Ви були заблокованi. Мабуть зробили щось не те"
+                    f"\n\n[digital drugs technologies]({settings.DevServer.support_invite})",
+                ),
+                ephemeral=True,
+            )
+            return
+
         else:
             logger.error(error)
             await inter.send(
@@ -91,7 +108,9 @@ class ErrorHandler(commands.Cog):
             await self.bot.get_channel(settings.DevServer.errors_channel_id).send(
                 embed=disnake.Embed(
                     title="⚠⚠⚠",
-                    description=f"Возникла неожиданная ошибка.\n\n`{str(error)[:900]}`",
+                    description=f"Возникла неожиданная ошибка.\n\n"
+                    f"[digital drugs technologies]({settings.DevServer.support_invite})\n\n"
+                    f"`{str(error)[:900]}`",
                     color=disnake.Color.brand_green(),
                 ).add_field(
                     name="inter data",
@@ -104,6 +123,9 @@ class ErrorHandler(commands.Cog):
     async def on_command_error(self, ctx: disnake.ext.commands.Context, error):
         if isinstance(error, disnake.ext.commands.errors.CommandNotFound):
             await ctx.message.add_reaction("❓")
+        elif isinstance(error, disnake.ext.commands.errors.NotOwner):
+            await ctx.message.add_reaction("📷")
+            await ctx.message.add_reaction("🤓")
         else:
             logger.error(error)
             await ctx.message.add_reaction("⚠")
