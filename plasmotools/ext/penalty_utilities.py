@@ -4,7 +4,7 @@ from typing import List
 import disnake
 from disnake.ext import commands, tasks
 
-from plasmotools import settings, checks
+from plasmotools import checks, settings
 from plasmotools.utils import api
 
 logger = logging.getLogger(__name__)

@@ -6,7 +6,7 @@ import disnake
 from disnake import ApplicationCommandInteraction, Localized
 from disnake.ext import commands
 
-from plasmotools import settings, checks
+from plasmotools import checks, settings
 from plasmotools.ext.reverse_role_sync.core import RRSCore
 from plasmotools.utils import formatters
 from plasmotools.utils.api import bank, messenger

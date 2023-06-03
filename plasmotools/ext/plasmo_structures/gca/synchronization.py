@@ -4,7 +4,7 @@ import disnake
 from disnake import HTTPException
 from disnake.ext import commands, tasks
 
-from plasmotools import settings, checks
+from plasmotools import checks, settings
 from plasmotools.utils import api, formatters
 
 logger = logging.getLogger(__name__)

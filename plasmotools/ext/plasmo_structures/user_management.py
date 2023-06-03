@@ -9,10 +9,11 @@ from disnake.ext import commands
 
 import plasmotools.utils.database.plasmo_structures.guilds as guilds_db
 import plasmotools.utils.database.plasmo_structures.roles as roles_db
-from plasmotools import settings, checks
+from plasmotools import checks, settings
 from plasmotools.ext.error_handler import GuildIsNotRegistered
 from plasmotools.ext.reverse_role_sync import core
-from plasmotools.utils.autocompleters.plasmo_structures import role_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import \
+    role_autocompleter
 
 logger = logging.getLogger(__name__)
 

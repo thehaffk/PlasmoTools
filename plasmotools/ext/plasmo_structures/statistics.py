@@ -4,7 +4,7 @@ import disnake
 from disnake.ext import commands
 
 import plasmotools.utils.database.plasmo_structures.guilds as guilds_db
-from plasmotools import settings, checks
+from plasmotools import checks, settings
 from plasmotools.utils import api
 
 logger = logging.getLogger(__name__)
