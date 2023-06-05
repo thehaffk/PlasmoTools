@@ -215,7 +215,7 @@ class FastInterpolPayouts(commands.Cog):
 
     @commands.message_command(
         name=Localized("Event", key="EVENT_INTERPOL_BUTTON_NAME"),
-        guild_ids=[settings.interpol_guild.discord_id, settings.DevServer.guild_id],
+        guild_ids=[settings.interpol_guild.discord_id],
     )
     @commands.default_member_permissions(administrator=True)
     async def event_payout_button(
