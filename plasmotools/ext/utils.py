@@ -4,12 +4,12 @@ from typing import Optional
 
 import disnake
 from disnake import ApplicationCommandInteraction, Localized
-from disnake.ext import tasks, commands
+from disnake.ext import commands
 
-from plasmotools import settings
+from plasmotools import checks, settings
 from plasmotools.ext.reverse_role_sync.core import RRSCore
 from plasmotools.utils import formatters
-from plasmotools.utils.api import messenger, bank
+from plasmotools.utils.api import bank, messenger
 from plasmotools.utils.api.user import get_user_data
 
 logger = logging.getLogger(__name__)
@@ -128,45 +128,36 @@ class Utils(commands.Cog):
         except disnake.Forbidden:
             pass
 
-    @commands.slash_command(
-        name=Localized("embed", key="EMBED_COMMAND_NAME"),
-        description=Localized(key="EMBED_COMMAND_DESCRIPTION"),
-    )
+    @commands.slash_command()
     @commands.has_guild_permissions(manage_webhooks=True)
+    @checks.blocked_users_slash_command_check()
     async def embed_command(
         self,
         inter: disnake.ApplicationCommandInteraction,
         title: str = commands.Param(
             default="",
-            name=Localized(key="EMBED_TITLE_NAME"),
-            description=Localized(key="EMBED_TITLE_DESCRIPTION"),
         ),
         description: str = commands.Param(
             default="",
-            name=Localized(key="EMBED_DESCRIPTION_NAME"),
-            description=Localized(key="EMBED_DESCRIPTION_DESCRIPTION"),
         ),
         message_content: str = commands.Param(
             default="",
-            name=Localized(key="EMBED_MESSAGE_CONTENT_NAME"),
-            description=Localized(key="EMBED_MESSAGE_CONTENT_DESCRIPTION"),
         ),
         color: str = commands.Param(
             choices=colors,
-            name=Localized(key="EMBED_COLOR_NAME"),
-            description=Localized(key="EMBED_COLOR_DESCRIPTION"),
             default=str(0x2F3136),
         ),
     ):
         """
-        Send embed without webhooks
+        Send embed without webhooks  {{EMBED_COMMAND}}
 
         Parameters
         ----------
-        title: Title field in embed
-        description: Description field in embed
-        message_content: Content beyond the embed
-        color: Embed color
+        inter
+        title: Title field in embed {{EMBED_TITLE}}
+        description: Description field in embed {{EMBED_DESCRIPTION}}
+        message_content: Content beyond the embed {{EMBED_MESSAGE_CONTENT}}
+        color: Embed color {{EMBED_COLOR}}
         """
         await inter.response.defer(ephemeral=True)
         embed = disnake.Embed(
@@ -184,14 +175,14 @@ class Utils(commands.Cog):
                 disnake.ui.Button(
                     style=disnake.ButtonStyle.green,
                     label="Опубликовать",
-                    custom_id="publish",
+                    custom_id=f"publish_{inter.author.id}",
                 )
             ],
         )
         try:
             await self.bot.wait_for(
                 "button_click",
-                check=lambda i: (i.component.custom_id == f"publish"),
+                check=lambda i: (i.component.custom_id == f"publish_{inter.author.id}"),
                 timeout=300,
             )
         except asyncio.TimeoutError:
@@ -212,13 +203,11 @@ class Utils(commands.Cog):
             embeds=(await self.generate_profile_embeds(user))
         )
 
-    @commands.slash_command(
-        name=Localized("help", key="HELP_COMMAND_NAME"),
-        description=Localized(key="HELP_COMMAND_DESCRIPTION"),
-    )
+    @commands.slash_command()
+    @checks.blocked_users_slash_command_check()
     async def help_command(self, inter: ApplicationCommandInteraction):
         """
-        Get info about bot
+        Get info about bot {{HELP_COMMAND}}
         """
         await inter.send(
             ephemeral=True,
@@ -240,6 +229,7 @@ Plasmo Tools - многофункциональный бот для дискор
         description="Send message via plasmo messenger",
         guild_ids=[settings.DevServer.guild_id, settings.LogsServer.guild_id],
     )
+    @checks.blocked_users_slash_command_check()
     async def senc_mc_message_command(
         self,
         inter: ApplicationCommandInteraction,
@@ -258,13 +248,11 @@ Plasmo Tools - многофункциональный бот для дискор
             )
         )
 
-    @commands.slash_command(
-        name=Localized("treasury-balance", key="TREASURY_BALANCE_COMMAND_NAME"),
-        description=Localized(key="TREASURY_BALANCE_COMMAND_DESCRIPTION"),
-    )
+    @commands.slash_command()
+    @checks.blocked_users_slash_command_check()
     async def treasury_balance_command(self, inter: ApplicationCommandInteraction):
         """
-        Get treasury balance for server and government structures
+        Get treasury balance for server and government structures {{TREASURY_BALANCE_COMMAND}}
         """
         await inter.send(
             embed=disnake.Embed(

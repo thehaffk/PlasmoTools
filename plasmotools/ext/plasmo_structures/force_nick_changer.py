@@ -23,7 +23,7 @@ class ForceNickChanger(commands.Cog):
         if before.guild.id == settings.PlasmoRPGuild.guild_id:
             return
 
-        if (await database.get_guild(before.guild.id)) is None:
+        if (await database.guilds.get_guild(before.guild.id)) is None:
             return
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if plasmo_guild is None:

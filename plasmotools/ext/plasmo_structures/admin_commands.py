@@ -4,6 +4,7 @@ import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
+from plasmotools import checks
 from plasmotools.utils.database import plasmo_structures as database
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ class AdminCommands(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     @commands.default_member_permissions(administrator=True)
+    @checks.blocked_users_slash_command_check()
     async def register_guild(
         self,
         inter: ApplicationCommandInteraction,
@@ -32,7 +34,7 @@ class AdminCommands(commands.Cog):
         """
         Регистрация/редактирование сервера в базе данных
         """
-        guild: database.Guild = await database.get_guild(inter.guild.id)
+        guild: database.guilds.Guild = await database.guilds.get_guild(inter.guild.id)
         if guild is not None:
             embed = disnake.Embed(
                 title="GUILD CHANGELOG",
@@ -46,7 +48,7 @@ class AdminCommands(commands.Cog):
                 color=disnake.Color.green(),
             )
             await inter.send(embed=embed, ephemeral=True)
-        guild: database.Guild = await database.register_guild(
+        guild: database.guilds.Guild = await database.guilds.register_guild(
             discord_id=inter.guild.id,
             alias=alias,
             player_role_id=player_role.id,
@@ -76,11 +78,12 @@ class AdminCommands(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     @commands.default_member_permissions(administrator=True)
+    @checks.blocked_users_slash_command_check()
     async def wipe_guild(self, inter: ApplicationCommandInteraction):
         """
         Удалить сервер из базы данных
         """
-        guild = await database.get_guild(inter.guild.id)
+        guild = await database.guilds.get_guild(inter.guild.id)
         if guild is None:
             await inter.send(
                 embed=disnake.Embed(
@@ -92,8 +95,8 @@ class AdminCommands(commands.Cog):
             )
             return
 
-        projects = await database.get_projects(guild.id)
-        roles = await database.get_roles(guild.id)
+        projects = await database.projects.get_projects(guild.id)
+        roles = await database.roles.get_roles(guild.id)
         [await project.delete() for project in projects]
         [await role.delete() for role in roles]
         await guild.delete()
@@ -110,11 +113,12 @@ class AdminCommands(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     @commands.default_member_permissions(administrator=True)
+    @checks.blocked_users_slash_command_check()
     async def get_guild_data(self, inter: ApplicationCommandInteraction):
         """
         Получить данные о сервере
         """
-        guild = await database.get_guild(inter.guild.id)
+        guild = await database.guilds.get_guild(inter.guild.id)
         if guild is None:
             await inter.send(
                 embed=disnake.Embed(

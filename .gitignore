@@ -13,7 +13,7 @@ cogs/.disabled/
 # Distribution / packaging
 .idea/
 .*/
-.*
+.env
 .Python
 build/
 develop-eggs/
@@ -64,8 +64,6 @@ cover/
 *.sqlite3
 
 __pypackages__/
-
-.env
 .venv
 env/
 venv/

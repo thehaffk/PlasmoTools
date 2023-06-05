@@ -1,9 +1,9 @@
 import logging
 
 import disnake
-from disnake.ext import tasks, commands
+from disnake.ext import commands
 
-from plasmotools import settings
+from plasmotools import checks, settings
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +67,7 @@ class BankerPatents(commands.Cog):
         guild_ids=[settings.DevServer.guild_id, settings.LogsServer.guild_id],
     )
     @commands.is_owner()
+    @checks.blocked_users_slash_command_check()
     async def patent_alpha(self, inter: disnake.ApplicationCommandInteraction):
         await inter.response.defer(ephemeral=True)
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple, Optional, List
+from typing import List, Optional, Tuple
 
 import aiohttp
 from aiohttp import ClientOSError
@@ -52,11 +52,13 @@ async def search_cards(token: str, query: str, silent: bool = False) -> list:
                     "Authorization": f"Bearer {token}",
                 },
             ) as resp:
-                if (resp.status != 200 or not (await resp.json()).get("status", False)) and resp.status != 404:
+                if (
+                    resp.status != 200 or not (await resp.json()).get("status", False)
+                ) and resp.status != 404:
                     if not silent:
                         logger.warning(
                             "Could not search cards: %s",
-                            (await resp.json()),
+                            await resp.json(),
                         )
                     return []
                 return (await resp.json()).get("data", [])
@@ -90,7 +92,7 @@ async def get_card_data(card_id: int, silent: bool = False) -> Optional[dict]:
             return response_json.get("data", [])[0]
 
 
-async def get_penalties(tab: str = "active") -> List[dict]:
+async def get_penalties(tab: str = "active", offset=0) -> List[dict]:
     try:
         async with aiohttp.ClientSession(
             headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
@@ -105,9 +107,12 @@ async def get_penalties(tab: str = "active") -> List[dict]:
                 if resp.status != 200 or not (response_json := await resp.json()).get(
                     "status", False
                 ):
+                    if resp.status == 403:
+                        logger.warning("Could not get penalties: Permission denied")
+                        return []
                     logger.warning(
                         "Could not get penalties: %s",
-                        response_json,
+                        await resp.json(),
                     )
                     return []
                 penalties += (
@@ -116,22 +121,7 @@ async def get_penalties(tab: str = "active") -> List[dict]:
             while offset + 100 < response_json.get("data", {}).get("all", {}).get(
                 "total", 0
             ):
-                async with session.get(
-                    "https://rp.plo.su/api/bank/penalties/helper?",
-                    params={"tab": tab, "offset": offset, "count": 100},
-                ) as resp:
-                    if resp.status != 200 or not (
-                        response_json := await resp.json()
-                    ).get("status", False):
-                        logger.warning(
-                            "Could not get penalties: %s",
-                            response_json,
-                        )
-                        return []
-                    penalties += (
-                        response_json.get("data", {}).get("all", {}).get("list", [])
-                    )
-                    offset += 100
+                penalties += await get_penalties(tab, offset + 100)
             return penalties
     except ClientOSError:
         logger.warning("Could not get penalties: %s", "ClientOSError")

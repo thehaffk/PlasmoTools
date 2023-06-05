@@ -25,6 +25,7 @@
     "HIRE_COMMAND_NAME": "найняти",
     "HIRE_COMMAND_DESCRIPTION": "Найняти гравця на роль",
     "HIRE_PLAYER_DESCRIPTION": "Гравець, котрого ви хочете найняти",
+    "HIRE_PLAYER": "гравець",
     "HIRE_ROLE_NAME": "роль",
     "HIRE_ROLE_DESCRIPTION": "Роль [⚠️ Обирайте тільки зі списку!]",
     "HIRE_REASON_NAME": "коментар",
@@ -38,6 +39,7 @@
 
     "PAYOUT_COMMAND_NAME": "виплати",
     "PAYOUT_COMMAND_DESCRIPTION": "Виплатити алмази гравцю",
+    "PAYOUT_PLAYER_NAME": "гравець",
     "PAYOUT_PLAYER_DESCRIPTION": "Гравець, котрому потрібно виплатити",
     "PAYOUT_AMOUNT_NAME": "сума",
     "PAYOUT_AMOUNT_DESCRIPTION": "Сума, яку потрібно виплатити гравцю",

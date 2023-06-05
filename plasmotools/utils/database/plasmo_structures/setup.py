@@ -3,32 +3,6 @@ import logging
 import aiosqlite
 
 import plasmotools.settings as settings
-from plasmotools.utils.database.plasmo_structures.guilds import (
-    Guild,
-    get_guild,
-    register_guild,
-    get_all_guilds,
-)
-from plasmotools.utils.database.plasmo_structures.payouts import (
-    PayoutEntry,
-    get_payout_entry,
-    get_payout_entries,
-    register_payout_entry,
-    set_saved_card,
-    get_saved_card,
-)
-from plasmotools.utils.database.plasmo_structures.projects import (
-    Project,
-    get_project,
-    get_projects,
-    register_project,
-)
-from plasmotools.utils.database.plasmo_structures.roles import (
-    Role,
-    get_role,
-    get_roles,
-    add_role,
-)
 
 PATH = settings.DATABASE_PATH
 logger = logging.getLogger(__name__)

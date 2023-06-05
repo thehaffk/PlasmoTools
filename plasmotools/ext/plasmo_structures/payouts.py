@@ -3,13 +3,18 @@ from typing import Optional
 
 import disnake
 from aiohttp import ClientSession
-from disnake import ApplicationCommandInteraction, Localized
+from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
-from plasmotools import settings
-from plasmotools.utils import formatters, autocompleters, api
+import plasmotools.utils.database.plasmo_structures.projects as projects_db
+from plasmotools import checks, settings
+from plasmotools.utils import api, formatters
 from plasmotools.utils.api import bank
 from plasmotools.utils.api.tokens import get_token_scopes
+from plasmotools.utils.autocompleters.bank import \
+    search_bank_cards_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import \
+    payouts_projects_autocompleter
 from plasmotools.utils.database import plasmo_structures as database
 
 logger = logging.getLogger(__name__)
@@ -27,15 +32,14 @@ class Payouts(commands.Cog):
 
     @commands.guild_only()
     @commands.slash_command(
-        name=Localized("projects", key="PROJECTS_COMMAND_NAME"),
-        description=Localized(key="PROJECTS_COMMAND_DESCRIPTION"),
         dm_permission=False,
     )
+    @checks.blocked_users_slash_command_check()
     async def projects(self, inter: ApplicationCommandInteraction):
         """
-        Помощь по проектам и выплатам
+        Помощь по проектам и выплатам {{PROJECTS_COMMAND}}
         """
-        guild = await database.get_guild(inter.guild.id)
+        guild = await database.guilds.get_guild(inter.guild.id)
         if guild is None:
             await inter.send(
                 embed=disnake.Embed(
@@ -52,17 +56,25 @@ class Payouts(commands.Cog):
             embed=disnake.Embed(
                 color=disnake.Color.green(),
                 description="Проекты в Plasmo Tools - это упрощение системы выплат. Создайте проект через "
-                "/проекты-создать чтобы получить доступ к /выплата\n\n"
-                f"**plasmo_token**: Чтобы получить токен плазмо - "
-                f"откройте тикет в [дискорде DDT]({settings.DevServer.support_invite}). (Как только мне "
-                f"будет не лень я сделаю адекватное автоматическое получение токена)",
+                "/проекты-создать чтобы получить доступ к </payout:1077320503632609291>\n\n"
+                f"**Получение plasmo_token**\n Когда перейдете по ссылке, авторизуйте приложение.\n"
+                f"Вас перенаправит на сайт, где вам нужно будет скопировать ваш токен из адресной строки:\n"
+                f"pt.haffk.tech/oauth/#access_token=***123TOKEN123**&scope=...&token_type=...",
             ),
             ephemeral=True,
+            components=[
+                disnake.ui.Button(
+                    url=settings.oauth2_url_for_projects,
+                    emoji="🔗",
+                    label="Получить plasmo token",
+                )
+            ],
         )
 
     @commands.guild_only()
     @commands.slash_command(name="проекты-создать", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
+    @checks.blocked_users_slash_command_check()
     async def projects_create(  # todo: remove
         self,
         inter: ApplicationCommandInteraction,
@@ -76,13 +88,14 @@ class Payouts(commands.Cog):
 
         Parameters
         ----------
+        inter
         name: Название проекта, например "Интерпол"
         webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/api/webhooks/...)
         from_card: Номер карты, с которой будет производиться выплата
         plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
         """
         # todo: autocomplete for from_card
-        guild = await database.get_guild(inter.guild.id)
+        guild = await database.guilds.get_guild(inter.guild.id)
         if guild is None:
             await inter.send(
                 embed=disnake.Embed(
@@ -119,7 +132,7 @@ class Payouts(commands.Cog):
                 title="Регистрирую проект...",
             ),
         )
-        db_project = await database.register_project(
+        db_project = await projects_db.register_project(
             name=name,
             guild_discord_id=inter.guild.id,
             is_active=True,
@@ -142,6 +155,7 @@ class Payouts(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="проекты-редактировать", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
+    @checks.blocked_users_slash_command_check()
     async def projects_edit(  # todo: remove
         self,
         inter: ApplicationCommandInteraction,
@@ -157,6 +171,7 @@ class Payouts(commands.Cog):
 
         Parameters
         ----------
+        inter
         project_id: Айди проекта
         webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.com/api/webhooks/{id}/{token})
         is_active: Доступен ли проект
@@ -165,7 +180,7 @@ class Payouts(commands.Cog):
         plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
         """
         await inter.response.defer(ephemeral=True)
-        db_project = await database.get_project(project_id)
+        db_project = await projects_db.get_project(project_id)
         if db_project is None:
             await inter.send(
                 embed=disnake.Embed(
@@ -205,6 +220,7 @@ class Payouts(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="проекты-удалить", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
+    @checks.blocked_users_slash_command_check()
     async def projects_delete(  # todo: remove
         self,
         inter: ApplicationCommandInteraction,
@@ -215,11 +231,12 @@ class Payouts(commands.Cog):
 
         Parameters
         ----------
+        inter
         project_id: Айди проекта
 
         """
         await inter.response.defer(ephemeral=True)
-        db_project = await database.get_project(project_id)
+        db_project = await projects_db.get_project(project_id)
         if db_project is None:
             await inter.edit_original_message(
                 embed=disnake.Embed(
@@ -251,12 +268,13 @@ class Payouts(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="проекты-список", dm_permission=False)
     @commands.default_member_permissions(administrator=True)
+    @checks.blocked_users_slash_command_check()
     async def projects_list(self, inter: ApplicationCommandInteraction):  # todo: remove
         """
         Получить список проектов на сервере
         """
         await inter.response.defer(ephemeral=True)
-        projects = await database.get_projects(guild_discord_id=inter.guild.id)
+        projects = await projects_db.get_projects(guild_discord_id=inter.guild.id)
         embed = disnake.Embed(
             color=disnake.Color.green(),
             title=f"Все проекты {inter.guild.name}",
@@ -274,7 +292,7 @@ class Payouts(commands.Cog):
                 value="Айди / Карта / Токен \nВебхук",
             )
             for project in projects:
-                project: database.Project
+                project: projects_db.Project
                 embed.add_field(
                     name=f"{project.name} - {'Активен' if project.is_active else 'Неактивен'}  ",
                     value=f"{project.id} / {formatters.format_bank_card(project.from_card)} / "
@@ -290,13 +308,13 @@ class Payouts(commands.Cog):
         interaction: disnake.Interaction,
         user: disnake.Member,
         amount: int,
-        project: database.Project,
+        project: projects_db.Project,
         message: str,
         transaction_message: str = None,
     ) -> bool:
         if transaction_message is None:
             transaction_message = message
-        guild = await database.get_guild(interaction.guild.id)
+        guild = await database.guilds.get_guild(interaction.guild.id)
         if guild is None:
             await interaction.edit_original_message(
                 embed=disnake.Embed(
@@ -343,7 +361,7 @@ class Payouts(commands.Cog):
             plasmo_user = user
         from_card = project.from_card
 
-        user_card = await database.get_saved_card(user.id)
+        user_card = await database.payouts.get_saved_card(user.id)
         if user_card is None:
             user_cards = sorted(
                 [
@@ -405,7 +423,7 @@ class Payouts(commands.Cog):
                 )
             except disnake.Forbidden:
                 pass
-            await database.set_saved_card(user.id, user_card)
+            await database.payouts.set_saved_card(user.id, user_card)
 
         await interaction.edit_original_message(
             embed=disnake.Embed(
@@ -493,7 +511,7 @@ class Payouts(commands.Cog):
             ),
         )
         # todo: save failed payments and retry them later
-        await database.register_payout_entry(
+        await database.payouts.register_payout_entry(
             project_id=project.id,
             user_id=user.id,
             amount=amount,
@@ -514,45 +532,34 @@ class Payouts(commands.Cog):
 
     @commands.guild_only()
     @commands.slash_command(
-        name=Localized("payout", key="PAYOUT_COMMAND_NAME"),
-        description=Localized(key="PAYOUT_COMMAND_DESCRIPTION"),
         dm_permission=False,
     )
+    @checks.blocked_users_slash_command_check()
     @commands.default_member_permissions(administrator=True)
     async def payout_command(
         self,
         inter: ApplicationCommandInteraction,
-        user: disnake.Member = commands.Param(
-            name=Localized("player", key="PLAYER_PARAM"),
-            description=Localized(key="PAYOUT_PLAYER_DESCRIPTION"),
-        ),
-        amount: int = commands.Param(
-            name=Localized("amount", key="PAYOUT_AMOUNT_NAME"),
-            description=Localized(key="PAYOUT_AMOUNT_DESCRIPTION"),
-        ),
+        user: disnake.Member = commands.Param(),
+        amount: int = commands.Param(),
         project: str = commands.Param(
-            name=Localized("project", key="PAYOUT_PROJECT_NAME"),
-            description=Localized(key="PAYOUT_PROJECT_DESCRIPTION"),
-            autocomplete=autocompleters.payouts_projects_autocompleter,
+            autocomplete=payouts_projects_autocompleter,
         ),
-        message: str = commands.Param(
-            name=Localized("message", key="PAYOUT_MESSAGE_NAME"),
-            description=Localized(key="PAYOUT_MESSAGE_DESCRIPTION"),
-        ),
+        message: str = commands.Param(),
     ):
         """
-        Payout diamonds to player
+        Payout diamonds to player {{PAYOUT_COMMAND}}
 
         Parameters
         ----------
-        user: Player to pay
-        amount: Amount of diamonds to payout
-        project: Payout project
-        message: Comment to payout
+        inter
+        user: Player to pay {{PAYOUT_PLAYER}}
+        amount: Amount of diamonds to payout {{PAYOUT_AMOUNT}}
+        project: Payout project {{PAYOUT_PROJECT}}
+        message: Comment to payout {{PAYOUT_MESSAGE}}
         """
         await inter.response.defer(ephemeral=True)
         try:
-            db_project = await database.get_project(int(project))
+            db_project = await projects_db.get_project(int(project))
             if db_project is None:
                 raise ValueError("Проект не найден")
             if db_project.guild_discord_id != inter.guild.id:
@@ -575,32 +582,24 @@ class Payouts(commands.Cog):
             return
         await self.payout(inter, user, amount, db_project, message)
 
-    @commands.slash_command(
-        name=Localized("set-payout-card", key="SET_PAYOUTS_CARD_COMMAND_NAME"),
-        description=Localized(key="SET_PAYOUTS_CARD_COMMAND_DESCRIPTION"),
-    )
+    @commands.slash_command()
+    @checks.blocked_users_slash_command_check()
     async def set_saved_card(
         self,
         inter: disnake.ApplicationCommandInteraction,
         card: str = commands.Param(
-            name=Localized(key="SET_PAYOUTS_CARD_PARAM_NAME"),
-            description=Localized(key="SET_PAYOUTS_CARD_PARAM_DESCRIPTION"),
-            autocomplete=autocompleters.search_bank_cards_autocompleter,
+            autocomplete=search_bank_cards_autocompleter,
         ),
     ):
         """
-        Set up your card for payouts
+        Set up your card for payouts {{SET_PAYOUTS_CARD_COMMAND}}
 
         Parameters
         ----------
-        card: Card number, format: 9000 or EB-9000. EB-0142 -> 142. EB-3666 -> 3666
+        inter
+        card: Card number, format: 9000 or EB-9000. EB-0142 -> 142. EB-3666 -> 3666 {{SET_PAYOUTS_CARD_PARAM}}
         """
         await inter.response.defer(ephemeral=True)
-        await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.yellow(), description="Валидирую данные..."
-            )
-        )
         try:
             card_id = int(card.replace(" ", "").replace("EB-", "").replace("ЕВ-", ""))
             if card_id < 0 or card_id > 9999:
@@ -632,14 +631,7 @@ class Payouts(commands.Cog):
             )
             return
 
-        await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.yellow(),
-                description="Сохраняю карту в базу данных...",
-            )
-        )
-
-        await database.set_saved_card(
+        await database.payouts.set_saved_card(
             user_id=inter.author.id,
             card_id=card_id,
         )
@@ -654,10 +646,6 @@ class Payouts(commands.Cog):
         )
 
     async def cog_load(self):
-        """
-        Called when disnake bot object is ready
-        """
-
         logger.info("%s Ready", __name__)
 
 

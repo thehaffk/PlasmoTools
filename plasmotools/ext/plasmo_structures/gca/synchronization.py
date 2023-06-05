@@ -4,9 +4,8 @@ import disnake
 from disnake import HTTPException
 from disnake.ext import commands, tasks
 
-from plasmotools import settings
-from plasmotools.utils import api
-from plasmotools.utils import formatters
+from plasmotools import checks, settings
+from plasmotools.utils import api, formatters
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +150,7 @@ class BACSynchronization(commands.Cog):
         name="everyone-sync",
         guild_ids=[settings.GCAGuild.guild_id],
     )
+    @checks.blocked_users_slash_command_check()
     @commands.has_permissions(manage_roles=True)
     async def everyone_sync(self, inter: disnake.ApplicationCommandInteraction):
         """
@@ -195,6 +195,7 @@ class BACSynchronization(commands.Cog):
     @commands.slash_command(
         name="sync", guild_ids=[settings.GCAGuild.guild_id], dm_permission=False
     )
+    @checks.blocked_users_slash_command_check()
     @commands.has_permissions(manage_roles=True)
     async def sync_user(
         self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member

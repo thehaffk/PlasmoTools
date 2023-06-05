@@ -1,7 +1,3 @@
-"""
-Config file for Plasmo Tools
-"""
-
 import logging
 import os
 from builtins import bool
@@ -9,27 +5,38 @@ from dataclasses import dataclass
 
 from dotenv import load_dotenv
 
+PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
+DATABASE_PATH = "./data.sqlite"
+
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 
 DEBUG = bool(int(os.getenv("BOT_DEBUG", "0")))
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("TOKEN", None)
 PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN", None)
-PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
-DATABASE_PATH = "./data.sqlite"
-
 if PT_PLASMO_TOKEN is None:
-    logger.critical("Plasmo oauth2 token not found")
+    logger.critical("PLASMO_TOKEN is missing")
 if PT_PLASMO_COOKIES is None:
-    logger.critical("Plasmo rp_token not found")
+    logger.critical("PLASMO_COOKIE is missing")
 
-__version__ = "1.5.8-pride" + ("-a" if DEBUG else "")
-
-# todo: update version?
+__version__ = "1.5.9" + ("-alpha" if DEBUG else "")
 
 help_url = "https://thfk.notion.site/Plasmo-Tools-help-a5874f7c3a56433ea2c3816527740fa0"
+
+oauth2_url_for_projects = "https://rp.plo.su/oauth2?client_id=FHHGpr8ZbZb35ZFvwSgD9EMbvkQF35ZFvwSgD9EMbvkQGpr8&redirect_uri=https://pt.haffk.tech/oauth/&response_type=token&scope=bank:manage%20bank:history%20bank:search%20user:notifications%20bank:penalties"
+
+blocked_users_ids = [
+    744193929746055168,  # TheMeko
+]
+
+owner_ids = [
+    737501414141591594,  # thehaffk
+    222718720127139840,  # Apehum
+    191836876980748298,  # KPidS
+    1017063823548616785,  # haffk alt
+]
 
 
 class LogsServer:

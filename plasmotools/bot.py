@@ -23,37 +23,33 @@ class PlasmoTools(commands.Bot):
         _intents = disnake.Intents.all()
         _intents.presences = False
         return cls(
-            owner_ids=[
-                737501414141591594,  # /h#9140
-                222718720127139840,  # Apehum#1878
-                191836876980748298,  # KPidS#3754
-                706995136311197730,  # attica#5884
-            ],
+            owner_ids=settings.owner_ids,
             status=disnake.Status.do_not_disturb,
             intents=_intents,
-            command_prefix=commands.when_mentioned,
-            allowed_mentions=disnake.AllowedMentions(everyone=False),
+            command_prefix=commands.when_mentioned_or("pt."),
             help_command=None,
             description="Plasmo Tools",
             case_insensitive=True,
             reload=settings.DEBUG,
             strip_after_prefix=True,
+            strict_localization=True,
         )
 
     async def on_ready(self):
         logger.info("Plasmo Tools %s is ready", settings.__version__)
         logger.info(f"Logged in as {self.user}")
-        log_channel = self.get_channel(settings.DevServer.bot_logs_channel_id)
         await self.change_presence(
             activity=disnake.Activity(
                 type=disnake.ActivityType.playing,
-                name=f"Plasmo Tools роботаем | {settings.__version__}",
+                name=f"t.me/plasmotools | Version: {settings.__version__}",
             )
         )
+
+        log_channel = self.get_channel(settings.DevServer.bot_logs_channel_id)
         await log_channel.send(
             embeds=[
                 disnake.Embed(
-                    title="ON READY Event called",
+                    title="New Connection",
                     description=f"Version: `{settings.__version__}`",
                 ),
                 disnake.Embed(

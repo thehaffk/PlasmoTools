@@ -4,7 +4,7 @@ from random import choice, randint
 
 import disnake
 from disnake import StageInstance
-from disnake.ext import tasks, commands
+from disnake.ext import commands
 
 from plasmotools import settings
 
@@ -79,9 +79,6 @@ class Fun(commands.Cog):
         voice_client: disnake.VoiceProtocol = await stage.connect()
         await asyncio.sleep(600)
         await voice_client.disconnect(force=True)
-
-
-
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)
