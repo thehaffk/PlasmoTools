@@ -12,8 +12,7 @@ import plasmotools.utils.database.plasmo_structures.roles as roles_db
 from plasmotools import checks, settings
 from plasmotools.ext.error_handler import GuildIsNotRegistered
 from plasmotools.ext.reverse_role_sync import core
-from plasmotools.utils.autocompleters.plasmo_structures import \
-    role_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import role_autocompleter
 
 logger = logging.getLogger(__name__)
 
@@ -320,6 +319,7 @@ class UserManagement(commands.Cog):
         )
 
     @commands.slash_command(
+        name="hire",
         dm_permission=False,
     )
     @commands.guild_only()
@@ -516,6 +516,7 @@ class UserManagement(commands.Cog):
     @commands.default_member_permissions(manage_roles=True)
     @is_guild_registered()
     @commands.slash_command(
+        name="fire",
         dm_permission=False,
     )
     @checks.blocked_users_slash_command_check()
