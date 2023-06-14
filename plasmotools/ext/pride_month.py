@@ -136,7 +136,9 @@ class PrideMonthManager(commands.Cog):
                             )
                             continue
                         contents = await resp.read()
-                await current_guild.edit(icon=contents, reason="GOOD BYE, PRIDE MONTH, SEE U IN 2024")
+                await current_guild.edit(
+                    icon=contents, reason="GOOD BYE, PRIDE MONTH, SEE U IN 2024"
+                )
                 self.up_to_date_avatars_guild_ids.append(guild.id)
             except disnake.Forbidden:
                 logger.warning("Unable to update avatar in %s", current_guild)
@@ -144,7 +146,6 @@ class PrideMonthManager(commands.Cog):
         if len(self.up_to_date_avatars_guild_ids) == len(guilds_to_edit):
             logger.info("All avatars are up to date, disabling check")
             self.pride_avatars_check_task.stop()
-
 
     @pride_avatars_check_task.before_loop
     async def before_pride_avatars_check_task(self):

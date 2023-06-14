@@ -6,6 +6,8 @@ from aiohttp import ClientSession
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
+import plasmotools.utils.database.plasmo_structures.guilds as guilds_db
+import plasmotools.utils.database.plasmo_structures.payouts as payouts_db
 import plasmotools.utils.database.plasmo_structures.projects as projects_db
 from plasmotools import checks, settings
 from plasmotools.utils import api, formatters
@@ -15,7 +17,6 @@ from plasmotools.utils.autocompleters.bank import \
     search_bank_cards_autocompleter
 from plasmotools.utils.autocompleters.plasmo_structures import \
     payouts_projects_autocompleter
-from plasmotools.utils.database import plasmo_structures as database
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ class Payouts(commands.Cog):
 
     @commands.guild_only()
     @commands.slash_command(
+        name="projects",
         dm_permission=False,
     )
     @checks.blocked_users_slash_command_check()
@@ -39,15 +41,15 @@ class Payouts(commands.Cog):
         """
         Помощь по проектам и выплатам {{PROJECTS_COMMAND}}
         """
-        guild = await database.guilds.get_guild(inter.guild.id)
+        guild = await guilds_db.get_guild(inter.guild.id)
         if guild is None:
             await inter.send(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     title="Ошибка",
                     description="Сервер не зарегистрирован как официальная структура.\n"
-                                "Если вы считаете что это ошибка - обратитесь в "
-                                f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                    "Если вы считаете что это ошибка - обратитесь в "
+                    f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
                 ),
                 ephemeral=True,
             )
@@ -56,17 +58,19 @@ class Payouts(commands.Cog):
             embed=disnake.Embed(
                 color=disnake.Color.green(),
                 description="Проекты в Plasmo Tools - это упрощение системы выплат. Создайте проект через "
-                            "/проекты-создать чтобы получить доступ к </payout:1077320503632609291>\n\n"
-                            f"**Получение plasmo_token**\n Когда перейдете по ссылке, авторизуйте приложение.\n"
-                            f"Вас перенаправит на сайт, где вам нужно будет скопировать ваш токен из адресной строки:\n"
-                            f"pt.haffk.tech/oauth/#access_token=***123TOKEN123**&scope=...&token_type=...",
+                "/проекты-создать чтобы получить доступ к </payout:1077320503632609291>\n\n"
+                f"**Получение plasmo_token**\n Когда перейдете по ссылке, авторизуйте приложение.\n"
+                f"Вас перенаправит на сайт, где вам нужно будет скопировать ваш токен из адресной строки:\n"
+                f"pt.haffk.tech/oauth/#access_token=***123TOKEN123**&scope=...&token_type=...",
             ),
             ephemeral=True,
-            components=[disnake.ui.Button(
-                url=settings.oauth2_url_for_projects,
-                emoji="🔗",
-                label="Получить plasmo token"
-            )]
+            components=[
+                disnake.ui.Button(
+                    url=settings.oauth2_url_for_projects,
+                    emoji="🔗",
+                    label="Получить plasmo token",
+                )
+            ],
         )
 
     @commands.guild_only()
@@ -93,7 +97,7 @@ class Payouts(commands.Cog):
         plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
         """
         # todo: autocomplete for from_card
-        guild = await database.guilds.get_guild(inter.guild.id)
+        guild = await guilds_db.get_guild(inter.guild.id)
         if guild is None:
             await inter.send(
                 embed=disnake.Embed(
@@ -312,7 +316,7 @@ class Payouts(commands.Cog):
     ) -> bool:
         if transaction_message is None:
             transaction_message = message
-        guild = await database.guilds.get_guild(interaction.guild.id)
+        guild = await guilds_db.get_guild(interaction.guild.id)
         if guild is None:
             await interaction.edit_original_message(
                 embed=disnake.Embed(
@@ -359,7 +363,7 @@ class Payouts(commands.Cog):
             plasmo_user = user
         from_card = project.from_card
 
-        user_card = await database.payouts.get_saved_card(user.id)
+        user_card = await payouts_db.get_saved_card(user.id)
         if user_card is None:
             user_cards = sorted(
                 [
@@ -421,7 +425,7 @@ class Payouts(commands.Cog):
                 )
             except disnake.Forbidden:
                 pass
-            await database.payouts.set_saved_card(user.id, user_card)
+            await payouts_db.set_saved_card(user.id, user_card)
 
         await interaction.edit_original_message(
             embed=disnake.Embed(
@@ -509,7 +513,7 @@ class Payouts(commands.Cog):
             ),
         )
         # todo: save failed payments and retry them later
-        await database.payouts.register_payout_entry(
+        await payouts_db.register_payout_entry(
             project_id=project.id,
             user_id=user.id,
             amount=amount,
@@ -529,9 +533,7 @@ class Payouts(commands.Cog):
         return True
 
     @commands.guild_only()
-    @commands.slash_command(
-        dm_permission=False,
-    )
+    @commands.slash_command(dm_permission=False, name="payout")
     @checks.blocked_users_slash_command_check()
     @commands.default_member_permissions(administrator=True)
     async def payout_command(
@@ -556,20 +558,7 @@ class Payouts(commands.Cog):
         message: Comment to payout {{PAYOUT_MESSAGE}}
         """
         await inter.response.defer(ephemeral=True)
-        try:
-            db_project = await projects_db.get_project(int(project))
-            if db_project is None:
-                raise ValueError("Проект не найден")
-            if db_project.guild_discord_id != inter.guild.id:
-                await inter.edit_original_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.red(),
-                        title="Ошибка",
-                        description="Проект не приналежит этому серверу",
-                    ),
-                )
-                return
-        except ValueError:
+        if not project.isdigit():
             await inter.edit_original_message(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
@@ -578,9 +567,23 @@ class Payouts(commands.Cog):
                 ),
             )
             return
+        db_project = await projects_db.get_project(int(project))
+        if db_project is None:
+            raise ValueError("Проект не найден")
+        if db_project.guild_discord_id != inter.guild.id:
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Проект не приналежит этому серверу",
+                ),
+            )
+            return
         await self.payout(inter, user, amount, db_project, message)
 
-    @commands.slash_command()
+    @commands.slash_command(
+        name="set-payouts-card",
+    )
     @checks.blocked_users_slash_command_check()
     async def set_saved_card(
         self,
@@ -629,7 +632,7 @@ class Payouts(commands.Cog):
             )
             return
 
-        await database.payouts.set_saved_card(
+        await payouts_db.set_saved_card(
             user_id=inter.author.id,
             card_id=card_id,
         )

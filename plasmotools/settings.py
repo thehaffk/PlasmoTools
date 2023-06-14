@@ -5,23 +5,22 @@ from dataclasses import dataclass
 
 from dotenv import load_dotenv
 
-PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
-DATABASE_PATH = "./data.sqlite"
-
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+DATABASE_PATH = "./data.sqlite"
 
 DEBUG = bool(int(os.getenv("BOT_DEBUG", "0")))
 TOKEN = os.getenv("TOKEN", None)
 PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN", None)
+PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
 if PT_PLASMO_TOKEN is None:
     logger.critical("PLASMO_TOKEN is missing")
 if PT_PLASMO_COOKIES is None:
     logger.critical("PLASMO_COOKIE is missing")
 
-__version__ = "1.5.9" + ("-alpha" if DEBUG else "")
+__version__ = "1.5.10" + ("-alpha" if DEBUG else "")
 
 help_url = "https://thfk.notion.site/Plasmo-Tools-help-a5874f7c3a56433ea2c3816527740fa0"
 
@@ -50,6 +49,7 @@ class LogsServer:
     rrs_verification_channel_id = 1060912903257079878
     leave_logs_channel_id = 1057983888229670922
     moderators_channel_id = 1073654991417507931
+    daily_check_channel_id = 1118522037565141002
 
     roles_notifications_role_id = 1046524223377637416
     errors_notifications_role_id = 876056190726045716

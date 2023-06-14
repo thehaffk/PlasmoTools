@@ -16,7 +16,9 @@ class StructureStatictics(commands.Cog):
 
     @commands.guild_only()
     @commands.default_member_permissions(manage_roles=True)
-    @commands.slash_command()
+    @commands.slash_command(
+        name="role-stats",
+    )
     @checks.blocked_users_slash_command_check()
     async def role_stats_command(
         self,

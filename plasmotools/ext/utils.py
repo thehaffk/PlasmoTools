@@ -9,7 +9,7 @@ from disnake.ext import commands
 from plasmotools import checks, settings
 from plasmotools.ext.reverse_role_sync.core import RRSCore
 from plasmotools.utils import formatters
-from plasmotools.utils.api import bank, messenger
+from plasmotools.utils.api import bank, messenger, utils
 from plasmotools.utils.api.user import get_user_data
 
 logger = logging.getLogger(__name__)
@@ -128,7 +128,9 @@ class Utils(commands.Cog):
         except disnake.Forbidden:
             pass
 
-    @commands.slash_command()
+    @commands.slash_command(
+        name="embed",
+    )
     @commands.has_guild_permissions(manage_webhooks=True)
     @checks.blocked_users_slash_command_check()
     async def embed_command(
@@ -203,7 +205,7 @@ class Utils(commands.Cog):
             embeds=(await self.generate_profile_embeds(user))
         )
 
-    @commands.slash_command()
+    @commands.slash_command(name="help")
     @checks.blocked_users_slash_command_check()
     async def help_command(self, inter: ApplicationCommandInteraction):
         """
@@ -248,7 +250,7 @@ Plasmo Tools - многофункциональный бот для дискор
             )
         )
 
-    @commands.slash_command()
+    @commands.slash_command(name="treasury-balance")
     @checks.blocked_users_slash_command_check()
     async def treasury_balance_command(self, inter: ApplicationCommandInteraction):
         """
@@ -281,6 +283,23 @@ Plasmo Tools - многофункциональный бот для дискор
                 color=disnake.Color.dark_green(),
             )
         )
+
+    @commands.command(name="budget")
+    @checks.blocked_users_slash_command_check()
+    async def budget_command(self, ctx: disnake.ext.commands.Context):
+        pay2_data = await utils.get_pay2_stats()
+        try:
+            await ctx.message.reply(
+                embed=disnake.Embed(
+                    description=disnake.utils.escape_markdown(pay2_data),
+                    color=disnake.Color.dark_green(),
+                ),
+                delete_after=360,
+            )
+            await asyncio.sleep(360)
+            await ctx.message.delete()
+        except disnake.Forbidden:
+            ...
 
     async def cog_load(self):
         logger.info("%s Ready", __name__)

@@ -320,6 +320,7 @@ class UserManagement(commands.Cog):
         )
 
     @commands.slash_command(
+        name="hire",
         dm_permission=False,
     )
     @commands.guild_only()
@@ -516,6 +517,7 @@ class UserManagement(commands.Cog):
     @commands.default_member_permissions(manage_roles=True)
     @is_guild_registered()
     @commands.slash_command(
+        name="fire",
         dm_permission=False,
     )
     @checks.blocked_users_slash_command_check()
