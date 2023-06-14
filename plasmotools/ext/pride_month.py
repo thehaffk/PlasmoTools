@@ -21,10 +21,6 @@ class Guild:
 
 guilds_to_edit = list()
 
-# guilds_to_edit.append(Guild(id=813451608871796766,  # Plasmo
-#                             pride_avatar_url="https://i.imgur.com/44sIPuM.jpg",
-#                             original_avatar_url="https://i.imgur.com/lpUKyvx.png"))
-
 guilds_to_edit.append(
     Guild(
         id=813451608871796766,  # Интерпол
@@ -74,34 +70,6 @@ guilds_to_edit.append(
         original_avatar_url="https://cdn.discordapp.com/attachments/980941642934673478/1114357565577498706/Rivylr8.png",
     )
 )
-# guilds_to_edit.append(
-#     Guild(
-#         id=872877081774657536,  # Бидрилс e
-#         pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044735559512225/4KQ7uO9.png",
-#         original_avatar_url="https://imgur.com/nIk4s4x.png",
-#     )
-# )
-# guilds_to_edit.append(
-#     Guild(
-#         id=1007717949743829112,  # Порт 3
-#         pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044753406275634/TpYqb34.png",
-#         original_avatar_url="https://i.imgur.com/2Ify7JA.png",
-#     )
-# )
-# guilds_to_edit.append(
-#     Guild(
-#         id=828683007635488809,  # ДД
-#         pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044767117451384/hBG3r5J.png",
-#         original_avatar_url="https://i.imgur.com/kw0Kafw.png",
-#     )
-# )
-# guilds_to_edit.append(
-#     Guild(
-#         id=966785796902363188,  # ДДТ
-#         pride_avatar_url="https://media.discordapp.net/attachments/939520105874858014/1108044781248073728/B6rCBQz.png",
-#         original_avatar_url="https://i.imgur.com/0gQE4Ac.png",
-#     )
-# )
 
 
 class PrideMonthManager(commands.Cog):
