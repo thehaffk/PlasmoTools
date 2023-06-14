@@ -50,7 +50,6 @@ class DailyReconciliation(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-
     @commands.command("run-api-sync")
     @commands.is_owner()
     async def manually_run_check(self, ctx):

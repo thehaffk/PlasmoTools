@@ -21,8 +21,10 @@ async def generate_bankers_stats_embeds(days=7) -> List[disnake.Embed]:
     bankers = sorted(bankers.items(), key=lambda x: x[1], reverse=True)
     bankers_top = "\n`№. transactions` - user\n"
     for index, _banker in enumerate(bankers[:99]):
-        bankers_top += f"`{index + 1}. {' ' * (3 - len(str(_banker[1])) + 2 - len(str(index + 1)))}{_banker[1]}` - " \
-                       f"{disnake.utils.escape_markdown(_banker[0])} \n"
+        bankers_top += (
+            f"`{index + 1}. {' ' * (3 - len(str(_banker[1])) + 2 - len(str(index + 1)))}{_banker[1]}` - "
+            f"{disnake.utils.escape_markdown(_banker[0])} \n"
+        )
     if len(bankers) > 100:
         bankers_top += f"100 - {len(bankers) + 1} hidden"
     main_statistics_embed = disnake.Embed(
