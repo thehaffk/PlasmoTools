@@ -19,7 +19,9 @@ class AdminCommands(commands.Cog):
 
     @commands.is_owner()
     @commands.guild_only()
-    @commands.slash_command()
+    @commands.slash_command(
+        name="register-guild",
+    )
     @commands.default_member_permissions(administrator=True)
     @checks.blocked_users_slash_command_check()
     async def register_guild(
@@ -76,7 +78,9 @@ class AdminCommands(commands.Cog):
 
     @commands.is_owner()
     @commands.guild_only()
-    @commands.slash_command()
+    @commands.slash_command(
+        name="wipe-guild",
+    )
     @commands.default_member_permissions(administrator=True)
     @checks.blocked_users_slash_command_check()
     async def wipe_guild(self, inter: ApplicationCommandInteraction):
@@ -111,7 +115,9 @@ class AdminCommands(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.slash_command()
+    @commands.slash_command(
+        name="get-guild-data",
+    )
     @commands.default_member_permissions(administrator=True)
     @checks.blocked_users_slash_command_check()
     async def get_guild_data(self, inter: ApplicationCommandInteraction):

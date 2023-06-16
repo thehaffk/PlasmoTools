@@ -46,6 +46,20 @@ class Fun(commands.Cog):
     async def on_message(self, message: disnake.Message):
         if message.content == self.bot.user.mention:
             try:
+                if randint(1, 1000) == 4:
+                    async with message.channel.typing():
+                        await asyncio.sleep(3)
+                        await message.reply("Блять, дружище")
+                    await asyncio.sleep(1)
+                    async with message.channel.typing():
+                        await asyncio.sleep(2)
+                        await message.channel.send("сходи нахуй")
+                    await asyncio.sleep(1)
+                    async with message.channel.typing():
+                        await asyncio.sleep(2)
+                        await message.channel.send("вы меня заебали с пингами своими")
+                    return
+
                 if message.author.id in self.bot.owner_ids:
                     await message.add_reaction("<:KOMAP:995730375504568361>")
                 else:
@@ -59,13 +73,11 @@ class Fun(commands.Cog):
         elif self.bot.user.id in [user.id for user in message.mentions]:
             async with message.channel.typing():
                 await asyncio.sleep(1)
-                if randint(1, 1000) == 1:
-                    await message.reply("пошел нахуй")
 
         if " комар " in (" " + message.content + " ").lower():
             if randint(1, 10) == 1:
                 await message.channel.send(content=choice(komaru_gifs))
-        if randint(0, 1) == 1:
+        if randint(0, 1):
             for word in settings.word_emojis:
                 if word == message.content:
                     try:
