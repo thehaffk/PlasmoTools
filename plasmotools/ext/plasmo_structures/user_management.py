@@ -21,8 +21,6 @@ logger = logging.getLogger(__name__)
 # TODO: Auto remove all roles, when user leaves plasmo rp
 
 
-
-
 async def check_role(
     inter, guild: guilds_db.Guild, role: Optional[roles_db.Role]
 ) -> bool:

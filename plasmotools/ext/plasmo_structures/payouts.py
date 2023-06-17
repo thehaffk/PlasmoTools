@@ -315,10 +315,7 @@ class Payouts(commands.Cog):
             )
             return False
 
-
-        if (
-                user.id == self.bot.user.id
-                or user.bot):
+        if user.id == self.bot.user.id or user.bot:
             await interaction.edit_original_message(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
@@ -327,7 +324,6 @@ class Payouts(commands.Cog):
                 ),
             )
             return False
-
 
         if not settings.DEBUG:
             plasmo_user = self.bot.get_guild(
@@ -368,7 +364,8 @@ class Payouts(commands.Cog):
                     )
                     if card["id"] != from_card
                     and card["holder_type"] == 0  # User
-                    and card["holder"] == plasmo_user.display_name  # fixme: new nicknames system
+                    and card["holder"]
+                    == plasmo_user.display_name  # fixme: new nicknames system
                 ],
                 key=lambda card: card["value"],
                 reverse=True,

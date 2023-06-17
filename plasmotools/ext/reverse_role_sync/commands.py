@@ -91,9 +91,9 @@ class RRSCommands(commands.Cog):
         structure_role_id = int(structure_role_id)
         plasmo_role_id = int(plasmo_role_id)
 
-        embed_title = ( ("Добавление новой роли" if not edit else "Редактирование роли")
-            + " требует подтверждения"
-        )
+        embed_title = (
+            "Добавление новой роли" if not edit else "Редактирование роли"
+        ) + " требует подтверждения"
         embed_text = ""
         if edit and entry_id is not None:
             embed_text += "Entry ID: " + str(entry_id) + "\n"

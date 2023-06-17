@@ -35,7 +35,9 @@ async def transfer(
             },
         ) as resp:
             if resp.status != 200 or not (await resp.json()).get("status", False):
-                errors = [error["msg"] for error in (await resp.json()).get("error", [])]
+                errors = [
+                    error["msg"] for error in (await resp.json()).get("error", [])
+                ]
                 return False, ", ".join(errors)
             return True, ""
 
