@@ -10,7 +10,7 @@ from disnake.ext import commands
 import plasmotools.utils.database.plasmo_structures.guilds as guilds_db
 import plasmotools.utils.database.plasmo_structures.roles as roles_db
 from plasmotools import checks, settings
-from plasmotools.ext.error_handler import GuildIsNotRegistered
+from plasmotools.checks import is_guild_registered
 from plasmotools.ext.reverse_role_sync import core
 from plasmotools.utils.autocompleters.plasmo_structures import \
     role_autocompleter
@@ -19,15 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 # TODO: Auto remove all roles, when user leaves plasmo rp
-
-
-def is_guild_registered():
-    async def predicate(inter):
-        if (await guilds_db.get_guild(inter.guild.id)) is None:
-            raise GuildIsNotRegistered()
-        return True
-
-    return commands.check(predicate)
 
 
 async def check_role(
@@ -712,7 +703,7 @@ class UserManagement(commands.Cog):
         Called when disnake bot object is ready
         """
 
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(bot: disnake.ext.commands.Bot):
