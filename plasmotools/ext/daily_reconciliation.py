@@ -240,7 +240,7 @@ class DailyReconciliation(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        if not self.daly_check_task.is_running():
+        if not self.daly_check_task.is_running() and not settings.DEBUG:
             self.daly_check_task.start()
 
     async def cog_load(self):

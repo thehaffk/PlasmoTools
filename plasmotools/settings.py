@@ -20,7 +20,7 @@ if PT_PLASMO_TOKEN is None:
 if PT_PLASMO_COOKIES is None:
     logger.critical("PLASMO_COOKIE is missing")
 
-__version__ = "1.5.10" + ("-alpha" if DEBUG else "")
+__version__ = "1.6.0" + ("-alpha" if DEBUG else "")
 
 help_url = "https://thfk.notion.site/Plasmo-Tools-help-a5874f7c3a56433ea2c3816527740fa0"
 
