@@ -98,7 +98,7 @@ class BankerStats(commands.Cog):
         self.bot = bot
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
     @commands.slash_command(
         name="banker-stats",

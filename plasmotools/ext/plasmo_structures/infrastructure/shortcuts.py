@@ -137,7 +137,7 @@ class FastInfrastructurePayouts(commands.Cog):
         Called when disnake bot object is ready
         """
 
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(bot: disnake.ext.commands.Bot):

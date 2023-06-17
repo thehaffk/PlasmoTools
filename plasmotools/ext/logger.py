@@ -432,7 +432,7 @@ class PlasmoLogger(commands.Cog):
         # await dd_logs_channel.send(embed=embed)
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(client):

@@ -10,45 +10,46 @@ from plasmotools.utils.formatters import build_progressbar
 logger = logging.getLogger(__name__)
 
 
-strings_to_roles_dict = {
-    "player": 746628733452025866,  # Игрок
-    "fusion": 751722994170331136,  # Fusion
-    "admin": 704364763248984145,  # Администрация
-    "booster": 689093907912458312,  # Бустер
-    "keeper": 1003276423747874896,  # Хранитель
-    "helper": 1023622804794527805,  # Хелпер
-    "soviet_member": 810492714235723777,  # Член совета глав
-    "soviet_helper": 826366703591620618,  # Помощник совета глав
-    "mko_helper": 844507728671277106,  # Участник Совета МКО
-    "interpol": 751723033357451335,  # Интерпол
-    "banker": 826367015014498314,  # Банкир
-    "president": 880065048792420403,  # Президент
-}
 
-if settings.DEBUG:
-    strings_to_roles_dict = {
-        "player": 841098135376101377,  # Игрок
-        "fusion": 841098260554317864,  # Fusion
-        "admin": 843919496615034911,  # Администрация
-        "keeper": 1118537860560191519,  # Хранитель
-        "helper": 1118537993813233684,  # Хелпер
-        "soviet_member": 873135550046023770,  # Член совета глав
-        "soviet_helper": 932719709462331542,  # Помощник совета глав
-        "mko_helper": 873135798814408735,  # Участник Совета МКО
-        "interpol": 932719823027318864,  # Интерпол
-        "banker": 873135413043273739,  # Банкир
-        "president": 1112132073319305286,  # Президент
-    }
-
-roles_to_strings_dict = {
-    strings_to_roles_dict[role_string]: role_string
-    for role_string in strings_to_roles_dict
-}
 
 
 class DailyReconciliation(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
+        self.strings_to_roles_dict = {
+            "player": 746628733452025866,  # Игрок
+            "fusion": 751722994170331136,  # Fusion
+            "admin": 704364763248984145,  # Администрация
+            "booster": 689093907912458312,  # Бустер
+            "keeper": 1003276423747874896,  # Хранитель
+            "helper": 1023622804794527805,  # Хелпер
+            "soviet_member": 810492714235723777,  # Член совета глав
+            "soviet_helper": 826366703591620618,  # Помощник совета глав
+            "mko_helper": 844507728671277106,  # Участник Совета МКО
+            "interpol": 751723033357451335,  # Интерпол
+            "banker": 826367015014498314,  # Банкир
+            "president": 880065048792420403,  # Президент
+        }
+
+        if settings.DEBUG:
+            self.strings_to_roles_dict = {
+                "player": 841098135376101377,  # Игрок
+                "fusion": 841098260554317864,  # Fusion
+                "admin": 843919496615034911,  # Администрация
+                "keeper": 1118537860560191519,  # Хранитель
+                "helper": 1118537993813233684,  # Хелпер
+                "soviet_member": 873135550046023770,  # Член совета глав
+                "soviet_helper": 932719709462331542,  # Помощник совета глав
+                "mko_helper": 873135798814408735,  # Участник Совета МКО
+                "interpol": 932719823027318864,  # Интерпол
+                "banker": 873135413043273739,  # Банкир
+                "president": 1112132073319305286,  # Президент
+            }
+
+        self.roles_to_strings_dict = {
+            self.strings_to_roles_dict[role_string]: role_string
+            for role_string in self.strings_to_roles_dict
+        }
 
     @commands.command("run-api-sync")
     @commands.is_owner()
@@ -137,19 +138,20 @@ class DailyReconciliation(commands.Cog):
             api_roles = []
 
             for role in member.roles:
-                if role.id in roles_to_strings_dict:
-                    discord_roles.append(roles_to_strings_dict[role.id])
+                if role.id in self.roles_to_strings_dict:
+                    discord_roles.append(self.roles_to_strings_dict[role.id])
 
             api_profile = await api.user.get_user_data(discord_id=member.id)
             if api_profile is None:
-                logger.debug("Unable to get Plasmo Profile for %i", member.id)
+                # logger.debug("Unable to get Plasmo Profile for %i", member.id)
                 continue
 
             for role in api_profile.get("roles", []):
-                if role in strings_to_roles_dict:
+                if role in self.strings_to_roles_dict:
                     api_roles.append(role)
                 elif role != "default":
-                    logger.warning("Unknown API roles: %s", role)
+                    logger.debug("Unknown API roles: %s at https://rp.plo.su/api/user/profile?discord_id=%i",
+                                   role, member.id)
 
             # Checks
             if api_profile.get("banned", False) and not settings.DEBUG:
@@ -157,8 +159,35 @@ class DailyReconciliation(commands.Cog):
                     member, api_profile, "**USER IS BANNED IN API, BUT NOT IN DISCORD**"
                 )
 
+                continue
+
+
+            if api_profile.get("has_access", False) != ("player" in discord_roles):
+                await self.log_error(
+                    member,
+                    api_profile,
+                    "**HAS_ACCESS AND PLAYER ROLE DO NOT MATCH:** \n"
+                    + "api      discord\n"
+                    + disnake.utils.escape_markdown(
+                        f"{api_profile.get('has_access')}    "
+                        f"{'has role' if 'player' in discord_roles else 'doesnt have role'}"
+                    ),
+                )
+
+            if not api_profile.get("has_access", False):
+                if discord_roles:
+                    await self.log_error(
+                        member,
+                        api_profile,
+                        "**HAS_ACCESS IS FALSE, BUT PLAYER HAS DISCORD ROLES:** \n"
+                        + "discord roles: "
+                        + ",".join(discord_roles),
+                    )
+                continue  # Checking for api roles / nickname / in_guild is unnececary if has_access if 0
+
+
             if sorted(api_roles) != sorted(discord_roles):
-                text = "ROLES DOES NOT MATCH\n"
+                text = " ROLES ARE NOT THE SAME\n"
                 text += "**Discord roles:**\n"
                 text += "```diff\n"
                 for role in set(discord_roles + api_roles):
@@ -183,16 +212,17 @@ class DailyReconciliation(commands.Cog):
 
                 await self.log_error(member, api_profile, text)
 
-            if api_profile.get("nick") != member.display_name:
-                await self.log_error(
-                    member,
-                    api_profile,
-                    "**NICKNAMES DOES NOT MATCH:** \n"
-                    + "api != discord"
-                    + disnake.utils.escape_markdown(
-                        f"'{api_profile.get('nick')}' != '{member.display_name}'"
-                    ),
-                )
+            # fixme: disnake v2.8.1 does not support new nickname system, display_name does not return guild nickname
+            # if api_profile.get("nick") != member.display_name:
+            #     await self.log_error(
+            #         member,
+            #         api_profile,
+            #         "**NICKNAMES DO NOT MATCH:** \n"
+            #         + "api          discord\n"
+            #         + disnake.utils.escape_markdown(
+            #             f"'{api_profile.get('nick')}        '{member.display_name}'"
+            #         ),
+            #     )
 
             if not api_profile.get("in_guild", False) and not settings.DEBUG:
                 await self.log_error(
@@ -214,7 +244,7 @@ class DailyReconciliation(commands.Cog):
             self.daly_check_task.start()
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(client):

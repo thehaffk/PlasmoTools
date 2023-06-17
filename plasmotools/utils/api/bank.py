@@ -15,7 +15,7 @@ async def transfer(
     to_card: int,
     amount: int,
     token: str,
-    message: str = "By PlasmoTools",
+    message: str = "via PlasmoTools",
 ) -> Tuple[bool, str]:
     """
     Transfer money from one card to another.
@@ -35,7 +35,8 @@ async def transfer(
             },
         ) as resp:
             if resp.status != 200 or not (await resp.json()).get("status", False):
-                return False, (await resp.json()).get("error", {}).get("msg", "")
+                errors = [error["msg"] for error in (await resp.json()).get("error", [])]
+                return False, ", ".join(errors)
             return True, ""
 
 
