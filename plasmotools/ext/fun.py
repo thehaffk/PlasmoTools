@@ -47,17 +47,11 @@ class Fun(commands.Cog):
         if message.content == self.bot.user.mention:
             try:
                 if randint(1, 1000) == 4:
-                    async with message.channel.typing():
-                        await asyncio.sleep(3)
-                        await message.reply("Блять, дружище")
-                    await asyncio.sleep(1)
-                    async with message.channel.typing():
-                        await asyncio.sleep(2)
-                        await message.channel.send("сходи нахуй")
-                    await asyncio.sleep(1)
-                    async with message.channel.typing():
-                        await asyncio.sleep(2)
-                        await message.channel.send("вы меня заебали с пингами своими")
+                    for answer_string in ["Блять, дружище", "сходи нахуй", "вы меня заебали с пингами своими"]:
+                        async with message.channel.typing():
+                            await asyncio.sleep(3)
+                            await message.reply(content=answer_string)
+                        await asyncio.sleep(1)
                     return
 
                 if message.author.id in self.bot.owner_ids:
@@ -74,9 +68,10 @@ class Fun(commands.Cog):
             async with message.channel.typing():
                 await asyncio.sleep(1)
 
-        if " комар " in (" " + message.content + " ").lower():
+        if "комар" in (message.content or "").lower():
             if randint(1, 10) == 1:
                 await message.channel.send(content=choice(komaru_gifs))
+
         if randint(0, 1):
             for word in settings.word_emojis:
                 if word == message.content:
@@ -93,7 +88,7 @@ class Fun(commands.Cog):
         await voice_client.disconnect(force=True)
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(client):

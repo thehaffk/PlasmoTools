@@ -89,7 +89,7 @@ class PenaltyUtilities(commands.Cog):
         await self.check_all_penalties()
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(client):

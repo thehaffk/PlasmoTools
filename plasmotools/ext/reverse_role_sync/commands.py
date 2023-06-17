@@ -91,9 +91,7 @@ class RRSCommands(commands.Cog):
         structure_role_id = int(structure_role_id)
         plasmo_role_id = int(plasmo_role_id)
 
-        embed_title = (
-            "RRS "
-            + ("Добавление новой роли" if not edit else "Редактирование роли")
+        embed_title = ( ("Добавление новой роли" if not edit else "Редактирование роли")
             + " требует подтверждения"
         )
         embed_text = ""
@@ -602,7 +600,7 @@ class RRSCommands(commands.Cog):
         )
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(client):
