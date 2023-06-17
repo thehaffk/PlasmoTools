@@ -7,10 +7,13 @@ import disnake
 from disnake import ApplicationCommandInteraction, Webhook
 from disnake.ext import commands
 
-from plasmotools import checks, models, settings
-from plasmotools.autocompleters.plasmo_structures import role_autocompleter
+import plasmotools.utils.database.plasmo_structures.guilds as guilds_db
+import plasmotools.utils.database.plasmo_structures.roles as roles_db
+from plasmotools import checks, settings
 from plasmotools.checks import is_guild_registered
-from plasmotools.embeds import build_simple_embed
+from plasmotools.ext.reverse_role_sync import core
+from plasmotools.utils.autocompleters.plasmo_structures import \
+    role_autocompleter
 
 logger = logging.getLogger(__name__)
 
@@ -18,18 +21,28 @@ logger = logging.getLogger(__name__)
 # TODO: Auto remove all roles, when user leaves plasmo rp
 
 
-async def check_role(inter, guild, role) -> bool:
-    if role is None or role.guild_discord_id != guild.discord_id:
+async def check_role(
+    inter, guild: guilds_db.Guild, role: Optional[roles_db.Role]
+) -> bool:
+    guild: guilds_db.Guild
+    if role is None or role.guild_discord_id != guild.id:
         await inter.send(
-            embed=build_simple_embed(
-                "Роль не найдена. Пожалуйста, выбирайте только из списка", failure=True
+            embed=disnake.Embed(
+                color=disnake.Color.red(),
+                title="Ошибка",
+                description="Роль не найдена. Пожалуйста, выбирайте только из списка.",
             ),
             ephemeral=True,
         )
         return False
-    if role.is_available is False:
+    role: roles_db.Role
+    if role.available is False:
         await inter.send(
-            embed=build_simple_embed("Роль не доступна для выбора", failure=True),
+            embed=disnake.Embed(
+                color=disnake.Color.red(),
+                title="Ошибка",
+                description="Роль не доступна для выбора. ",
+            ),
             ephemeral=True,
         )
         return False
@@ -50,11 +63,9 @@ class UserManagement(commands.Cog):
         """
         Получить список ролей в сервере
         """
-        roles = await models.StructureRole.objects.filter(
-            guild_discord_id=inter.guild.id
-        ).all()
+        roles = await roles_db.get_roles(inter.guild.id)
         embed = disnake.Embed(
-            color=disnake.Color.dark_green(),
+            color=disnake.Color.green(),
             title=f"Все роли {inter.guild.name}",
         )
         if len(roles) == 0:
@@ -70,7 +81,7 @@ class UserManagement(commands.Cog):
             for role in roles:
                 embed.add_field(
                     name=f"{role.name}",
-                    value=f"{settings.Emojis.enabled if role.is_available else settings.Emojis.disabled} "
+                    value=f"{settings.Emojis.enabled if role.available else settings.Emojis.disabled} "
                     f"<@&{role.role_discord_id}> / `{role.role_discord_id}` \n ||{role.webhook_url}||",
                     inline=False,
                 )
@@ -103,45 +114,72 @@ class UserManagement(commands.Cog):
 
         """
 
-        db_guild = await models.StructureGuild.objects.get(discord_id=inter.guild.id)
-        if role.id in [db_guild.player_role_id, db_guild.head_role_id]:
+        guild = await guilds_db.get_guild(inter.guild.id)
+        if role.id == guild.player_role_id or role.id == guild.head_role_id:
             await inter.send(
-                embed=build_simple_embed(
-                    "Эта роль не может быть закреплена как нанимаемая\n"
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Эта роль не может быть закреплена как нанимаемая\n"
                     "Если вы считаете что это ошибка - обратитесь в "
                     f"[поддержку digital drugs technologies]{settings.DevServer.support_invite}",
-                    failure=True,
                 ),
                 ephemeral=True,
             )
             return
         await inter.response.defer(ephemeral=True)
-        async with aiohttp.ClientSession() as session:  # todo: create method to check webhooks (dry)
+        async with aiohttp.ClientSession() as session:
             webhook = Webhook.from_url(webhook_url, session=session)
             if webhook is None:
                 await inter.send(
-                    embed=build_simple_embed(
-                        "Не удалось получить вебхук. Проверьте правильность ссылки.",
-                        failure=True,
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Ошибка",
+                        description="Не удалось получить вебхук. Проверьте правильность ссылки.",
+                    ),
+                    ephemeral=True,
+                )
+                return
+            elif webhook.guild_id != inter.guild.id:
+                await inter.send(
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Ошибка",
+                        description="Вебхук не принадлежит этому серверу.",
                     ),
                     ephemeral=True,
                 )
                 return
 
-        await models.StructureRole.objects.update_or_create(
-            role_discord_id=role.id,
-            defaults={
-                "guild_discord_id": inter.guild.id,
-                "name": name,
-                "webhook_url": webhook_url,
-                "is_available": available,
-            },
-        )
-        await inter.edit_original_message(
-            embed=build_simple_embed(
-                f"Роль `{name}` обновлена",
-            ),
-        )
+        db_role = await roles_db.get_role(role.id)
+        if db_role is not None:
+            await db_role.edit(
+                name=name,
+                webhook_url=webhook_url,
+                available=available,
+            )
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.green(),
+                    title="Роль обновлена",
+                    description=f"Роль `{name}` обновлена",
+                ),
+            )
+        else:
+            await roles_db.add_role(
+                guild_discord_id=inter.guild.id,
+                role_discord_id=role.id,
+                name=name,
+                webhook_url=webhook_url,
+                available=available,
+            )
+            await inter.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.green(),
+                    title="Роль создана",
+                    description=f"Роль `{name}` зарегистрирована",
+                ),
+            )
 
     @commands.guild_only()
     @commands.slash_command(name="роли-удалить", dm_permission=False)
@@ -156,14 +194,35 @@ class UserManagement(commands.Cog):
         """
         Удалить роль из базы данных
         """
-        await inter.response.defer(ephemeral=True)
-        await models.StructureRole.objects.filter(
-            role_discord_id=role.id, guild_discord_id=inter.guild_id
-        ).delete()
-        await inter.edit_original_message(
-            embed=build_simple_embed(
-                "Роль удалена",
+        db_role = await roles_db.get_role(role.id)
+        if db_role is None:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Роль не найдена в базе данных",
+                ),
+                ephemeral=True,
             )
+            return
+        if db_role.guild_discord_id != inter.guild.id:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Роль не приналежит этому серверу",
+                ),
+                ephemeral=True,
+            )
+            return
+        await db_role.delete()
+
+        await inter.send(
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Роль удалена",
+            ),
+            ephemeral=True,
         )
 
     @commands.guild_only()
@@ -191,45 +250,62 @@ class UserManagement(commands.Cog):
         name: Название роли, например "Интерпол"
 
         """
-        db_role = await models.StructureRole.objects.filter(
-            role_discord_id=role.id, guild_discord_id=inter.guild_id
-        ).first()
+        db_role = await roles_db.get_role(role.id)
         if db_role is None:
-            return await inter.send(
-                embed=build_simple_embed("Роль не найдена", failure=True),
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Роль не найдена в базе данных",
+                ),
                 ephemeral=True,
             )
+            return
+        if db_role.guild_discord_id != inter.guild.id:
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Ошибка",
+                    description="Роль не приналежит этому серверу",
+                ),
+                ephemeral=True,
+            )
+            return
 
         if webhook_url is not None:
             async with aiohttp.ClientSession() as session:
-                webhook = await Webhook.from_url(webhook_url, session=session).fetch()
+                webhook = Webhook.from_url(webhook_url, session=session)
                 if webhook is None:
                     await inter.send(
-                        embed=build_simple_embed(
-                            "Не удалось получить вебхук. Проверьте правильность ссылки",
-                            failure=True,
+                        embed=disnake.Embed(
+                            color=disnake.Color.red(),
+                            title="Ошибка",
+                            description="Не удалось получить вебхук. Проверьте правильность ссылки.",
                         ),
                         ephemeral=True,
                     )
                     return
                 elif webhook.guild_id != inter.guild.id:
                     await inter.send(
-                        embed=build_simple_embed(
-                            "Вебхук не принадлежит этому серверу.", failure=True
+                        embed=disnake.Embed(
+                            color=disnake.Color.red(),
+                            title="Ошибка",
+                            description="Вебхук не принадлежит этому серверу.",
                         ),
                         ephemeral=True,
                     )
                     return
 
-        await db_role.update(
-            name=name if name is not None else db_role.name,
-            webhook_url=webhook_url if webhook_url is not None else db_role.webhook_url,
-            is_available=available if available is not None else db_role.is_available,
+        await db_role.edit(
+            name=name,
+            webhook_url=webhook_url,
+            available=available,
         )
 
         await inter.send(
-            embed=build_simple_embed(
-                "Роль отредактирована",
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Роль отредактирована",
             ),
             ephemeral=True,
         )
@@ -269,48 +345,50 @@ class UserManagement(commands.Cog):
                 settings.Gifs.v_durku,
                 ephemeral=True,
             )
-        db_role = await models.StructureRole.objects.filter(
-            guild_discord_id=inter.guild.id, role_discord_id=int(role)
-        ).first()
-        db_guild = await models.StructureGuild.objects.filter(
-            discord_id=inter.guild.id
-        ).first()
-
-        if not await check_role(inter, db_guild, db_role):
+        guild, db_role = await guilds_db.get_guild(
+            inter.guild.id
+        ), await roles_db.get_role(role_discord_id=int(role))
+        if not await check_role(inter, guild, db_role):
             return
-
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         plasmo_user = plasmo_guild.get_member(user.id) if plasmo_guild else None
         structure_role = inter.guild.get_role(db_role.role_discord_id)
         if structure_role is None:
             await inter.send(
-                embed=build_simple_embed("Роль не найдена", failure=True),
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="Role not found.",
+                ),
                 ephemeral=True,
             )
-            await db_role.update(is_available=False)
+            await db_role.edit(available=False)
             return
         if (
             user.bot
-            or inter.guild.get_role(db_guild.player_role_id) not in user.roles
+            or inter.guild.get_role(guild.player_role_id) not in user.roles
             or (plasmo_user is None and not settings.DEBUG)
         ):
             return await inter.send(
-                embed=build_simple_embed(
-                    "Вы не можете нанять этого пользователя.", failure=True
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="You cannot hire this user.",
                 ),
                 ephemeral=True,
             )
         hire_anyway = False
         if db_role.role_discord_id in [role.id for role in user.roles]:
             await inter.edit_original_message(
-                embed=build_simple_embed(
-                    f"У пользователя уже есть роль <@&{db_role.role_discord_id}>",
-                    failure=True,
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description=f"User already has <@&{db_role.role_discord_id}> role.",
                 ),
                 components=[
                     disnake.ui.Button(
                         label="Просто отправить уведомление",
-                        style=disnake.ButtonStyle.gray,
+                        style=disnake.ButtonStyle.red,
                         custom_id=f"hire_anyway.{user.id}.{db_role.role_discord_id}",
                     )
                 ],
@@ -332,42 +410,49 @@ class UserManagement(commands.Cog):
         # Check for permissions
         if inter.author.top_role.position <= structure_role.position:
             return await inter.send(
-                embed=build_simple_embed(
-                    "Вы не можете управлять этой ролью", failure=True
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="You cannot manage this role.",
                 ),
                 ephemeral=True,
             )
 
         plasmo_user: disnake.Member
         embed = disnake.Embed(
-            color=disnake.Color.dark_green(),
-            description=f"{user.mention} принят на должность **{db_role.name}**",  # todo: gender things
+            color=disnake.Color.green(),
+            description=f"{user.mention} был принят на должность **{db_role.name}**",
         ).set_author(
             name=plasmo_user.display_name if plasmo_user else user.display_name,
-            icon_url="https://plasmorp.com/avatar/"
+            icon_url="https://rp.plo.su/avatar/"
             + (plasmo_user.display_name if plasmo_user else user.display_name),
         )
         if comment is not None and comment.strip() != "":
             embed.add_field(name="Комментарий", value=comment)
 
-        rrs_cog = None
+        rrs_cog: Optional[core.RRSCore] = None
         if not hire_anyway:
-            if (rrs_cog := self.bot.get_cog("RRSCore")) is not None:
+            rrs_cog: Optional[core.RRSCore] = self.bot.get_cog("RRSCore")
+            if rrs_cog is not None:
                 await inter.edit_original_message(
-                    embed=build_simple_embed(
+                    embed=disnake.Embed(
+                        color=disnake.Color.green(),
                         description="Проверка правил RRS...",
-                        without_title=True,
                     )
                 )
-                rrs_result = await rrs_cog.process_UM_structure_role_change(
+                rrs_result = await rrs_cog.process_structure_role_change(
                     member=user,
                     role=structure_role,
-                    author=inter.author,
+                    operation_author=inter.author,
                     role_is_added=True,
                 )
                 if rrs_result is False:
                     return await inter.edit_original_message(
-                        embed=build_simple_embed("Операция отклонена RRS", failure=True)
+                        embed=disnake.Embed(
+                            color=disnake.Color.red(),
+                            title="Error",
+                            description="Operation was cancelled by RRS.",
+                        )
                     )
 
         try:
@@ -379,8 +464,10 @@ class UserManagement(commands.Cog):
             )
         except disnake.Forbidden:
             return await inter.send(
-                embed=build_simple_embed(
-                    "У бота нет прав на выдачу этой роли", failure=True
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="Unable to fire this user. Bot has no permissions to add this role.",
                 ),
                 ephemeral=True,
             )
@@ -395,22 +482,25 @@ class UserManagement(commands.Cog):
             except disnake.errors.NotFound:
                 await user.remove_roles(
                     structure_role,
-                    reason="Unexpected error",
+                    reason=f"Unexpected error",
                 )
                 return await inter.edit_original_message(
-                    embed=build_simple_embed(
-                        "Не удалось получить вебхук для отправки уведомления",
-                        failure=True,
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Error",
+                        description="Unable to access webhook.",
                     ),
                 )
 
-        await self.bot.get_channel(db_guild.logs_channel_id).send(
+        await self.bot.get_channel(guild.logs_channel_id).send(
             embed=embed.add_field("Called by", inter.author.mention)
         )
 
         await inter.edit_original_message(
-            embed=build_simple_embed(
-                "User was successfully hired.",
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Done",
+                description="User was successfully hired.",
             ),
         )
 
@@ -439,58 +529,61 @@ class UserManagement(commands.Cog):
         Parameters
         ----------
         inter
-        user: Player {{FIRE_PLAYER}}
-        role: Role [⚠ Choose from autocomplete!] {{FIRE_ROLE}}
-        reason: Reason {{FIRE_REASON}}
+        reason: Reason{{FIRE_PLAYER}}
+        user: Player {{FIRE_ROLE}}
+        role: Role [⚠ Choose from autocomplete!] {{FIRE_REASON}}
         """
         await inter.response.defer(ephemeral=True)
-        if not role.isdigit():
+        try:
+            guild, db_role = await guilds_db.get_guild(
+                inter.guild.id
+            ), await roles_db.get_role(role_discord_id=int(role))
+        except ValueError:
             return await inter.edit_original_message(
                 settings.Gifs.v_durku,
             )
-        db_role = await models.StructureRole.objects.filter(
-            guild_discord_id=inter.guild_id, role_discord_id=role
-        ).first()
-        db_guild = await models.StructureGuild.objects.filter(
-            discord_id=inter.guild_id
-        ).first()
-
-        if not await check_role(inter, db_guild, db_role):
+        if not await check_role(inter, guild, db_role):
             return
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if plasmo_guild is None and not settings.DEBUG:
-            logger.critical("Plasmo RP guild not found")
-            return
+            raise RuntimeError("Plasmo RP guild not found")
         plasmo_user = plasmo_guild.get_member(user.id) if plasmo_guild else None
         structure_role = inter.guild.get_role(db_role.role_discord_id)
         if structure_role is None:
             await inter.edit_original_message(
-                embed=build_simple_embed("Роль не найдена", failure=True),
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="Role not found.",
+                ),
             )
-            await db_role.update(is_available=False)
+            await db_role.edit(available=False)
             return
         if (
             user.bot
-            or inter.guild.get_role(db_guild.player_role_id) not in user.roles
+            or inter.guild.get_role(guild.player_role_id) not in user.roles
             or (plasmo_user is None and not settings.DEBUG)
         ):
             return await inter.edit_original_message(
-                embed=build_simple_embed(
-                    "Вы не можете увольнять этого пользователя", failure=True
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="You cant fire this user.",
                 ),
             )
 
         fire_anyway = False
         if db_role.role_discord_id not in [role.id for role in user.roles]:
             await inter.edit_original_message(
-                embed=build_simple_embed(
-                    f"У пользователя нет роли <@&{db_role.role_discord_id}>",
-                    failure=True,
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description=f"User does not have <@&{db_role.role_discord_id}> role.",
                 ),
                 components=[
                     disnake.ui.Button(
                         label="Просто отправить уведомление",
-                        style=disnake.ButtonStyle.gray,
+                        style=disnake.ButtonStyle.red,
                         custom_id=f"fire_anyway.{user.id}.{db_role.role_discord_id}",
                     )
                 ],
@@ -511,8 +604,10 @@ class UserManagement(commands.Cog):
         # Check for permissions
         if inter.author.top_role.position <= structure_role.position:
             return await inter.send(
-                embed=build_simple_embed(
-                    "Вы не можете управлять этой ролью", failure=True
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="You cannot manage this role.",
                 ),
                 ephemeral=True,
             )
@@ -521,35 +616,37 @@ class UserManagement(commands.Cog):
 
         embed = disnake.Embed(
             color=disnake.Color.dark_red(),
-            description=f"{user.mention} уволен с должности **{db_role.name}**",
+            description=f"{user.mention} был уволен с должности **{db_role.name}**",
         ).set_author(
             name=plasmo_user.display_name if plasmo_user else user.display_name,
-            icon_url="https://plasmorp.com/avatar/"
+            icon_url="https://rp.plo.su/avatar/"
             + (plasmo_user.display_name if plasmo_user else user.display_name),
         )
         if reason is not None and reason.strip() != "":
             embed.add_field(name="Причина", value=reason)
 
-        rrs_cog = None
+        rrs_cog: Optional[core.RRSCore] = None
         if not fire_anyway:
-            rrs_cog = self.bot.get_cog("RRSCore")
+            rrs_cog: Optional[core.RRSCore] = self.bot.get_cog("RRSCore")
             if rrs_cog is not None:
                 await inter.edit_original_message(
-                    embed=build_simple_embed(
+                    embed=disnake.Embed(
+                        color=disnake.Color.green(),
                         description="Проверка правил RRS...",
-                        without_title=True,
                     )
                 )
-                rrs_result = await rrs_cog.process_UM_structure_role_change(
+                rrs_result = await rrs_cog.process_structure_role_change(
                     member=user,
                     role=structure_role,
-                    author=inter.author,
+                    operation_author=inter.author,
                     role_is_added=False,
                 )
                 if rrs_result is False:
                     return await inter.edit_original_message(
-                        embed=build_simple_embed(
-                            "Операция была отменена RRS", failure=True
+                        embed=disnake.Embed(
+                            color=disnake.Color.red(),
+                            title="Error",
+                            description="Operation was cancelled by RRS.",
                         )
                     )
 
@@ -562,8 +659,10 @@ class UserManagement(commands.Cog):
             )
         except disnake.Forbidden:
             return await inter.send(
-                embed=build_simple_embed(
-                    "У бота нет прав снимать эту роль", failure=True
+                embed=disnake.Embed(
+                    color=disnake.Color.red(),
+                    title="Error",
+                    description="Unable to fire this user. Bot has no permissions to remove this role.",
                 ),
                 ephemeral=True,
             )
@@ -577,20 +676,26 @@ class UserManagement(commands.Cog):
             except disnake.errors.NotFound:
                 await user.add_roles(
                     structure_role,
-                    reason="Unexpected error",
+                    reason=f"Unexpected error",
                 )
                 return await inter.edit_original_message(
-                    embed=build_simple_embed(
-                        "Не удалось получить доступ к вебхуку", failure=True
+                    embed=disnake.Embed(
+                        color=disnake.Color.red(),
+                        title="Error",
+                        description="Unable to access webhook.",
                     ),
                 )
 
-        await self.bot.get_channel(db_guild.logs_channel_id).send(
+        await self.bot.get_channel(guild.logs_channel_id).send(
             embed=embed.add_field("Called by", inter.author.mention)
         )
 
         await inter.edit_original_message(
-            embed=build_simple_embed("The user was successfully fired"),
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                title="Done",
+                description="The user was successfully fired.",
+            ),
         )
 
     async def cog_load(self):

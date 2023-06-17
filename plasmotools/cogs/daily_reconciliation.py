@@ -3,9 +3,9 @@ import logging
 import disnake
 from disnake.ext import commands, tasks
 
-from plasmotools import plasmo_api, settings
-from plasmotools.embeds import build_simple_embed
-from plasmotools.formatters import build_progressbar
+from plasmotools import settings
+from plasmotools.utils import api
+from plasmotools.utils.formatters import build_progressbar
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +14,7 @@ class DailyReconciliation(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
         self.strings_to_roles_dict = {
-            "player": 746628733452025866,  # Старый игрок
-            "new_player": 1122893850692829184,  #
+            "player": 746628733452025866,  # Игрок
             "fusion": 751722994170331136,  # Fusion
             "admin": 704364763248984145,  # Администрация
             "booster": 689093907912458312,  # Бустер
@@ -49,7 +48,7 @@ class DailyReconciliation(commands.Cog):
             for role_string in self.strings_to_roles_dict
         }
 
-    @commands.command("run-plasmo_api-sync")
+    @commands.command("run-api-sync")
     @commands.is_owner()
     async def manually_run_check(self, ctx):
         await ctx.message.add_reaction("✅")
@@ -90,7 +89,7 @@ class DailyReconciliation(commands.Cog):
             Roles: {', '.join(['`' + role.name + '`' for role in member.roles][1:])}
             
             **API**
-            Link: [u/{api_nick}](https://plasmorp.com/u/{api_nick})
+            Link: [u/{api_nick}](https://rp.plo.su/u/{api_nick})
             id: {api_data.get('id', "`MISSING`")}
             discord_id: {api_data.get('discord_id', "`MISSING`")}
             nick: {disnake.utils.escape_markdown(api_data.get('nick', "MISSING"))}
@@ -139,7 +138,7 @@ class DailyReconciliation(commands.Cog):
                 if role.id in self.roles_to_strings_dict:
                     discord_roles.append(self.roles_to_strings_dict[role.id])
 
-            api_profile = await plasmo_api.user.get_user_data(discord_id=member.id)
+            api_profile = await api.user.get_user_data(discord_id=member.id)
             if api_profile is None:
                 # logger.debug("Unable to get Plasmo Profile for %i", member.id)
                 continue
@@ -149,7 +148,7 @@ class DailyReconciliation(commands.Cog):
                     api_roles.append(role)
                 elif role != "default":
                     logger.debug(
-                        "Unknown API roles: %s at https://plasmorp.com/api/user/profile?discord_id=%i",
+                        "Unknown API roles: %s at https://rp.plo.su/api/user/profile?discord_id=%i",
                         role,
                         member.id,
                     )
@@ -162,14 +161,12 @@ class DailyReconciliation(commands.Cog):
 
                 continue
 
-            if api_profile.get("has_access", False) != (
-                "player" in discord_roles or "new_player" in discord_roles
-            ):
+            if api_profile.get("has_access", False) != ("player" in discord_roles):
                 await self.log_error(
                     member,
                     api_profile,
                     "**HAS_ACCESS AND PLAYER ROLE DO NOT MATCH:** \n"
-                    + "plasmo_api      discord\n"
+                    + "api      discord\n"
                     + disnake.utils.escape_markdown(
                         f"{api_profile.get('has_access')}    "
                         f"{'has role' if 'player' in discord_roles else 'doesnt have role'}"
@@ -185,7 +182,7 @@ class DailyReconciliation(commands.Cog):
                         + "discord roles: "
                         + ",".join(discord_roles),
                     )
-                continue  # Checking for api roles / nickname / in_guild is unnececary if it has_access if 0
+                continue  # Checking for api roles / nickname / in_guild is unnececary if has_access if 0
 
             if sorted(api_roles) != sorted(discord_roles):
                 text = " ROLES ARE NOT THE SAME\n"
@@ -213,7 +210,7 @@ class DailyReconciliation(commands.Cog):
 
                 await self.log_error(member, api_profile, text)
 
-            #  todo: this?
+            # fixme: disnake v2.8.1 does not support new nickname system, display_name does not return guild nickname
             # if api_profile.get("nick") != member.display_name:
             #     await self.log_error(
             #         member,
@@ -231,7 +228,7 @@ class DailyReconciliation(commands.Cog):
                 )
 
         await self.bot.get_channel(settings.LogsServer.daily_check_channel_id).send(
-            embed=build_simple_embed("Complete", failure=False)
+            embed=disnake.Embed(title="Complete", color=disnake.Color.dark_green())
         )
         await log_message.unpin()
 
@@ -241,7 +238,7 @@ class DailyReconciliation(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        if not self.daly_check_task.is_running() and not settings.DEBUG:
+        if not self.daly_check_task.is_running():
             self.daly_check_task.start()
 
     async def cog_load(self):
