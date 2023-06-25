@@ -1,18 +1,8 @@
 import logging
-from typing import Set
 
 import disnake
 from disnake.ext import commands
-
-from plasmotools import settings
-from plasmotools.utils.database import rrs as rrs_database
-from plasmotools.utils.database.plasmo_structures import \
-    guilds as guilds_database
-import logging
-from typing import Set
-
-import disnake
-from disnake.ext import commands
+from disnake.ext import commands, tasks
 
 from plasmotools import settings
 from plasmotools.utils.database import rrs as rrs_database
@@ -110,6 +100,7 @@ class RRSCore(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
+    # todo: rewrite
     async def generate_profile_embed(self, user: disnake.Member) -> disnake.Embed:
         all_rrs_rules = await rrs_database.roles.get_rrs_roles()
         embed = disnake.Embed(
@@ -920,32 +911,79 @@ class RRSCore(commands.Cog):
             return  # RRS Not required (already handled)
 
         if entry.action == disnake.AuditLogAction.member_role_update:
-
-            db_rules = set()
             if entry.guild.id == settings.PlasmoRPGuild.guild_id:
-                for discord_role in (entry.changes.before.roles + entry.changes.after.roles):
-                    possible_rules = await rrs_database.roles.get_rrs_roles(plasmo_role_id=discord_role.id)
-                    for rule in possible_rules:
-                        if not rule.disabled:
-                            db_rules += rule
-                if db_rules:
-                    await self.process_structure_role_change(entry=entry, db_rules=db_rules)
-                    return
+                await self.process_structure_role_change(entry=entry)
+                return
 
             else:
-                for discord_role in (entry.changes.before.roles + entry.changes.after.roles):
-                    possible_rules = await rrs_database.roles.get_rrs_roles(structure_role_id=discord_role.id)
-                    for rule in possible_rules:
-                        if not rule.disabled:
-                            db_rules += rule
-                if db_rules:
-                    await self.process_structure_role_change(entry=entry, db_rules=db_rules)
-                    return
+                await self.process_structure_role_change(entry=entry)
+                return
 
-    async def process_structure_role_change(self, entry: disnake.AuditLogEntry, db_rules: Set[rrs_database.roles.RRSRole]):
+        elif entry.action == disnake.AuditLogAction.role_delete:
+            print(entry)
+            await self.process_role_deletion(entry=entry)
+            return
+
+
+    async def process_structure_role_change(self, entry: disnake.AuditLogEntry):
         ...
 
-    async def process_donor_role_change(self, entry: disnake.AuditLogEntry, db_rules: Set[rrs_database.roles.RRSRole]):
+    async def process_donor_role_change(self, entry: disnake.AuditLogEntry):
+        ...
+
+    async def process_role_deletion(self, entry: disnake.AuditLogEntry):
+        if entry.guild.id == settings.PlasmoRPGuild.guild_id:
+            return
+
+        active_linked_structure_rules = await rrs_database.roles.get_rrs_roles(structure_role_id=int(entry.target.id),
+                                                                               active=True)
+        print(active_linked_structure_rules)
+        if active_linked_structure_rules:
+            structure_logs_channel = self.bot.get_channel(
+                (await guilds_database.get_guild(discord_id=entry.guild.id)).logs_channel_id)
+            rrs_logs_channel = self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id)
+            for rrs_rule in active_linked_structure_rules:
+                await rrs_rule.edit(disabled=True)
+                embed = disnake.Embed(
+                    color=disnake.Color.dark_red(),
+                    title="Linked RRS role got deleted",
+                    description=f"""
+                    RRS rule:
+                    id {rrs_rule.id}
+                    Plasmo role {self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
+                    .get_role(rrs_rule.plasmo_role_id).name 
+                    if not settings.DEBUG 
+                    else 'debug mode is enabled'} {rrs_rule.plasmo_role_id}
+                    Structure role {entry.before.name} {rrs_rule.structure_role_id}
+                    **rule is now disabled**
+                    
+                    Deleted by {entry.user.mention}
+                    """
+                )
+                await rrs_logs_channel.send(
+                    content=f"<@&{1120748226119729267}>",
+                    embed=embed,
+                    components=[
+                        disnake.ui.Button(
+                            style=disnake.ButtonStyle.green,
+                            label="Restore",
+                            custom_id="FIX-DELETED-ROLE_" + str(rrs_rule.structure_role_id)
+                        )
+                    ]
+                )
+                try:
+                    await structure_logs_channel.send(embed=embed)
+                except disnake.HTTPException as e: # in case of server raids (role is being deleted, it can be raid)
+                    logger.warning("Unable to send log message to structure logs channel because of %s", e.text)
+
+
+
+
+
+
+
+    @tasks.loop(hours=1)
+    async def scheduled_sync(self):
         ...
 
 

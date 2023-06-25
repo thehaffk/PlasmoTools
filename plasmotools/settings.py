@@ -15,6 +15,7 @@ DEBUG = bool(int(os.getenv("BOT_DEBUG", "0")))
 TOKEN = os.getenv("TOKEN", None)
 PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN", None)
 PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
+
 if PT_PLASMO_TOKEN is None:
     logger.critical("PLASMO_TOKEN is missing")
 if PT_PLASMO_COOKIES is None:
