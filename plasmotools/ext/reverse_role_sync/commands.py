@@ -8,8 +8,7 @@ from disnake.ext import commands
 from plasmotools import checks, settings, utils
 from plasmotools.ext.reverse_role_sync.core import RRSCore
 from plasmotools.utils.database import rrs as rrs_database
-from plasmotools.utils.database.plasmo_structures import \
-    guilds as guilds_database
+from plasmotools.utils.database.plasmo_structures import guilds as guilds_database
 
 logger = logging.getLogger(__name__)
 
@@ -91,9 +90,9 @@ class RRSCommands(commands.Cog):
         structure_role_id = int(structure_role_id)
         plasmo_role_id = int(plasmo_role_id)
 
-        embed_title = ( ("Добавление новой роли" if not edit else "Редактирование роли")
-            + " требует подтверждения"
-        )
+        embed_title = (
+            "Добавление новой роли" if not edit else "Редактирование роли"
+        ) + " требует подтверждения"
         embed_text = ""
         if edit and entry_id is not None:
             embed_text += "Entry ID: " + str(entry_id) + "\n"
@@ -258,6 +257,7 @@ class RRSCommands(commands.Cog):
         )
         await inter.edit_original_message(embed=status_embed)
 
+    # fixme: does NOT works with broken db
     @commands.slash_command(
         name="rrs-list",
         dm_permission=False,

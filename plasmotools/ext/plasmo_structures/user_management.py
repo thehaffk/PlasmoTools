@@ -12,15 +12,12 @@ import plasmotools.utils.database.plasmo_structures.roles as roles_db
 from plasmotools import checks, settings
 from plasmotools.checks import is_guild_registered
 from plasmotools.ext.reverse_role_sync import core
-from plasmotools.utils.autocompleters.plasmo_structures import \
-    role_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import role_autocompleter
 
 logger = logging.getLogger(__name__)
 
 
 # TODO: Auto remove all roles, when user leaves plasmo rp
-
-
 
 
 async def check_role(

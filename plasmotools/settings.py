@@ -54,8 +54,11 @@ class LogsServer:
 
     roles_notifications_role_id = 1046524223377637416
     errors_notifications_role_id = 876056190726045716
-    rrs_verifications_notifications_role_id = 843154786726445105
     moderator_role_id = 875736652977418292
+    
+    rrs_verifications_notifications_role_id = 843154786726445105
+    rrs_alerts_role_id = 1120748226119729267
+
 
     pride_month_event_id = 1103678285570904204
 

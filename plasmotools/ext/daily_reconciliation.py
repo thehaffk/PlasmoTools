@@ -10,9 +10,6 @@ from plasmotools.utils.formatters import build_progressbar
 logger = logging.getLogger(__name__)
 
 
-
-
-
 class DailyReconciliation(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
@@ -150,8 +147,11 @@ class DailyReconciliation(commands.Cog):
                 if role in self.strings_to_roles_dict:
                     api_roles.append(role)
                 elif role != "default":
-                    logger.debug("Unknown API roles: %s at https://rp.plo.su/api/user/profile?discord_id=%i",
-                                   role, member.id)
+                    logger.debug(
+                        "Unknown API roles: %s at https://rp.plo.su/api/user/profile?discord_id=%i",
+                        role,
+                        member.id,
+                    )
 
             # Checks
             if api_profile.get("banned", False) and not settings.DEBUG:
@@ -160,7 +160,6 @@ class DailyReconciliation(commands.Cog):
                 )
 
                 continue
-
 
             if api_profile.get("has_access", False) != ("player" in discord_roles):
                 await self.log_error(
@@ -184,7 +183,6 @@ class DailyReconciliation(commands.Cog):
                         + ",".join(discord_roles),
                     )
                 continue  # Checking for api roles / nickname / in_guild is unnececary if has_access if 0
-
 
             if sorted(api_roles) != sorted(discord_roles):
                 text = " ROLES ARE NOT THE SAME\n"

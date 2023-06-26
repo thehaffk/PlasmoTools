@@ -14,10 +14,10 @@ from plasmotools.checks import is_guild_registered
 from plasmotools.utils import api, formatters
 from plasmotools.utils.api import bank
 from plasmotools.utils.api.tokens import get_token_scopes
-from plasmotools.utils.autocompleters.bank import \
-    search_bank_cards_autocompleter
-from plasmotools.utils.autocompleters.plasmo_structures import \
-    payouts_projects_autocompleter
+from plasmotools.utils.autocompleters.bank import search_bank_cards_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import (
+    payouts_projects_autocompleter,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -315,10 +315,7 @@ class Payouts(commands.Cog):
             )
             return False
 
-
-        if (
-                user.id == self.bot.user.id
-                or user.bot):
+        if user.id == self.bot.user.id or user.bot:
             await interaction.edit_original_message(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
@@ -327,7 +324,6 @@ class Payouts(commands.Cog):
                 ),
             )
             return False
-
 
         if not settings.DEBUG:
             plasmo_user = self.bot.get_guild(
@@ -368,7 +364,8 @@ class Payouts(commands.Cog):
                     )
                     if card["id"] != from_card
                     and card["holder_type"] == 0  # User
-                    and card["holder"] == plasmo_user.display_name  # fixme: new nicknames system
+                    and card["holder"]
+                    == plasmo_user.display_name  # fixme: new nicknames system
                 ],
                 key=lambda card: card["value"],
                 reverse=True,

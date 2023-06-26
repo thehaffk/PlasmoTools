@@ -47,7 +47,11 @@ class Fun(commands.Cog):
         if message.content == self.bot.user.mention:
             try:
                 if randint(1, 1000) == 4:
-                    for answer_string in ["Блять, дружище", "сходи нахуй", "вы меня заебали с пингами своими"]:
+                    for answer_string in [
+                        "Блять, дружище",
+                        "сходи нахуй",
+                        "вы меня заебали с пингами своими",
+                    ]:
                         async with message.channel.typing():
                             await asyncio.sleep(3)
                             await message.reply(content=answer_string)
