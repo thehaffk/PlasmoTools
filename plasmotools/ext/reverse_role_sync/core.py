@@ -201,16 +201,16 @@ class RRSCore(commands.Cog):
 
     async def _process_structure_member_role_update_entry(self, entry: disnake.AuditLogEntry):
         """
-        Checks if changed role has any RRS rules, if so, syncs them
-
-        Parameters
-        ----------
-        entry: disnake.AuditLogEntry
-
-        Returns
-        -------
-        None
+        Processes structure member role update entry
         """
+        await self._process_structure_member_roles_update(
+            author=entry.user,
+            target=entry.target,
+            added_roles=entry.after.roles,
+            removed_roles=entry.before.roles,
+            reason=entry.reason,
+            from_audit=True,
+        )
 
 
 
@@ -220,6 +220,7 @@ class RRSCore(commands.Cog):
                                                      added_roles: list[disnake.Role],
                                                      removed_roles: list[disnake.Role],
                                                      reason: str = None,
+                                                     from_audit: bool = False,
                                                      ):
         added_roles_ids = [
             _.id for _ in added_roles if _ not in removed_roles
@@ -245,9 +246,12 @@ class RRSCore(commands.Cog):
 
                 plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
                 plasmo_member = plasmo_guild.get_member(target.id)
-                if not plasmo_member or not (
+                if not plasmo_member or not any([
                     settings.PlasmoRPGuild.player_role_id
+                    in [_.id for _ in plasmo_member.roles],
+                    settings.PlasmoRPGuild.new_player_role_id
                     in [_.id for _ in plasmo_member.roles]
+                    ]
                 ):
                     if role.id in added_roles_ids:
                         await target.remove_roles(
@@ -384,6 +388,18 @@ class RRSCore(commands.Cog):
             return
 
     async def _process_plasmo_member_role_update_entry(self, entry: disnake.AuditLogEntry):
+        """
+    Processes plasmo member role update entry
+        """
+
+    async def _process_plasmo_member_roles_update(self,
+                                                     author: disnake.Member,
+                                                     target: disnake.Member,
+                                                     added_roles: list[disnake.Role],
+                                                     removed_roles: list[disnake.Role],
+                                                     reason: str = None,
+                                                     from_audit: bool = False,
+                                                     ):
         ...
 
     # todo: implement

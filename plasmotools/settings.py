@@ -28,7 +28,7 @@ help_url = "https://thfk.notion.site/Plasmo-Tools-help-a5874f7c3a56433ea2c381652
 oauth2_url_for_projects = "https://rp.plo.su/oauth2?client_id=FHHGpr8ZbZb35ZFvwSgD9EMbvkQF35ZFvwSgD9EMbvkQGpr8&redirect_uri=https://pt.haffk.tech/oauth/&response_type=token&scope=bank:manage%20bank:history%20bank:search%20user:notifications%20bank:penalties"
 
 blocked_users_ids = [
-    744193929746055168,  # TheMeko
+    # 744193929746055168,  # TheMeko
 ]
 
 owner_ids = [
@@ -160,6 +160,7 @@ class PlasmoRPGuild:
 
 disallowed_to_rrs_roles = [
     PlasmoRPGuild.player_role_id,
+    PlasmoRPGuild.new_player_role_id,
     PlasmoRPGuild.helper_role_id,
     PlasmoRPGuild.fusion_role_id,
     PlasmoRPGuild.president_role_id,
@@ -175,6 +176,7 @@ api_roles = {
     "banker": PlasmoRPGuild.banker_role_id,
     "keeper": PlasmoRPGuild.keeper_role_id,
     "player": PlasmoRPGuild.player_role_id,
+    "new_player": PlasmoRPGuild.new_player_role_id,
     "fusion": PlasmoRPGuild.fusion_role_id,
 }
 

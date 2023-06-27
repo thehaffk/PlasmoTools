@@ -37,6 +37,9 @@ class BACSynchronization(commands.Cog):
                 "has_access": plasmo_guild.get_role(
                     settings.PlasmoRPGuild.player_role_id
                 )
+                in plasmo_member.roles or plasmo_guild.get_role(
+                    settings.PlasmoRPGuild.new_player_role_id
+                )
                 in plasmo_member.roles,
                 "nick": plasmo_member.display_name,
             }

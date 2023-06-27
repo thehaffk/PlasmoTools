@@ -332,8 +332,9 @@ class Payouts(commands.Cog):
 
             if (
                 plasmo_user is None
-                or plasmo_user.guild.get_role(settings.PlasmoRPGuild.player_role_id)
-                not in plasmo_user.roles
+                or (plasmo_user.guild.get_role(settings.PlasmoRPGuild.player_role_id)
+                not in plasmo_user.roles and plasmo_user.guild.get_role(settings.PlasmoRPGuild.new_player_role_id)
+                not in plasmo_user.roles)
             ):
                 await interaction.edit_original_message(
                     embed=disnake.Embed(

@@ -14,7 +14,8 @@ class DailyReconciliation(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
         self.strings_to_roles_dict = {
-            "player": 746628733452025866,  # Игрок
+            "player": 746628733452025866,  # Старый игрок
+            "new_player": 1122893850692829184, #
             "fusion": 751722994170331136,  # Fusion
             "admin": 704364763248984145,  # Администрация
             "booster": 689093907912458312,  # Бустер
@@ -161,7 +162,7 @@ class DailyReconciliation(commands.Cog):
 
                 continue
 
-            if api_profile.get("has_access", False) != ("player" in discord_roles):
+            if api_profile.get("has_access", False) != ("player" in discord_roles or "new_player" in discord_roles):
                 await self.log_error(
                     member,
                     api_profile,
