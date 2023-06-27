@@ -480,7 +480,6 @@ class RRSCore(commands.Cog):
                 await is_author_has_permission(
                     structure_role=role,
                     plasmo_role=plasmo_guild.get_role(rule.plasmo_role_id),
-                    role_is_added=role_is_added,
                     author=author
                 )
                 for rule in linked_rules
