@@ -11,31 +11,6 @@ from plasmotools.utils.database.plasmo_structures import guilds as guilds_databa
 logger = logging.getLogger(__name__)
 
 
-# todo: force role sync
-# todo: scheduled sync
-# todo: check for player role
-# todo: rewrite all with on_audit smth
-
-# RRS default scenario:
-# listen to role changes at structure
-# check if role is registered
-# find operation author
-# check permissions + head role check
-# ask head for confirmation if needed
-#       if head is not available - ask for confirmation from president
-#       if president is not available - ask for confirmation from ddtech
-#       rollback role at structure until confirmation
-#       log changes
-# check plasmo roles
-# edit plasmo roles if needed
-# save changes to database
-
-# leave
-# player role removed
-# account transfer
-# head changes
-
-
 class RRSConfirmView(disnake.ui.View):
     def __init__(
         self,
@@ -63,12 +38,12 @@ class RRSConfirmView(disnake.ui.View):
         self.stop()
 
 
-
 async def is_author_has_permission(
     structure_role: disnake.Role,
     plasmo_role: disnake.Role,
-    db_guild: guilds_database.Guild,
-    entry: disnake.AuditLogEntry,
+    author: disnake.Member,
+    db_guild: guilds_database.Guild = None,
+
 ) -> bool:
     """
     Check if author has permission to change structure role
@@ -76,14 +51,14 @@ async def is_author_has_permission(
     ----------
     structure_role: disnake.Role
     plasmo_role: disnake.Role
+    author: disnake.Member
     db_guild: guilds_database.Guild
-    entry: disnake.AuditLogEntry
 
     Returns
     -------
     bool: True if author has permission, False if not
     """
-    plasmo_author = plasmo_role.guild.get_member(entry.user.id)
+    plasmo_author = plasmo_role.guild.get_member(author.id)
     if not plasmo_author:
         return False
 
@@ -99,6 +74,9 @@ async def is_author_has_permission(
     if plasmo_role.id in settings.disallowed_to_rrs_roles:
         return False
 
+    if db_guild is None:
+        db_guild = await guilds_database.get_guild(structure_role.guild.id)
+
     if structure_role == db_guild.head_role_id:
         return any(
             [
@@ -107,7 +85,7 @@ async def is_author_has_permission(
             ]
         )
 
-    if db_guild.head_role_id in [role.id for role in entry.user.roles]:
+    if db_guild.head_role_id in [role.id for role in author.roles]:
         return True
 
     return False
@@ -213,15 +191,15 @@ class RRSCore(commands.Cog):
 
         if entry.action == disnake.AuditLogAction.member_role_update:
             if entry.guild.id == settings.PlasmoRPGuild.guild_id:
-                return await self.process_donor_role_change(entry=entry)
+                return await self._process_plasmo_member_role_update_entry(entry=entry)
 
             else:
-                return await self.process_structure_role_change(entry=entry)
+                return await self._process_structure_member_role_update_entry(entry=entry)
 
         elif entry.action == disnake.AuditLogAction.role_delete:
-            return await self.process_role_deletion(entry=entry)
+            return await self._process_role_deletion(entry=entry)
 
-    async def process_structure_role_change(self, entry: disnake.AuditLogEntry):
+    async def _process_structure_member_role_update_entry(self, entry: disnake.AuditLogEntry):
         """
         Checks if changed role has any RRS rules, if so, syncs them
 
@@ -234,17 +212,26 @@ class RRSCore(commands.Cog):
         None
         """
 
+
+
+    async def _process_structure_member_roles_update(self,
+                                                     author: disnake.Member,
+                                                     target: disnake.Member,
+                                                     added_roles: list[disnake.Role],
+                                                     removed_roles: list[disnake.Role],
+                                                     reason: str = None,
+                                                     ):
         added_roles_ids = [
-            _.id for _ in entry.after.roles if _ not in entry.before.roles
+            _.id for _ in added_roles if _ not in removed_roles
         ]
         removed_roles_ids = [
-            _.id for _ in entry.before.roles if _ not in entry.after.roles
+            _.id for _ in removed_roles if _ not in added_roles
         ]
 
-        db_guild = await guilds_database.get_guild(entry.guild.id)
+        db_guild = await guilds_database.get_guild(target.guild.id)
         rrs_logs_channel = self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id)
 
-        for role in entry.before.roles + entry.after.roles:
+        for role in added_roles + removed_roles:
             rrs_rules = await rrs_database.roles.get_rrs_roles(
                 structure_role_id=role.id
             )
@@ -253,17 +240,17 @@ class RRSCore(commands.Cog):
                     continue
 
                 if db_guild is None:
-                    await self.update_rrs_rule(rule_id=rrs_rule.id, rrs_rule=rrs_rule)
+                    await self._update_rrs_rule(rule_id=rrs_rule.id, rrs_rule=rrs_rule)
                     continue
 
                 plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
-                plasmo_member = plasmo_guild.get_member(int(entry.target.id))
+                plasmo_member = plasmo_guild.get_member(target.id)
                 if not plasmo_member or not (
                     settings.PlasmoRPGuild.player_role_id
                     in [_.id for _ in plasmo_member.roles]
                 ):
                     if role.id in added_roles_ids:
-                        await entry.target.remove_roles(
+                        await target.remove_roles(
                             role,
                             reason="It is forbidden to give non-players roles, related to rrs | RRSNR",
                         )
@@ -272,14 +259,14 @@ class RRSCore(commands.Cog):
                                 color=disnake.Color.dark_gray(),
                                 title="Action prevented",
                                 description=f"""
-                                 `Author`: {entry.user.display_name} ({entry.user.id})
-                                 `Target`: {entry.target.display_name} ({entry.target.id})
+                                 `Author`: {author.display_name} ({author.id})
+                                 `Target`: {target.display_name} ({target.id})
                                  `Role`: {role.name} ({role.id})
                                  `Reason`: It is forbidden to give non-players roles, related to rrs
                                  """,
                             ).add_field(
                                 name="Guild",
-                                value=f"{entry.guild.name} | {entry.guild.id}",
+                                value=f"{target.guild.name} | {target.guild.id}",
                             )
                         )
                         return
@@ -290,10 +277,11 @@ class RRSCore(commands.Cog):
                     structure_role=role,
                     plasmo_role=plasmo_role,
                     db_guild=db_guild,
-                    entry=entry,
+                    author=author,
                 )
+                ...
 
-    async def update_rrs_rule(self, rule_id: int, rrs_rule=None, db_guild=None):
+    async def _update_rrs_rule(self, rule_id: int, rrs_rule=None, db_guild=None):
         """
         Checks if RRS rule is valid, if not, disables it
         Parameters
@@ -395,11 +383,11 @@ class RRSCore(commands.Cog):
             )
             return
 
-    async def process_donor_role_change(self, entry: disnake.AuditLogEntry):
+    async def _process_plasmo_member_role_update_entry(self, entry: disnake.AuditLogEntry):
         ...
 
     # todo: implement
-    async def process_role_deletion(self, entry: disnake.AuditLogEntry):
+    async def _process_role_deletion(self, entry: disnake.AuditLogEntry):
         if entry.guild.id == settings.PlasmoRPGuild.guild_id:
             return
 
@@ -466,6 +454,38 @@ class RRSCore(commands.Cog):
             "Sorry, this feature is not implemented yet", ephemeral=True
         )
         return
+
+    async def process_UM_structure_role_change(
+        self,
+        member: disnake.Member,
+        role: disnake.Role,
+        author: disnake.Member,
+        role_is_added: bool,
+    ) -> bool:
+        # todo: impement asap
+        linked_rules = [
+            rule
+            for rule in await rrs_database.roles.get_rrs_roles(
+                structure_role_id=role.id
+            )
+            if not rule.disabled
+        ]
+        plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
+        if not plasmo_guild:
+            logger.critical("Unable to locate plasmo guild")
+            return False
+
+        return all(
+            [
+                await is_author_has_permission(
+                    structure_role=role,
+                    plasmo_role=plasmo_guild.get_role(rule.plasmo_role_id),
+                    role_is_added=role_is_added,
+                    author=author
+                )
+                for rule in linked_rules
+            ]
+        )
 
     # @tasks.loop(hours=1)
     # async def scheduled_sync(self):

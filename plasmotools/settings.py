@@ -130,6 +130,7 @@ class PlasmoRPGuild:
     interpol_role_id = 751723033357451335
     banker_role_id = 826367015014498314
     player_role_id = 746628733452025866
+    new_player_role_id = 1122893850692829184
     keeper_role_id = 1003276423747874896
     ne_komar_role_id = 956884028533919774
     fusion_role_id = 751722994170331136

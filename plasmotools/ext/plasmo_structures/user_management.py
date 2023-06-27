@@ -439,10 +439,10 @@ class UserManagement(commands.Cog):
                         description="Проверка правил RRS...",
                     )
                 )
-                rrs_result = await rrs_cog.process_structure_role_change(
+                rrs_result = await rrs_cog.process_UM_structure_role_change(
                     member=user,
                     role=structure_role,
-                    operation_author=inter.author,
+                    author=inter.author,
                     role_is_added=True,
                 )
                 if rrs_result is False:
@@ -634,10 +634,10 @@ class UserManagement(commands.Cog):
                         description="Проверка правил RRS...",
                     )
                 )
-                rrs_result = await rrs_cog.process_structure_role_change(
+                rrs_result = await rrs_cog.process_UM_structure_role_change(
                     member=user,
                     role=structure_role,
-                    operation_author=inter.author,
+                    author=inter.author,
                     role_is_added=False,
                 )
                 if rrs_result is False:
