@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 import disnake
@@ -11,31 +12,31 @@ from plasmotools.utils.database.plasmo_structures import guilds as guilds_databa
 logger = logging.getLogger(__name__)
 
 
-class RRSConfirmView(disnake.ui.View):
-    def __init__(
-        self,
-    ):
-        super().__init__(timeout=86400)
-        self.decision = None
-        self.report_to_ddt = False
-
-    @disnake.ui.button(label="Подтвердить", style=disnake.ButtonStyle.green, emoji="✅")
-    async def confirm(
-        self, button: disnake.ui.Button, interaction: disnake.Interaction
-    ):
-        self.decision = True
-        await interaction.response.send_message("Подтверждено", ephemeral=True)
-        self.stop()
-
-    @disnake.ui.button(label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌")
-    async def cancel(self, button: disnake.ui.Button, interaction: disnake.Interaction):
-        self.decision = False
-        await interaction.response.send_message("Отменено", ephemeral=True)
-        self.stop()
-
-    async def on_timeout(self) -> None:
-        self.decision = None
-        self.stop()
+# class RRSSupervisorConfirmationView(disnake.ui.View):
+#     def __init__(
+#         self,
+#     ):
+#         super().__init__(timeout=86400)
+#         self.decision = None
+#         self.report_to_ddt = False
+#
+#     @disnake.ui.button(label="Подтвердить", style=disnake.ButtonStyle.green, emoji="✅")
+#     async def confirm(
+#         self, button: disnake.ui.Button, interaction: disnake.Interaction
+#     ):
+#         self.decision = True
+#         await interaction.response.send_message("Подтверждено", ephemeral=True)
+#         self.stop()
+#
+#     @disnake.ui.button(label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌")
+#     async def cancel(self, button: disnake.ui.Button, interaction: disnake.Interaction):
+#         self.decision = False
+#         await interaction.response.send_message("Отменено", ephemeral=True)
+#         self.stop()
+#
+#     async def on_timeout(self) -> None:
+#         self.decision = None
+#         self.stop()
 
 
 async def is_author_has_permission(
@@ -43,7 +44,6 @@ async def is_author_has_permission(
     plasmo_role: disnake.Role,
     author: disnake.Member,
     db_guild: guilds_database.Guild = None,
-
 ) -> bool:
     """
     Check if author has permission to change structure role
@@ -186,20 +186,27 @@ class RRSCore(commands.Cog):
         if entry.guild.id != settings.DevServer.guild_id:
             return
 
-        if entry.user.id == self.bot.user.id and str(entry.reason).endswith("RRSNR"):
-            return  # RRS Not required (already handled)
+        if entry.user.id == self.bot.user.id:
+            if str(entry.reason).endswith("RRSNR") or str(entry.reason).startswith(
+                "RRS |"
+            ):
+                return  # RRS Not required (already handled)
 
         if entry.action == disnake.AuditLogAction.member_role_update:
             if entry.guild.id == settings.PlasmoRPGuild.guild_id:
                 return await self._process_plasmo_member_role_update_entry(entry=entry)
 
             else:
-                return await self._process_structure_member_role_update_entry(entry=entry)
+                return await self._process_structure_member_role_update_entry(
+                    entry=entry
+                )
 
         elif entry.action == disnake.AuditLogAction.role_delete:
             return await self._process_role_deletion(entry=entry)
 
-    async def _process_structure_member_role_update_entry(self, entry: disnake.AuditLogEntry):
+    async def _process_structure_member_role_update_entry(
+        self, entry: disnake.AuditLogEntry
+    ):
         """
         Processes structure member role update entry
         """
@@ -212,22 +219,20 @@ class RRSCore(commands.Cog):
             from_audit=True,
         )
 
+    async def _process_structure_member_roles_update(
+        self,
+        author: disnake.Member,
+        target: disnake.Member,
+        added_roles: list[disnake.Role],
+        removed_roles: list[disnake.Role],
+        reason: str = None,
+        from_audit: bool = False,
+    ):
+        added_roles_ids = [_.id for _ in added_roles if _ not in removed_roles]
+        removed_roles_ids = [_.id for _ in removed_roles if _ not in added_roles]
 
-
-    async def _process_structure_member_roles_update(self,
-                                                     author: disnake.Member,
-                                                     target: disnake.Member,
-                                                     added_roles: list[disnake.Role],
-                                                     removed_roles: list[disnake.Role],
-                                                     reason: str = None,
-                                                     from_audit: bool = False,
-                                                     ):
-        added_roles_ids = [
-            _.id for _ in added_roles if _ not in removed_roles
-        ]
-        removed_roles_ids = [
-            _.id for _ in removed_roles if _ not in added_roles
-        ]
+        not_permitted_roles_to_add = []
+        not_permitted_roles_to_remove = []
 
         db_guild = await guilds_database.get_guild(target.guild.id)
         rrs_logs_channel = self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id)
@@ -246,17 +251,18 @@ class RRSCore(commands.Cog):
 
                 plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
                 plasmo_member = plasmo_guild.get_member(target.id)
-                if not plasmo_member or not any([
-                    settings.PlasmoRPGuild.player_role_id
-                    in [_.id for _ in plasmo_member.roles],
-                    settings.PlasmoRPGuild.new_player_role_id
-                    in [_.id for _ in plasmo_member.roles]
+                if not plasmo_member or not any(
+                    [
+                        settings.PlasmoRPGuild.player_role_id
+                        in [_.id for _ in plasmo_member.roles],
+                        settings.PlasmoRPGuild.new_player_role_id
+                        in [_.id for _ in plasmo_member.roles],
                     ]
                 ):
                     if role.id in added_roles_ids:
                         await target.remove_roles(
                             role,
-                            reason="It is forbidden to give non-players roles, related to rrs | RRSNR",
+                            reason="RRS | It is forbidden to give non-players roles, related to rrs",
                         )
                         await rrs_logs_channel.send(
                             embed=disnake.Embed(
@@ -283,7 +289,104 @@ class RRSCore(commands.Cog):
                     db_guild=db_guild,
                     author=author,
                 )
-                ...
+                if not author_has_permission:
+                    if role.id in added_roles_ids:
+                        not_permitted_roles_to_add.append(role)
+                    elif role.id in removed_roles_ids:
+                        not_permitted_roles_to_remove.append(role)
+                    continue
+
+                rrs_action = await rrs_database.actions.register_action(
+                    structure_role_id=role.id,
+                    user_id=target.id,
+                    author_id=author.id,
+                    approved_by_user_id=author.id,
+                    is_role_granted=role.id in added_roles_ids,
+                    reason="Manual" if not from_audit else reason,
+                    date=int(datetime.datetime.utcnow().timestamp()),
+                )
+
+                if role.id in added_roles_ids:
+                    try:
+                        await plasmo_member.add_roles(
+                            plasmo_role,
+                            reason=f"RRS | {author.display_name} | RRSID {rrs_action.id}",
+                        )
+                    except disnake.Forbidden:
+                        await rrs_action.delete()
+                        await target.remove_roles(
+                            role, reason="RRS | Unable to add role at Plasmo"
+                        )
+                        alert_embed = disnake.Embed(
+                            title="RRS Error",
+                            description=f"""
+                            Unable to add role at Plasmo
+                            `Author`: {author.display_name} ({author.id})
+                            `Target`: {target.display_name} ({target.id})
+                            `Structure Role`: {role.name} ({role.id})
+                            `Plasmo Role`: {plasmo_role.name} ({plasmo_role.id})
+                            `Reason`: {reason}
+                            """,
+                            color=disnake.Color.red(),
+                        ).add_field(
+                            name="Guild",
+                            value=f"{target.guild.name} | {target.guild.id}",
+                        )
+                        await rrs_logs_channel.send(
+                            content=f"<@&{settings.LogsServer.rrs_alerts_role_id}>",
+                            embed=alert_embed,
+                        )
+                        await author.send(
+                            embed=alert_embed.add_field(
+                                name="Произошла неожиданная ошибка",
+                                value="Не удалось выдать роль на сервере Plasmo. "
+                                "Если вы считаете, что это баг - "
+                                "обратитесь в тикеты PRP",
+                            )
+                        )
+                elif role.id in removed_roles_ids:
+                    try:
+                        await plasmo_member.remove_roles(
+                            plasmo_role,
+                            reason=f"RRS | {author.display_name} | RRSID {rrs_action.id}",
+                        )
+                    except disnake.Forbidden:
+                        await rrs_action.delete()
+                        await target.add_roles(
+                            role, reason="RRS | Unable to remove role at Plasmo"
+                        )
+                        alert_embed = disnake.Embed(
+                            title="RRS Error",
+                            description=f"""
+                            Unable to remove role at Plasmo
+                            `Author`: {author.display_name} ({author.id})
+                            `Target`: {target.display_name} ({target.id})
+                            `Structure Role`: {role.name} ({role.id})
+                            `Plasmo Role`: {plasmo_role.name} ({plasmo_role.id})
+                            `Reason`: {reason}
+                            """,
+                            color=disnake.Color.red(),
+                        ).add_field(
+                            name="Guild",
+                            value=f"{target.guild.name} | {target.guild.id}",
+                        )
+                        await rrs_logs_channel.send(
+                            content=f"<@&{settings.LogsServer.rrs_alerts_role_id}>",
+                            embed=alert_embed,
+                        )
+                        await author.send(
+                            embed=alert_embed.add_field(
+                                name="Произошла неожиданная ошибка",
+                                value="Не удалось забрать роль на сервере Plasmo. "
+                                "Если вы считаете, что это баг - "
+                                "обратитесь в тикеты PRP",
+                            )
+                        )
+
+        ...  # todo: Process roles in not_permitted_..
+
+
+
 
     async def _update_rrs_rule(self, rule_id: int, rrs_rule=None, db_guild=None):
         """
@@ -387,23 +490,34 @@ class RRSCore(commands.Cog):
             )
             return
 
-    async def _process_plasmo_member_role_update_entry(self, entry: disnake.AuditLogEntry):
+    async def _process_plasmo_member_role_update_entry(
+        self, entry: disnake.AuditLogEntry
+    ):
         """
-    Processes plasmo member role update entry
+        Processes plasmo member role update entry
         """
+        await self._process_plasmo_member_roles_update(
+            author=entry.user,
+            target=entry.target,
+            added_roles=entry.after.roles,
+            removed_roles=entry.before.roles,
+            reason=entry.reason,
+            from_audit=True,
+        )
 
-    async def _process_plasmo_member_roles_update(self,
-                                                     author: disnake.Member,
-                                                     target: disnake.Member,
-                                                     added_roles: list[disnake.Role],
-                                                     removed_roles: list[disnake.Role],
-                                                     reason: str = None,
-                                                     from_audit: bool = False,
-                                                     ):
-        ...
+    async def _process_plasmo_member_roles_update(
+        self,
+        author: disnake.Member,
+        target: disnake.Member,
+        added_roles: list[disnake.Role],
+        removed_roles: list[disnake.Role],
+        reason: str = None,
+        from_audit: bool = False,
+    ):
+        ...  # todo: implement
 
-    # todo: implement
     async def _process_role_deletion(self, entry: disnake.AuditLogEntry):
+        # todo: implement
         if entry.guild.id == settings.PlasmoRPGuild.guild_id:
             return
 
@@ -496,7 +610,7 @@ class RRSCore(commands.Cog):
                 await is_author_has_permission(
                     structure_role=role,
                     plasmo_role=plasmo_guild.get_role(rule.plasmo_role_id),
-                    author=author
+                    author=author,
                 )
                 for rule in linked_rules
             ]

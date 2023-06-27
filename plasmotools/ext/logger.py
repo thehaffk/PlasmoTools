@@ -128,7 +128,7 @@ class PlasmoLogger(commands.Cog):
                 )
             if "RRSID" in audit_entry.reason:
                 rrs_entry_id = int(
-                    re.findall(r"RRS / \w* / RRSID: (\d+)", audit_entry.reason)[0]
+                    re.findall(r"RRS \| \w* \| RRSID: (\d+)", audit_entry.reason)[0]
                 )
                 rrs_entry = await get_action(rrs_entry_id)
 
