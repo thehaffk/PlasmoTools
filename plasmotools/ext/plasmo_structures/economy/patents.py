@@ -50,7 +50,7 @@ class SelectPatentOwnersView(disnake.ui.View):
         self, select: disnake.UserSelectMenu, interaction: disnake.MessageInteraction
     ):
         self.patent_owners = interaction.values
-        print(self.patent_owners)
+        # print(self.patent_owners)
         await interaction.response.defer(ephemeral=True, with_message=False)
 
     async def on_timeout(self) -> None:
@@ -107,7 +107,9 @@ class BankerPatents(commands.Cog):
         timed_out = await select_owners_view.wait()
         if timed_out:
             return await inter.edit_original_response(
-                embed=disnake.Embed(title="Время вышло", color=disnake.Color.dark_red()),
+                embed=disnake.Embed(
+                    title="Время вышло", color=disnake.Color.dark_red()
+                ),
                 view=None,
             )
 

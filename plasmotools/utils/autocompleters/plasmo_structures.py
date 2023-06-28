@@ -12,7 +12,13 @@ async def role_autocompleter(
 ) -> dict[str, str]:
     if inter.guild is None:
         return {}
-    roles = await models.StructureRole.objects.filter(guild_discord_id=inter.guild.id, is_available=True).limit(25).all()
+    roles = (
+        await models.StructureRole.objects.filter(
+            guild_discord_id=inter.guild.id, is_available=True
+        )
+        .limit(25)
+        .all()
+    )
 
     return (
         {role.name: str(role.role_discord_id) for role in roles}
@@ -30,11 +36,14 @@ async def payouts_projects_autocompleter(
     if inter.guild is None:
         return {}
 
-    db_projects = await models.StructureProject.objects.filter(
-        guild_discord_id=inter.guild.id,
-        is_active=True,
-
-    ).limit(25).all()
+    db_projects = (
+        await models.StructureProject.objects.filter(
+            guild_discord_id=inter.guild.id,
+            is_active=True,
+        )
+        .limit(25)
+        .all()
+    )
 
     db_projects = {
         project.name: str(project.id)

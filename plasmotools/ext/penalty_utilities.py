@@ -23,6 +23,8 @@ class PenaltyUtilities(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        if settings.DEBUG:
+            return
         await self.check_all_penalties()
 
     async def _cancel_penalty(self, penalty: dict):

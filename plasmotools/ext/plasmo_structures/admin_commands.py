@@ -36,7 +36,7 @@ class AdminCommands(commands.Cog):
         """
         Регистрация/редактирование сервера в базе данных
         """
-        db_guild = await models.StructureGuild.objects.update_or_create(
+        db_guild, created = await models.StructureGuild.objects.update_or_create(
             discord_id=inter.guild.id,
             defaults={
                 "alias": alias,
@@ -44,7 +44,7 @@ class AdminCommands(commands.Cog):
                 "head_role_id": head_role.id,
                 "public_chat_channel_id": public_chat.id,
                 "logs_channel_id": logs_channel.id,
-            }
+            },
         )
         await inter.send(
             embed=disnake.Embed(
@@ -55,10 +55,10 @@ class AdminCommands(commands.Cog):
                 name="guild data",
                 value=f"""
             `alias`: {db_guild.alias}
-            `player_role`: {db_guild.player_role_id}
-            `head_role`: {db_guild.head_role_id}
-            `public_chat`: {db_guild.public_chat_channel_id}
-            `logs_channel`: {db_guild.logs_channel_id}
+            `player_role`: <@&{db_guild.player_role_id}> / {db_guild.player_role_id}
+            `head_role`: <@&{db_guild.head_role_id}> / {db_guild.head_role_id}
+            `public_chat`: <#{db_guild.public_chat_channel_id}> / {db_guild.public_chat_channel_id}
+            `logs_channel`: <#{db_guild.logs_channel_id}> / {db_guild.logs_channel_id}
             """,
             ),
             ephemeral=True,
@@ -78,8 +78,12 @@ class AdminCommands(commands.Cog):
         # todo: send some kind of logs or smth
 
         await models.StructureGuild.objects.filter(discord_id=inter.guild.id).delete()
-        await models.StructureProject.objects.filter(guild_discord_id=inter.guild.id).delete()
-        await models.StructureRole.objects.filter(guild_discord_id=inter.guild.id).delete()
+        await models.StructureProject.objects.filter(
+            guild_discord_id=inter.guild.id
+        ).delete()
+        await models.StructureRole.objects.filter(
+            guild_discord_id=inter.guild.id
+        ).delete()
 
         await inter.send(
             embed=disnake.Embed(
@@ -97,20 +101,14 @@ class AdminCommands(commands.Cog):
     )
     @commands.default_member_permissions(administrator=True)
     @checks.blocked_users_slash_command_check()
+    @checks.is_guild_registered()
     async def get_guild_data(self, inter: ApplicationCommandInteraction):
         """
         Получить данные о сервере
         """
-        db_guild = await models.StructureGuild.objects.filter(discord_id=inter.guild.id).first()
-        if db_guild is None:
-            return await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Сервер не зарегистрирован как официальная структура"
-                ),
-                ephemeral=True,
-            )
+        db_guild = await models.StructureGuild.objects.filter(
+            discord_id=inter.guild.id
+        ).first()
 
         await inter.send(
             embed=disnake.Embed(

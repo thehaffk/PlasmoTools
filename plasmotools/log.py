@@ -29,9 +29,9 @@ def setup() -> None:
     root_logger.addHandler(file_handler)
 
     logging.getLogger("disnake").setLevel(logging.WARNING)
-    logging.getLogger("aiosqlite").setLevel(logging.WARNING)  # TODO: Remove
-    logging.getLogger("aiomysql/").setLevel(logging.WARNING)
+    logging.getLogger("aiosqlite").setLevel(logging.WARNING)
     logging.getLogger("asyncio").setLevel(logging.WARNING)
+    logging.getLogger("databases").setLevel(logging.WARNING)
 
     coloredlogs.DEFAULT_LEVEL_STYLES = {
         **coloredlogs.DEFAULT_LEVEL_STYLES,

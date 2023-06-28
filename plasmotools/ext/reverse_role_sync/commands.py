@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 # todo: rename 'entry' ro 'role'
 
+
 class AdminConfirmationView(disnake.ui.View):
     """
     Confirmation view for admin commands
@@ -23,12 +24,12 @@ class AdminConfirmationView(disnake.ui.View):
         self.bot = bot
         self.admin = None
 
-    async def check_user(self, user: disnake.User) -> bool:
+    async def is_plasmo_admin(self, user: disnake.User) -> bool:
         """
         Check if user is admin
         """
         if settings.DEBUG:
-            return user.id in self.bot.owner_ids  # Apehum
+            return user.id in self.bot.owner_ids
         plasmo_user = self.plasmo_guild.get_member(user.id)
         if plasmo_user is None:
             return False
@@ -41,7 +42,7 @@ class AdminConfirmationView(disnake.ui.View):
         """
         Confirm button
         """
-        if not await self.check_user(interaction.user):
+        if not await self.is_plasmo_admin(interaction.user):
             await interaction.response.send_message(
                 "You are not allowed to approve/reject this request", ephemeral=True
             )
@@ -59,7 +60,7 @@ class AdminConfirmationView(disnake.ui.View):
         """
         Cancel button
         """
-        if not await self.check_user(interaction.user):
+        if not await self.is_plasmo_admin(interaction.user):
             await interaction.response.send_message(
                 "You are not allowed to approve/reject this request", ephemeral=True
             )
@@ -270,7 +271,7 @@ class RRSCommands(commands.Cog):
         """
         await inter.response.defer(ephemeral=True)
         if entry_id is not None:
-            entry = await models.RRSRole.objects.filter(id=entry_id).all()
+            entry = await models.RRSRole.objects.filter(id=entry_id).first()
             if entry is None:
                 await inter.edit_original_message("Entry not found")
                 return
@@ -473,8 +474,6 @@ class RRSCommands(commands.Cog):
             disabled=disabled,
         )
 
-
-
     @commands.is_owner()
     @commands.slash_command(
         name="rrs-remove",
@@ -530,7 +529,6 @@ class RRSCommands(commands.Cog):
         entry = await models.RRSRole.objects.filter(id=entry_id).first()
         if entry is None:
             return await inter.send("Entry not found", ephemeral=True)
-
 
         if structure_role_id is not None or plasmo_role_id is not None:
             await inter.send("Отправлено на подтверждение", ephemeral=True)

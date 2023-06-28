@@ -15,7 +15,11 @@ def blocked_users_slash_command_check():
 
 def is_guild_registered():
     async def predicate(inter):
-        if not (await models.StructureGuild.objects.filter(discord_id=inter.guild.id).exists()):
+        if not (
+            await models.StructureGuild.objects.filter(
+                discord_id=inter.guild.id
+            ).exists()
+        ):
             raise GuildIsNotRegistered()
         return True
 

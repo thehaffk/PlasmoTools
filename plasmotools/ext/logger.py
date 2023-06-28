@@ -135,7 +135,7 @@ class PlasmoLogger(commands.Cog):
 
                 rrs_rule = await models.RRSRole.objects.filter(
                     structure_role_id=rrs_entry.structure_role_id,
-                    plasmo_role_id=role.id
+                    plasmo_role_id=role.id,
                 ).first()
 
                 structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)

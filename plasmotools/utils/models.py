@@ -43,6 +43,7 @@ class StructureGuild(orm.Model):
     tablename = "structure_guilds"
     registry = models
     fields = {
+        "id": orm.Integer(primary_key=True),
         "discord_id": orm.BigInteger(unique=True),
         "alias": orm.String(max_length=32),
         "player_role_id": orm.BigInteger(),
@@ -74,12 +75,18 @@ class StructureProject(orm.Model):
     registry = models
     fields = {
         "id": orm.Integer(primary_key=True),
-        "name": orm.String(max_length=32,),
+        "name": orm.String(
+            max_length=32,
+        ),
         "is_active": orm.Boolean(default=False),
         "guild_discord_id": orm.Integer(),
         "from_card": orm.Integer(),
-        "plasmo_bearer_token": orm.String(max_length=256,),
-        "webhook_url": orm.String(max_length=256,),
+        "plasmo_bearer_token": orm.String(
+            max_length=256,
+        ),
+        "webhook_url": orm.String(
+            max_length=256,
+        ),
     }
 
 
@@ -87,11 +94,16 @@ class StructureRole(orm.Model):
     tablename = "structure_roles"
     registry = models
     fields = {
-        "name": orm.String(max_length=32,),
+        "id": orm.Integer(primary_key=True),
+        "name": orm.String(
+            max_length=32,
+        ),
         "guild_discord_id": orm.Integer(),
         "role_discord_id": orm.Integer(unique=True),
-        "is_available": orm.Integer(),
-        "webhook_url": orm.String(max_length=256,),
+        "is_available": orm.Boolean(default=True),
+        "webhook_url": orm.String(
+            max_length=256,
+        ),
     }
 
 
@@ -99,7 +111,8 @@ class PersonalSettings(orm.Model):
     tablename = "personal_settings"
     registry = models
     fields = {
-        "discord_id": orm.BigInteger(),
+        "id": orm.Integer(primary_key=True),
+        "discord_id": orm.BigInteger(unique=True),
         "saved_card": orm.Integer(allow_null=True),
         "bearer_token": orm.String(max_length=256, allow_null=True),
         "rp_token": orm.String(max_length=256, allow_null=True),
@@ -107,7 +120,6 @@ class PersonalSettings(orm.Model):
         "allow_pings_in_payouts": orm.Boolean(default=True),
         "announce_events_in_mc_dms": orm.Boolean(default=True),
         "send_roles_logs_in_dms": orm.Boolean(default=False),
-        # ""
     }
 
 

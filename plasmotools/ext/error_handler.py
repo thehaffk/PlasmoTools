@@ -1,6 +1,7 @@
 import logging
 
 import disnake
+from disnake import InteractionTimedOut
 from disnake.ext import commands
 from disnake.ext.commands.errors import (
     CheckFailure,
@@ -11,6 +12,7 @@ from disnake.ext.commands.errors import (
 )
 
 from plasmotools import settings
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -72,12 +74,11 @@ class ErrorHandler(commands.Cog):
             )
         elif isinstance(error, GuildIsNotRegistered):
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Сервер не зарегистрирован как официальная структура.\n"
+                embed=build_simple_embed(
+                    "Сервер не зарегистрирован как официальная структура.\n"
                     "Если вы считаете что это ошибка - обратитесь в "
                     f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
+                    failure=True,
                 ),
                 ephemeral=True,
             )
@@ -93,7 +94,17 @@ class ErrorHandler(commands.Cog):
                 ephemeral=True,
             )
             return
-
+        elif isinstance(error, disnake.errors.NotFound):
+            await inter.send(
+                embed=disnake.Embed(
+                    color=disnake.Color.dark_red(),
+                    title="Попробуйте еще раз",
+                ),
+                ephemeral=True,
+            )
+            return
+        elif isinstance(error, InteractionTimedOut):
+            logger.error(error)
         else:
             logger.error(error)
             await inter.send(

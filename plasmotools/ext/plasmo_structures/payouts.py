@@ -159,7 +159,11 @@ class Payouts(commands.Cog):
         plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
         """
         await inter.response.defer(ephemeral=True)
-        if not (await models.StructureProject.objects.filer(id=project_id, guild_discord_id=inter.guild.id).exists()):
+        if not (
+            await models.StructureProject.objects.filter(
+                id=project_id, guild_discord_id=inter.guild.id
+            ).exists()
+        ):
             return await inter.send(
                 embed=disnake.Embed(
                     color=disnake.Color.dark_red(),
@@ -169,14 +173,19 @@ class Payouts(commands.Cog):
                 ephemeral=True,
             )
 
-        db_project = await models.StructureProject.objects.get(id=project_id, guild_discord_id=inter.guild.id)
+        db_project = await models.StructureProject.objects.get(
+            id=project_id, guild_discord_id=inter.guild.id
+        )
         await db_project.update(
-            name=name,
-            is_active=is_active,
-            from_card=from_card,
-            plasmo_bearer_token=plasmo_bearer_token,
-            webhook_url=webhook_url,
-
+            name=name if name is not None else db_project.name,
+            is_active=is_active if is_active is not None else db_project.is_active,
+            from_card=from_card if from_card is not None else db_project.from_card,
+            plasmo_bearer_token=plasmo_bearer_token
+            if plasmo_bearer_token is not None
+            else db_project.plasmo_bearer_token,
+            webhook_url=webhook_url
+            if webhook_url is not None
+            else db_project.webhook_url,
         )
         await inter.send(
             embed=disnake.Embed(
@@ -206,7 +215,9 @@ class Payouts(commands.Cog):
 
         """
         await inter.response.defer(ephemeral=True)
-        await models.StructureProject.objects.filter(id=project_id, guild_discord_id=inter.guild.id).delete()
+        await models.StructureProject.objects.filter(
+            id=project_id, guild_discord_id=inter.guild.id
+        ).delete()
         await inter.edit_original_message(
             embed=disnake.Embed(
                 color=disnake.Color.dark_green(),
@@ -224,7 +235,9 @@ class Payouts(commands.Cog):
         Получить список проектов на сервере
         """
         await inter.response.defer(ephemeral=True)
-        db_projects = await models.StructureProject.objects.filter(guild_discord_id=inter.guild.id).all()
+        db_projects = await models.StructureProject.objects.filter(
+            guild_discord_id=inter.guild.id
+        ).all()
         embed = disnake.Embed(
             color=disnake.Color.dark_green(),
             title=f"Все проекты {inter.guild.name}",
@@ -309,7 +322,11 @@ class Payouts(commands.Cog):
             plasmo_user = user
 
         from_card = project.from_card
-        user_card = (await models.PersonalSettings.objects.get_or_create(discord_id=user.id, defaults={})).saved_card
+        user_card = (
+            await models.PersonalSettings.objects.get_or_create(
+                discord_id=user.id, defaults={}
+            )
+        )[0].saved_card
         if user_card is None:
             user_cards = sorted(
                 [
@@ -373,7 +390,9 @@ class Payouts(commands.Cog):
             except disnake.Forbidden:
                 pass
 
-            await models.PersonalSettings.objects.get(discord_id=user.id).update(saved_card=user_card)
+            await models.PersonalSettings.objects.filter(discord_id=user.id).update(
+                saved_card=user_card
+            )
 
         await interaction.edit_original_message(
             embed=disnake.Embed(
@@ -438,7 +457,9 @@ class Payouts(commands.Cog):
                     ),
                 )
 
-        db_guild = await models.StructureGuild.objects.get(id=interaction.guild.id)
+        db_guild = await models.StructureGuild.objects.get(
+            discord_id=interaction.guild.id
+        )
         await self.bot.get_channel(db_guild.logs_channel_id).send(
             embed=embed.add_field("Выплатил", interaction.author.mention, inline=False)
             .add_field(
@@ -477,7 +498,7 @@ class Payouts(commands.Cog):
             embed=disnake.Embed(
                 description=f"{formatters.format_bank_card(from_card)} -> "
                 f"{amount} {settings.Emojis.diamond} -> {formatters.format_bank_card(user_card)}\n"
-                f"By {interaction.author.display_name} {interaction.author.mention}, with Message: {message}",
+                f"Author {interaction.author.display_name} {interaction.author.mention}\n Message: {message}",
             )
         )
         return True
@@ -519,8 +540,9 @@ class Payouts(commands.Cog):
             )
             return
         try:
-            db_project = await models.StructureProject.objects.get(id=int(project_id),
-                                                                   is_active=True, guild_discord_id=inter.guild.id)
+            db_project = await models.StructureProject.objects.get(
+                id=int(project_id), is_active=True, guild_discord_id=inter.guild.id
+            )
         except orm.NoMatch:
             await inter.edit_original_message(
                 embed=disnake.Embed(
@@ -585,18 +607,18 @@ class Payouts(commands.Cog):
             return
 
         await models.PersonalSettings.objects.update_or_create(
-            user_discord_id=inter.author.id,
+            discord_id=inter.author.id,
             defaults={
                 "saved_card": card_id,
-            }
+            },
         )
         await inter.edit_original_message(
             embed=disnake.Embed(
                 color=disnake.Color.dark_green(),
-                description="Карта для выплат успешно установлена\n"
+                description="Карта для выплат успешно обновлена\n"
                 f" {formatters.format_bank_card(card_id)} - {api_card['name']}\n"
                 f"Принадлежит {api_card['holder']}",
-            ),
+            )
         )
 
     async def cog_load(self):

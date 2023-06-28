@@ -74,7 +74,9 @@ async def is_author_has_permission(
         return False
 
     if db_guild is None:
-        db_guild = await models.StructureGuild.objects.get(discord_id=structure_role.guild.id)
+        db_guild = await models.StructureGuild.objects.get(
+            discord_id=structure_role.guild.id
+        )
 
     if structure_role == db_guild.head_role_id:
         return any(
@@ -233,13 +235,13 @@ class RRSCore(commands.Cog):
         not_permitted_roles_to_add = []
         not_permitted_roles_to_remove = []
 
-        db_guild = await models.StructureGuild.objects.get(guild_id=target.guild.id)
+        db_guild = await models.StructureGuild.objects.get(discord_id=target.guild.id)
         rrs_logs_channel = self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id)
 
         for role in added_roles + removed_roles:
             rrs_rules = await models.RRSRole.objects.filter(
                 structure_role_id=role.id
-            )
+            ).all()
             for rrs_rule in rrs_rules:
                 if rrs_rule.disabled:
                     continue
@@ -403,7 +405,9 @@ class RRSCore(commands.Cog):
             return
 
         if not db_guild:
-            db_guild = await models.StructureGuild.objects.get(discord_id=rrs_rule.structure_guild_id)
+            db_guild = await models.StructureGuild.objects.get(
+                discord_id=rrs_rule.structure_guild_id
+            )
         guild = self.bot.get_guild(rrs_rule.structure_guild_id)
         if not db_guild or not guild:
             await rrs_rule.update(disabled=True)
@@ -529,7 +533,9 @@ class RRSCore(commands.Cog):
         )
 
         structure_logs_channel = self.bot.get_channel(
-            (await models.StructureGuild.objects.get(discord_id=entry.guild.id)).logs_channel_id
+            (
+                await models.StructureGuild.objects.get(discord_id=entry.guild.id)
+            ).logs_channel_id
         )
         rrs_logs_channel = self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id)
         for rrs_rule in active_linked_structure_rules:
@@ -590,12 +596,13 @@ class RRSCore(commands.Cog):
     ) -> bool:
         # todo: impement asap
         linked_rules = await models.RRSRole.objects.filter(
-                structure_role_id=role.id,
-                disabled=False
-        )
+            structure_role_id=role.id, disabled=False
+        ).all()
 
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if not plasmo_guild:
+            if settings.DEBUG:
+                return True
             logger.critical("Unable to locate plasmo guild")
             return False
 
@@ -614,11 +621,10 @@ class RRSCore(commands.Cog):
     # async def scheduled_sync(self):
     #     ...
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        # if not self.sync_all_players.is_running():
-        #     await self.sync_all_players.start()
-        print(await models.RRSRole.objects.all())
+    # @commands.Cog.listener()
+    # async def on_ready(self):
+    # if not self.sync_all_players.is_running():
+    #     await self.sync_all_players.start()
 
     async def cog_load(self):
         logger.info("%s loaded", __name__)

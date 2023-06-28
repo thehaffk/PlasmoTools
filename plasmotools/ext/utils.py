@@ -285,7 +285,6 @@ Plasmo Tools - многофункциональный бот для дискор
         )
 
     @commands.command(name="budget")
-    @checks.blocked_users_slash_command_check()
     async def budget_command(self, ctx: disnake.ext.commands.Context):
         pay2_data = await utils.get_pay2_stats()
         try:

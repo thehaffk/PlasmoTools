@@ -35,10 +35,11 @@ async def transfer(
             },
         ) as resp:
             if resp.status != 200 or not (await resp.json()).get("status", False):
-                errors = [
-                    error["msg"] for error in (await resp.json()).get("error", [])
-                ]
-                return False, ", ".join(errors)
+                errors = (await resp.json()).get("error", [])
+                if isinstance(errors, dict):
+                    errors = [errors]
+
+                return False, ", ".join([error["msg"] for error in errors])
             return True, ""
 
 

@@ -8,6 +8,8 @@ from plasmotools.utils import models
 
 logger = logging.getLogger(__name__)
 
+# todo: sync every structure on startup
+
 
 class ForceNickChanger(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
@@ -22,7 +24,11 @@ class ForceNickChanger(commands.Cog):
             return
         if before.guild.id == settings.PlasmoRPGuild.guild_id:
             return
-        if not (await models.StructureGuild.objects.filer(discord_id=before.guild.id).exists()):
+        if not (
+            await models.StructureGuild.objects.filter(
+                discord_id=before.guild.id
+            ).exists()
+        ):
             return
 
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
