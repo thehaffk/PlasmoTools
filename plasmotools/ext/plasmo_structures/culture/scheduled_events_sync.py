@@ -72,7 +72,7 @@ class ScheduledEventsSync(commands.Cog):
             embed=disnake.Embed(
                 title="Вы хотите перенести ваш ивент в Plasmo RP?",
                 description="Если вы хотите перенести ваш ивент в дискорд Plasmo RP, нажмите на кнопку ниже",
-                color=disnake.Color.green(),
+                color=disnake.Color.dark_green(),
             ),
             view=view,
         )

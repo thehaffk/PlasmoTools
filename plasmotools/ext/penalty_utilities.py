@@ -82,7 +82,7 @@ class PenaltyUtilities(commands.Cog):
         await inter.send(
             embed=disnake.Embed(
                 description="Running manual penalty check...",
-                color=disnake.Color.green(),
+                color=disnake.Color.dark_green(),
             ),
             ephemeral=True,
         )

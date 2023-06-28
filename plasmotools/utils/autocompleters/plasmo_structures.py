@@ -2,8 +2,7 @@ import logging
 
 import disnake
 
-from plasmotools.utils.database.plasmo_structures.projects import get_projects
-from plasmotools.utils.database.plasmo_structures.roles import get_roles
+from plasmotools.utils import models
 
 logger = logging.getLogger(__name__)
 
@@ -13,13 +12,12 @@ async def role_autocompleter(
 ) -> dict[str, str]:
     if inter.guild is None:
         return {}
-    roles = await get_roles(guild_discord_id=inter.guild.id)
-    roles = roles[:25]
+    roles = await models.StructureRole.objects.filter(guild_discord_id=inter.guild.id, is_available=True).limit(25).all()
 
     return (
-        {role.name: str(role.role_discord_id) for role in roles if role.available}
+        {role.name: str(role.role_discord_id) for role in roles}
         if roles
-        else {"Нет доступных ролей": "404"}
+        else {"Нет доступных ролей": "69420"}
     )
 
 
@@ -32,15 +30,18 @@ async def payouts_projects_autocompleter(
     if inter.guild is None:
         return {}
 
-    db_projects = await get_projects(guild_discord_id=inter.guild.id)
-    db_projects = db_projects[:25]
+    db_projects = await models.StructureProject.objects.filter(
+        guild_discord_id=inter.guild.id,
+        is_active=True,
+
+    ).limit(25).all()
 
     db_projects = {
         project.name: str(project.id)
         for project in db_projects
-        if project.is_active and project.from_card is not None
+        if project.from_card is not None and project.from_card != -1
     }
     if len(db_projects) == 0:
-        db_projects = {"Нет доступных проектов": "404"}
+        db_projects = {"Нет доступных проектов": "69420"}
 
     return db_projects

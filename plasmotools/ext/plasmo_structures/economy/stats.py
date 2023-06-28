@@ -30,7 +30,7 @@ async def generate_bankers_stats_embeds(days=7) -> List[disnake.Embed]:
     main_statistics_embed = disnake.Embed(
         title=f"Bank statistics for last {days} days",
         description=f"Total transactions: {len(transactions)}\n" + bankers_top,
-        color=disnake.Color.green(),
+        color=disnake.Color.dark_green(),
     )
     return [main_statistics_embed]
 
@@ -40,7 +40,7 @@ async def generate_banker_stats_embeds(
 ) -> List[disnake.Embed]:
     banker_stats_embed = disnake.Embed(
         title=f"Banker statistics for {user.display_name} for last {days} days",
-        color=disnake.Color.green(),
+        color=disnake.Color.dark_green(),
         description="`Roles:`" + ", ".join([role.mention for role in user.roles[1:]]),
     )
 
@@ -128,7 +128,7 @@ class BankerStats(commands.Cog):
         """
         await inter.send(
             embed=disnake.Embed(
-                color=disnake.Color.green(),
+                color=disnake.Color.dark_green(),
                 title=f"{settings.Emojis.loading2} Calculating...",
                 description="Collecting statistics can take a long time, please wait...",
             ),
@@ -150,7 +150,7 @@ class BankerStats(commands.Cog):
     ):
         await inter.send(
             embed=disnake.Embed(
-                color=disnake.Color.green(),
+                color=disnake.Color.dark_green(),
                 title=f"{settings.Emojis.loading2} Calculating...",
                 description="Collecting statistics can take a long time, please wait...",
             ),

@@ -7,7 +7,7 @@ from disnake.ext import commands
 
 from plasmotools import settings
 from plasmotools.ext.plasmo_structures.payouts import Payouts
-from plasmotools.utils.database import plasmo_structures as database
+from plasmotools.utils import models
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class FastInfrastructurePayouts(commands.Cog):
         if message.author == inter.author:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Нельзя выплачивать самому себе",
                 ),
@@ -39,7 +39,7 @@ class FastInfrastructurePayouts(commands.Cog):
         if self.bot.user in reacted_users[0]:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="На сообщении стоит реакция ✅ от PlasmoTools, нельзя выплатить второй раз.\n\n"
                     "Администраторы могут убрать эту реакцию и выплата будет вновь доступна",
@@ -67,7 +67,7 @@ class FastInfrastructurePayouts(commands.Cog):
         if payouts_cog is None:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Неизвестная ошибка",
                 ),
@@ -80,7 +80,7 @@ class FastInfrastructurePayouts(commands.Cog):
             interaction=inter,
             user=message.author,
             amount=8,
-            project=await database.projects.get_project(fake_call_project_id),
+            project=await models.StructureProject.objects.get(id=fake_call_project_id),
             message=f"За [вызов]({message.jump_url})",
             transaction_message=f"Автоматическая выплата за вызов",
         )
@@ -108,7 +108,7 @@ class FastInfrastructurePayouts(commands.Cog):
         if payouts_cog is None:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Неизвестная ошибка",
                 ),
@@ -121,7 +121,7 @@ class FastInfrastructurePayouts(commands.Cog):
             interaction=inter,
             user=message.author,
             amount=4,
-            project=await database.projects.get_project(damage_project_id),
+            project=await models.StructurePayout.objects.get(id=damage_project_id),
             message=f"За [починку поломки]({message.jump_url})",
             transaction_message="Автоматическая выплата за починку поломки",
         )

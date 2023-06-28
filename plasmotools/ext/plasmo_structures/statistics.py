@@ -3,7 +3,6 @@ import logging
 import disnake
 from disnake.ext import commands
 
-import plasmotools.utils.database.plasmo_structures.guilds as guilds_db
 from plasmotools import checks, settings
 from plasmotools.utils import api
 
@@ -19,7 +18,7 @@ class StructureStatictics(commands.Cog):
     @commands.slash_command(
         name="role-stats",
     )
-    @checks.blocked_users_slash_command_check()
+    @checks.is_guild_registered()
     async def role_stats_command(
         self,
         inter: disnake.ApplicationCommandInteraction,
@@ -35,20 +34,12 @@ class StructureStatictics(commands.Cog):
         """
         await inter.send(
             embed=disnake.Embed(
-                color=disnake.Color.green(),
+                color=disnake.Color.dark_green(),
                 title=f"{settings.Emojis.loading2} Calculating...",
                 description="Collecting statistics can take a long time, please wait...",
             ),
             ephemeral=True,
         )
-        guild = await guilds_db.get_guild(inter.guild.id)
-        if guild is None:
-            return await inter.edit_original_message(
-                embed=disnake.Embed(
-                    title="Ошибка",
-                    description="Сервер не зарегистрирован как официальная структура",
-                )
-            )
         if len(role.members) > 80:
             return await inter.edit_original_message(
                 embed=disnake.Embed(

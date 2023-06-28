@@ -11,9 +11,8 @@ from disnake.ext import commands
 
 from plasmotools import settings
 from plasmotools.utils import api
+from plasmotools.utils import models
 from plasmotools.utils.api import messenger
-from plasmotools.utils.database.rrs.actions import get_action
-from plasmotools.utils.database.rrs.roles import get_rrs_roles
 
 logger = logging.getLogger(__name__)
 
@@ -130,16 +129,15 @@ class PlasmoLogger(commands.Cog):
                 rrs_entry_id = int(
                     re.findall(r"RRS \| \w* \| RRSID: (\d+)", audit_entry.reason)[0]
                 )
-                rrs_entry = await get_action(rrs_entry_id)
+                rrs_entry = await models.RRSAction.objects.get(id=rrs_entry_id)
 
                 description_text += f"via Plasmo Tools (ID: {rrs_entry.id})\n"
 
-                rrs_rules = await get_rrs_roles(
-                    structure_role_id=rrs_entry.structure_role_id
-                )
-                rrs_rule = [
-                    rule for rule in rrs_rules if rule.plasmo_role_id == role.id
-                ][0]
+                rrs_rule = await models.RRSRole.objects.filter(
+                    structure_role_id=rrs_entry.structure_role_id,
+                    plasmo_role_id=role.id
+                ).first()
+
                 structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
                 structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
 
@@ -303,7 +301,7 @@ class PlasmoLogger(commands.Cog):
 
         log_embed = disnake.Embed(
             title=f"⚡ {nickname} был разбанен",
-            color=disnake.Color.green(),
+            color=disnake.Color.dark_green(),
             description=f"""
             {member.mention} | [u/{nickname}](https://rp.plo.su/u/{nickname})
              
@@ -363,7 +361,7 @@ class PlasmoLogger(commands.Cog):
             disnake.Embed(
                 description=f"Guild: **{message.guild}**\n\n"
                 f"{message.author.mention} deleted message in {message.channel.mention}",
-                color=disnake.Color.red(),
+                color=disnake.Color.dark_red(),
             )
             .add_field(
                 name="Raw message",

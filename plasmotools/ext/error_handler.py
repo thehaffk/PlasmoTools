@@ -37,7 +37,7 @@ class ErrorHandler(commands.Cog):
                     title="У Вас недостаточно прав.",
                     description="Вам нужно "
                     f"иметь роль <@&{error.missing_role}> для использования этой команды.",
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                 ),
                 ephemeral=True,
             )
@@ -47,7 +47,7 @@ class ErrorHandler(commands.Cog):
                     title="У Вас недостаточно прав.",
                     description="Вам нужно "
                     f"иметь пермишен **{error.missing_permissions[0]}** для использования этой команды.",
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                 ),
                 ephemeral=True,
             )
@@ -57,7 +57,7 @@ class ErrorHandler(commands.Cog):
                     title="У Вас недостаточно прав.",
                     description="Вам нужно быть "
                     "администратором Plasmo или разработчиком бота для использования этой функции.",
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                 ),
                 ephemeral=True,
             )
@@ -66,14 +66,14 @@ class ErrorHandler(commands.Cog):
                 embed=disnake.Embed(
                     title="Команда недоступна.",
                     description="`This command cannot be used in private messages.`",
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                 ),
                 ephemeral=True,
             )
         elif isinstance(error, GuildIsNotRegistered):
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Сервер не зарегистрирован как официальная структура.\n"
                     "Если вы считаете что это ошибка - обратитесь в "
@@ -85,7 +85,7 @@ class ErrorHandler(commands.Cog):
         elif isinstance(error, CheckFailure):
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ой, а що трапилось?",
                     description="Ви були заблокованi. Мабуть зробили щось не те"
                     f"\n\n[digital drugs technologies]({settings.DevServer.support_invite})",
@@ -101,7 +101,7 @@ class ErrorHandler(commands.Cog):
                     title="Error",
                     description=f"Возникла неожиданная ошибка.\n\n`{error}`"
                     f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                 ),
                 ephemeral=True,
             )
@@ -134,7 +134,7 @@ class ErrorHandler(commands.Cog):
                     title="Error",
                     description=f"Возникла неожиданная ошибка.\n\n`{error}`"
                     f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                 ),
                 delete_after=10,
             )

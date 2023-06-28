@@ -5,11 +5,11 @@ from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
 from plasmotools import checks, settings
-from plasmotools.utils.database import rrs as rrs_database
-from plasmotools.utils.database.plasmo_structures import guilds as guilds_database
+from plasmotools.utils import models
 
 logger = logging.getLogger(__name__)
 
+# todo: rename 'entry' ro 'role'
 
 class AdminConfirmationView(disnake.ui.View):
     """
@@ -94,7 +94,7 @@ class RRSCommands(commands.Cog):
         embed_text = ""
         if edit and entry_id is not None:
             embed_text += "Entry ID: " + str(entry_id) + "\n"
-            entry = await rrs_database.roles.get_rrs_role(entry_id)
+            entry = await models.RRSRole.objects.get(id=entry_id)
             new_structure_guild = self.bot.get_guild(structure_guild_id)
             if entry.structure_guild_id != structure_guild_id:
                 old_structure_guild = self.bot.get_guild(entry.structure_guild_id)
@@ -270,7 +270,7 @@ class RRSCommands(commands.Cog):
         """
         await inter.response.defer(ephemeral=True)
         if entry_id is not None:
-            entry = await rrs_database.roles.get_rrs_role(entry_id)
+            entry = await models.RRSRole.objects.filter(id=entry_id).all()
             if entry is None:
                 await inter.edit_original_message("Entry not found")
                 return
@@ -285,12 +285,12 @@ class RRSCommands(commands.Cog):
             if structure_guild is None:
                 structure_guild = "Structure guild not found"
                 logger.warning("Structure guild not found, disabling RRS entry")
-                await entry.edit(disabled=True)
+                await entry.update(disabled=True)
             structure_role = structure_guild.get_role(entry.structure_role_id)
             if structure_role is None:
                 structure_role = "Structure role not found"
                 logger.warning("Structure role not found, disabling RRS entry")
-                await entry.edit(disabled=True)
+                await entry.update(disabled=True)
 
             if not settings.DEBUG:
                 plasmo_role_name = (
@@ -324,16 +324,16 @@ class RRSCommands(commands.Cog):
                 embed=embed,
             )
 
-        entries = await rrs_database.roles.get_rrs_roles(
+        entries = await models.RRSRole.objects.filter(
             structure_guild_id=inter.guild.id
             if inter.guild.id != settings.DevServer.guild_id
             and inter.guild.id != settings.LogsServer.guild_id
             else None  # Provide None for dev/logs server, so it will return all entries, not only for dev server
-        )
+        ).all()
 
         rrs_embed = disnake.Embed(
             title="Registered RRS entries",
-            color=disnake.Color.green(),
+            color=disnake.Color.dark_green(),
             description="`id`.`локальная роль` **->** `роль на PRP` **|** `количество игроков с ролью`",
         )
 
@@ -359,7 +359,7 @@ class RRSCommands(commands.Cog):
                 else:
                     plasmo_role = plasmo_guild.get_role(entry.plasmo_role_id)
                 if not structure_role or not plasmo_role:
-                    await entry.edit(disabled=True)
+                    await entry.update(disabled=True)
                 roles_text += (
                     f"**{entry.id}.** {structure_role} **->** {plasmo_role} **|** {len(structure_role.members) if structure_role else 'role not found'} "
                     f"{'** Disabled**' if entry.disabled else ''}\n"
@@ -379,13 +379,14 @@ class RRSCommands(commands.Cog):
         dm_permission=False,
         guild_ids=[settings.DevServer.guild_id, settings.LogsServer.guild_id],
     )
+    @checks.is_guild_registered()
     @checks.blocked_users_slash_command_check()
     async def register_rrs_entry(
         self,
         inter: ApplicationCommandInteraction,
-        sgid: str,
-        srid: str,
-        prid: str,
+        structure_guild_id: str,
+        structure_role_id: str,
+        plasmo_role_id: str,
         disabled: bool = False,
     ):
         """
@@ -394,45 +395,35 @@ class RRSCommands(commands.Cog):
         Parameters
         ----------
         inter
-        sgid: structure guild id
-        srid: structure role id
-        prid: plasmo role id
+        structure_guild_id: structure guild id
+        structure_role_id: structure role id
+        plasmo_role_id: plasmo role id
         disabled: is disabled
         """
         await inter.response.defer(ephemeral=True)
-        guild = await guilds_database.get_guild(int(sgid))
-        if guild is None:
-            await inter.send(
+        if not (all([
+            structure_guild_id.isdigit(),
+            structure_role_id.isdigit(),
+            plasmo_role_id.isdigit(),
+        ])):
+            return await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="Сервер не зарегистрирован как официальная структура.\n"
-                    "Если вы считаете что это ошибка - обратитесь в "
-                    f"[поддержку digital drugs technologies]({settings.DevServer.support_invite})",
-                ),
-                ephemeral=True,
-            )
-            return
-        try:
-            sgid = int(sgid)
-            srid = int(srid)
-            prid = int(prid)
-        except ValueError:
-            await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Некорректный формат ID",
                 ),
                 ephemeral=True,
             )
-            return
 
-        structure_guild = self.bot.get_guild(sgid)
+        structure_guild_id = int(structure_guild_id)
+        structure_role_id = int(structure_role_id)
+        plasmo_role_id = int(plasmo_role_id)
+
+        structure_guild = self.bot.get_guild(structure_guild_id)
         if structure_guild is None:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Сервер структуры не найден",
                 ),
@@ -440,11 +431,11 @@ class RRSCommands(commands.Cog):
             )
             return
 
-        structure_role = structure_guild.get_role(srid)
+        structure_role = structure_guild.get_role(structure_role_id)
         if structure_role is None:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Роль в структуре не найдена",
                 ),
@@ -459,11 +450,11 @@ class RRSCommands(commands.Cog):
             else:
                 raise RuntimeError("Plasmo guild not found")
         else:
-            plasmo_role = plasmo_guild.get_role(prid)
+            plasmo_role = plasmo_guild.get_role(plasmo_role_id)
             if plasmo_role is None:
                 await inter.send(
                     embed=disnake.Embed(
-                        color=disnake.Color.red(),
+                        color=disnake.Color.dark_red(),
                         title="Ошибка",
                         description="Роль в Plasmo RP не найдена",
                     ),
@@ -473,11 +464,11 @@ class RRSCommands(commands.Cog):
 
         await inter.edit_original_message(
             embed=disnake.Embed(
-                color=disnake.Color.green(),
+                color=disnake.Color.dark_green(),
                 title="Data",
-                description=f"**Structure guild**: {sgid} | {structure_guild}\n"
-                f"**Structure role**: {srid} | {structure_role}\n"
-                f"**Plasmo role**: {prid} | {plasmo_role}\n"
+                description=f"**Structure guild**: {structure_guild_id} | {structure_guild}\n"
+                f"**Structure role**: {structure_role_id} | {structure_role}\n"
+                f"**Plasmo role**: {plasmo_role_id} | {plasmo_role}\n"
                 f"**Disabled**: {disabled}",
             )
         )
@@ -486,18 +477,20 @@ class RRSCommands(commands.Cog):
             inter.author,
             structure_guild.id,
             structure_role.id,
-            plasmo_role.id if not settings.DEBUG else prid,
+            plasmo_role.id if not settings.DEBUG else plasmo_role_id,
             disabled,
         )
         if not admin_decision:
             return
 
-        entry = await rrs_database.roles.register_rrs_role(
-            structure_guild_id=int(sgid),
-            structure_role_id=int(srid),
-            plasmo_role_id=int(prid),
+        await models.RRSRole.objects.create(
+            structure_guild_id=int(structure_guild_id),
+            structure_role_id=int(structure_role_id),
+            plasmo_role_id=int(plasmo_role_id),
             disabled=disabled,
         )
+
+
 
     @commands.is_owner()
     @commands.slash_command(
@@ -519,17 +512,9 @@ class RRSCommands(commands.Cog):
         inter
         entry_id: entry id
         """
-        entry = await rrs_database.roles.get_rrs_role(entry_id)
-        if entry is None:
-            await inter.send("Entry not found", ephemeral=True)
-            return
-
-        data_string = (
-            f"{entry.id} - {entry.disabled} - SGID {entry.structure_guild_id} "
-            f"- SRID {entry.structure_role_id} - PRID {entry.plasmo_role_id}"
-        )
-        await entry.delete()
-        await inter.send(f"{data_string} - deleted", ephemeral=True)
+        # todo: add confirmation
+        await models.RRSRole.objects.filter(id=entry_id).delete()
+        await inter.send("deleted", ephemeral=True)
 
     @commands.is_owner()
     @commands.slash_command(
@@ -559,10 +544,10 @@ class RRSCommands(commands.Cog):
         structure_role_id: structure role id
         plasmo_role_id: plasmo role id
         """
-        entry = await rrs_database.roles.get_rrs_role(entry_id)
+        entry = await models.RRSRole.objects.filter(id=entry_id).first()
         if entry is None:
-            await inter.send("Entry not found", ephemeral=True)
-            return
+            return await inter.send("Entry not found", ephemeral=True)
+
 
         if structure_role_id is not None or plasmo_role_id is not None:
             await inter.send("Отправлено на подтверждение", ephemeral=True)
@@ -578,7 +563,7 @@ class RRSCommands(commands.Cog):
             if not admin_decision:
                 return
 
-        await entry.edit(
+        await entry.update(
             disabled=disabled,
             structure_guild_id=int(structure_guild_id) if structure_guild_id else None,
             structure_role_id=int(structure_role_id) if structure_role_id else None,

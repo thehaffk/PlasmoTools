@@ -129,7 +129,7 @@ class BACSynchronization(commands.Cog):
             await member.send(
                 embed=disnake.Embed(
                     title="Вас разбанили на Plasmo RP",
-                    color=disnake.Color.green(),
+                    color=disnake.Color.dark_green(),
                     description=f"Держите инвайт и не забывайте соблюдать "
                     f"правила сервера {settings.PlasmoRPGuild.invite_url}\n\n\n"
                     f"⚡ by [digital drugs]({settings.LogsServer.invite_url})",

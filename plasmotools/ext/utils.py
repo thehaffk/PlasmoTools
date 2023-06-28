@@ -15,7 +15,7 @@ from plasmotools.utils.api.user import get_user_data
 logger = logging.getLogger(__name__)
 
 colors = {
-    Localized("Red", key="EMBED_COLOR_RED"): str(disnake.Color.red().value),
+    Localized("Red", key="EMBED_COLOR_RED"): str(disnake.Color.dark_red().value),
     Localized("Dark red", key="EMBED_COLOR_RED"): str(disnake.Color.dark_red().value),
     Localized("Green", key="EMBED_COLOR_RED"): str(disnake.Color.green().value),
     Localized("Dark green", key="EMBED_COLOR_RED"): str(
@@ -43,7 +43,7 @@ class Utils(commands.Cog):
                 disnake.Embed(
                     title=f"{member.display_name}'s Plasmo Profile",
                     description="This user has no Plasmo profile",
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                 )
             ]
         fusion = member_api_profile.get("fusion", None)
@@ -258,7 +258,7 @@ Plasmo Tools - многофункциональный бот для дискор
         """
         await inter.send(
             embed=disnake.Embed(
-                color=disnake.Color.green(),
+                color=disnake.Color.dark_green(),
                 title=f"{settings.Emojis.loading2} Calculating...",
                 description="Collecting data can take a long time, please wait...",
             ),

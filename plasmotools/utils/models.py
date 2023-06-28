@@ -89,7 +89,7 @@ class StructureRole(orm.Model):
     fields = {
         "name": orm.String(max_length=32,),
         "guild_discord_id": orm.Integer(),
-        "role_discord_id": orm.Integer(),
+        "role_discord_id": orm.Integer(unique=True),
         "is_available": orm.Integer(),
         "webhook_url": orm.String(max_length=256,),
     }
@@ -100,7 +100,6 @@ class PersonalSettings(orm.Model):
     registry = models
     fields = {
         "discord_id": orm.BigInteger(),
-        "plasmo_id": orm.Integer(),
         "saved_card": orm.Integer(allow_null=True),
         "bearer_token": orm.String(max_length=256, allow_null=True),
         "rp_token": orm.String(max_length=256, allow_null=True),

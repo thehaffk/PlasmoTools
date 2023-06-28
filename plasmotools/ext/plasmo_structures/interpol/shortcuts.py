@@ -9,7 +9,7 @@ from disnake.ext import commands
 
 from plasmotools import settings
 from plasmotools.ext.plasmo_structures.payouts import Payouts
-from plasmotools.utils.database import plasmo_structures as database
+from plasmotools.utils import models
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class FastInterpolPayouts(commands.Cog):
         if message.author == inter.author:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Нельзя выплачивать самому себе",
                 ),
@@ -68,7 +68,7 @@ class FastInterpolPayouts(commands.Cog):
         if self.bot.user in reacted_users[0]:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="На сообщении стоит реакция ✅ от PlasmoTools, нельзя выплатить второй раз.\n\n"
                     "Администраторы могут убрать эту реакцию и выплата будет вновь доступна",
@@ -100,7 +100,7 @@ class FastInterpolPayouts(commands.Cog):
         if rank is None:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Не удалось найти ранговую роль, невозможно вычислить размер выплаты",
                 ),
@@ -112,7 +112,7 @@ class FastInterpolPayouts(commands.Cog):
         if payouts_cog is None:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Неизвестная ошибка",
                 ),
@@ -125,7 +125,7 @@ class FastInterpolPayouts(commands.Cog):
             interaction=inter,
             user=message.author,
             amount=rank["fake_call_payout"],
-            project=await database.projects.get_project(fake_call_project_id),
+            project=await models.StructureProject.objects.get(id=fake_call_project_id),
             message=f"За [ложный вызов]({message.jump_url}) / {rank['name']}",
             transaction_message=f"Выплата за ложный вызов / Расценка по рангу {rank['name']}",
         )
@@ -156,7 +156,7 @@ class FastInterpolPayouts(commands.Cog):
         if rank is None:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Не удалось найти ранговую роль, невозможно вычислить размер выплаты",
                 ),
@@ -168,7 +168,7 @@ class FastInterpolPayouts(commands.Cog):
         if payouts_cog is None:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Неизвестная ошибка",
                 ),
@@ -181,7 +181,7 @@ class FastInterpolPayouts(commands.Cog):
             interaction=inter,
             user=message.author,
             amount=rank["ten_penalties_payout"],
-            project=await database.projects.get_project(fake_call_project_id),
+            project=await models.StructureProject.objects.get(id=fake_call_project_id),
             message=f"За 10 выданных штрафов / {rank['name']}",
             transaction_message=f"Выплата за 10 выполненных штрафов / Расценка по рангу {rank['name']}",
         )
@@ -212,7 +212,7 @@ class FastInterpolPayouts(commands.Cog):
         if rank is None:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Не удалось найти ранговую роль, невозможно вычислить размер выплаты",
                 ),
@@ -229,7 +229,7 @@ class FastInterpolPayouts(commands.Cog):
         if len(finded_groups) == 0:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Сообщение написано не по форме ⚠",
                 ),
@@ -278,7 +278,7 @@ class FastInterpolPayouts(commands.Cog):
             await message.add_reaction("⚠")
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Маловато ⚠",
                 ),
@@ -288,7 +288,7 @@ class FastInterpolPayouts(commands.Cog):
         elif event_duration > 180:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description=f"Многовато минут, такое вручную выплачивайте ⚠\n"
                     f"Чтобы не выплатить миллион алмазов из-за бага, в боте установлен лимит - 180 минут. "
@@ -312,7 +312,7 @@ class FastInterpolPayouts(commands.Cog):
         if payouts_cog is None:
             await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
                     description="Неизвестная ошибка",
                 ),
@@ -325,7 +325,7 @@ class FastInterpolPayouts(commands.Cog):
             interaction=inter,
             user=message.author,
             amount=payout_amount,
-            project=await database.projects.get_project(events_project_id),
+            project=await models.StructureProject.objects.get(events_project_id),
             message=f"За ивент '{event_title}' ({event_duration} мин.) / {rank['name']}",
         )
         if result:

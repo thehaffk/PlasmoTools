@@ -5,7 +5,7 @@ from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 
 from plasmotools import checks
-from plasmotools.utils.database import plasmo_structures as database
+from plasmotools.utils import models
 
 logger = logging.getLogger(__name__)
 
@@ -36,41 +36,29 @@ class AdminCommands(commands.Cog):
         """
         Регистрация/редактирование сервера в базе данных
         """
-        guild: database.guilds.Guild = await database.guilds.get_guild(inter.guild.id)
-        if guild is not None:
-            embed = disnake.Embed(
-                title="GUILD CHANGELOG",
-                description=f"""
-                `alias`: {guild.alias} -> {alias}
-                `player_role`: {guild.player_role_id} -> {player_role.name}
-                `head_role`: {guild.head_role_id} -> {head_role.name}
-                `public_chat`: {guild.public_chat_channel_id} -> {public_chat.name}
-                `logs_channel`: {guild.logs_channel_id} -> {logs_channel.name}
-                """,
-                color=disnake.Color.green(),
-            )
-            await inter.send(embed=embed, ephemeral=True)
-        guild: database.guilds.Guild = await database.guilds.register_guild(
+        db_guild = await models.StructureGuild.objects.update_or_create(
             discord_id=inter.guild.id,
-            alias=alias,
-            player_role_id=player_role.id,
-            head_role_id=head_role.id,
-            public_chat_channel_id=public_chat.id,
-            logs_channel_id=logs_channel.id,
+            defaults={
+                "alias": alias,
+                "player_role_id": player_role.id,
+                "head_role_id": head_role.id,
+                "public_chat_channel_id": public_chat.id,
+                "logs_channel_id": logs_channel.id,
+            }
         )
         await inter.send(
             embed=disnake.Embed(
-                color=disnake.Color.green(),
+                color=disnake.Color.dark_green(),
                 title="Успех",
-                description=f"Сервер {inter.guild.name} зарегистрирован как официальная структура.",
+                description=f"Сервер {inter.guild.name} отредактирован в базе данных",
             ).add_field(
                 name="guild data",
                 value=f"""
-            `alias`: {guild.alias}
-            `player_role`: {guild.player_role_id}
-            `head_role`: {guild.head_role_id}
-            `public_chat`: {guild.public_chat_channel_id}
-            `logs_channel`: {guild.logs_channel_id}
+            `alias`: {db_guild.alias}
+            `player_role`: {db_guild.player_role_id}
+            `head_role`: {db_guild.head_role_id}
+            `public_chat`: {db_guild.public_chat_channel_id}
+            `logs_channel`: {db_guild.logs_channel_id}
             """,
             ),
             ephemeral=True,
@@ -82,34 +70,23 @@ class AdminCommands(commands.Cog):
         name="wipe-guild",
     )
     @commands.default_member_permissions(administrator=True)
-    @checks.blocked_users_slash_command_check()
     async def wipe_guild(self, inter: ApplicationCommandInteraction):
         """
         Удалить сервер из базы данных
         """
-        guild = await database.guilds.get_guild(inter.guild.id)
-        if guild is None:
-            await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.red(),
-                    title="Ошибка",
-                    description="Сервер не зарегистрирован как официальная структура.\n",
-                ),
-                ephemeral=True,
-            )
-            return
+        # todo: add confirmation
+        # todo: send some kind of logs or smth
 
-        projects = await database.projects.get_projects(guild.id)
-        roles = await database.roles.get_roles(guild.id)
-        [await project.delete() for project in projects]
-        [await role.delete() for role in roles]
-        await guild.delete()
+        await models.StructureGuild.objects.filter(discord_id=inter.guild.id).delete()
+        await models.StructureProject.objects.filter(guild_discord_id=inter.guild.id).delete()
+        await models.StructureRole.objects.filter(guild_discord_id=inter.guild.id).delete()
+
         await inter.send(
             embed=disnake.Embed(
-                color=disnake.Color.green(),
+                color=disnake.Color.dark_green(),
                 title="Успех",
                 description=f"Сервер {inter.guild.name} и все привязанные к нему проекты и роли "
-                f"удалены из БД **PlasmoTools.**",
+                "удалены из базы данных",
             ),
             ephemeral=True,
         )
@@ -124,30 +101,29 @@ class AdminCommands(commands.Cog):
         """
         Получить данные о сервере
         """
-        guild = await database.guilds.get_guild(inter.guild.id)
-        if guild is None:
-            await inter.send(
+        db_guild = await models.StructureGuild.objects.filter(discord_id=inter.guild.id).first()
+        if db_guild is None:
+            return await inter.send(
                 embed=disnake.Embed(
-                    color=disnake.Color.red(),
+                    color=disnake.Color.dark_red(),
                     title="Ошибка",
-                    description="404, Not Found",
+                    description="Сервер не зарегистрирован как официальная структура"
                 ),
                 ephemeral=True,
             )
-            return
+
         await inter.send(
             embed=disnake.Embed(
-                color=disnake.Color.green(),
-                title="Успех",
-                description=f"Сервер {inter.guild.name} зарегистрирован как официальная структура.",
+                color=disnake.Color.dark_green(),
+                title=f"Данные о {inter.guild.name}",
             ).add_field(
                 name="guild data",
                 value=f"""
-            `alias`: {guild.alias}
-            `player_role`: <@&{guild.player_role_id}> / {guild.player_role_id} 
-            `head_role`: <@&{guild.head_role_id}> / {guild.head_role_id} 
-            `public_chat`: <#{guild.public_chat_channel_id}> / {guild.public_chat_channel_id} 
-            `logs_channel`: <#{guild.logs_channel_id}> / {guild.logs_channel_id} 
+            `alias`: {db_guild.alias}
+            `player_role`: <@&{db_guild.player_role_id}> / {db_guild.player_role_id} 
+            `head_role`: <@&{db_guild.head_role_id}> / {db_guild.head_role_id} 
+            `public_chat`: <#{db_guild.public_chat_channel_id}> / {db_guild.public_chat_channel_id} 
+            `logs_channel`: <#{db_guild.logs_channel_id}> / {db_guild.logs_channel_id} 
             """,
             ),
             ephemeral=True,

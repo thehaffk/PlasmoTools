@@ -107,7 +107,7 @@ class BankerPatents(commands.Cog):
         timed_out = await select_owners_view.wait()
         if timed_out:
             return await inter.edit_original_response(
-                embed=disnake.Embed(title="Время вышло", color=disnake.Color.red()),
+                embed=disnake.Embed(title="Время вышло", color=disnake.Color.dark_red()),
                 view=None,
             )
 

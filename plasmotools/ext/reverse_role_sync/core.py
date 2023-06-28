@@ -7,8 +7,6 @@ from disnake.ext import commands
 
 from plasmotools import settings
 from plasmotools.utils import models
-from plasmotools.utils.database import rrs as rrs_database
-from plasmotools.utils.database.plasmo_structures import guilds as guilds_database
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +42,7 @@ async def is_author_has_permission(
     structure_role: disnake.Role,
     plasmo_role: disnake.Role,
     author: disnake.Member,
-    db_guild: guilds_database.Guild = None,
+    db_guild=None,
 ) -> bool:
     """
     Check if author has permission to change structure role
@@ -76,7 +74,7 @@ async def is_author_has_permission(
         return False
 
     if db_guild is None:
-        db_guild = await guilds_database.get_guild(structure_role.guild.id)
+        db_guild = await models.StructureGuild.objects.get(discord_id=structure_role.guild.id)
 
     if structure_role == db_guild.head_role_id:
         return any(
@@ -98,7 +96,7 @@ class RRSCore(commands.Cog):
 
     # todo: rewrite
     async def generate_profile_embed(self, user: disnake.Member) -> disnake.Embed:
-        all_rrs_rules = await rrs_database.roles.get_rrs_roles()
+        all_rrs_rules = await models.RRSRole.objects.all()
         embed = disnake.Embed(
             title=f"Профиль RRS - {user.display_name}",
             color=disnake.Colour.dark_green(),
@@ -235,11 +233,11 @@ class RRSCore(commands.Cog):
         not_permitted_roles_to_add = []
         not_permitted_roles_to_remove = []
 
-        db_guild = await guilds_database.get_guild(target.guild.id)
+        db_guild = await models.StructureGuild.objects.get(guild_id=target.guild.id)
         rrs_logs_channel = self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id)
 
         for role in added_roles + removed_roles:
-            rrs_rules = await rrs_database.roles.get_rrs_roles(
+            rrs_rules = await models.RRSRole.objects.filter(
                 structure_role_id=role.id
             )
             for rrs_rule in rrs_rules:
@@ -297,14 +295,14 @@ class RRSCore(commands.Cog):
                         not_permitted_roles_to_remove.append(role)
                     continue
 
-                rrs_action = await rrs_database.actions.register_action(
+                rrs_action = await models.RRSAction.objects.create(
                     structure_role_id=role.id,
                     user_id=target.id,
                     author_id=author.id,
                     approved_by_user_id=author.id,
                     is_role_granted=role.id in added_roles_ids,
                     reason="Manual" if not from_audit else reason,
-                    date=int(datetime.datetime.utcnow().timestamp()),
+                    date=datetime.datetime.utcnow(),
                 )
 
                 if role.id in added_roles_ids:
@@ -328,7 +326,7 @@ class RRSCore(commands.Cog):
                             `Plasmo Role`: {plasmo_role.name} ({plasmo_role.id})
                             `Reason`: {reason}
                             """,
-                            color=disnake.Color.red(),
+                            color=disnake.Color.dark_red(),
                         ).add_field(
                             name="Guild",
                             value=f"{target.guild.name} | {target.guild.id}",
@@ -366,7 +364,7 @@ class RRSCore(commands.Cog):
                             `Plasmo Role`: {plasmo_role.name} ({plasmo_role.id})
                             `Reason`: {reason}
                             """,
-                            color=disnake.Color.red(),
+                            color=disnake.Color.dark_red(),
                         ).add_field(
                             name="Guild",
                             value=f"{target.guild.name} | {target.guild.id}",
@@ -400,15 +398,15 @@ class RRSCore(commands.Cog):
 
         """
         if not rrs_rule:
-            rrs_rule = await rrs_database.roles.get_rrs_role(rule_id)
+            rrs_rule = await models.RRSRole.objects.get(id=rule_id)
         if not rrs_rule or rrs_rule.disabled:
             return
 
         if not db_guild:
-            db_guild = await guilds_database.get_guild(rrs_rule.structure_guild_id)
+            db_guild = await models.StructureGuild.objects.get(discord_id=rrs_rule.structure_guild_id)
         guild = self.bot.get_guild(rrs_rule.structure_guild_id)
         if not db_guild or not guild:
-            await rrs_rule.edit(disabled=True)
+            await rrs_rule.update(disabled=True)
             alert_embed = disnake.Embed(
                 title="Problem with RRS rule",
                 description=f"""
@@ -428,7 +426,7 @@ class RRSCore(commands.Cog):
 
         guild_role = guild.get_role(rrs_rule.structure_role_id)
         if not guild_role:
-            await rrs_rule.edit(disabled=True)
+            await rrs_rule.update(disabled=True)
             alert_embed = disnake.Embed(
                 title="Problem with RRS rule",
                 description=f"""
@@ -462,7 +460,7 @@ class RRSCore(commands.Cog):
 
         plasmo_role = plasmo_guild.get_role(rrs_rule.plasmo_role_id)
         if not plasmo_role:
-            await rrs_rule.edit(disabled=True)
+            await rrs_rule.update(disabled=True)
             alert_embed = disnake.Embed(
                 title="Problem with RRS rule",
                 description=f"""
@@ -519,23 +517,23 @@ class RRSCore(commands.Cog):
         if entry.guild.id == settings.PlasmoRPGuild.guild_id:
             return
 
-        active_linked_structure_rules = await rrs_database.roles.get_rrs_roles(
-            structure_role_id=int(entry.target.id), active=True
-        )
+        active_linked_structure_rules = await models.RRSRole.objects.filter(
+            structure_role_id=int(entry.target.id), disabled=False
+        ).all()
         if not active_linked_structure_rules:
             return
         logger.info(
-            "Linked structure role got deleted: sgid %s, srid: %s",
+            "Linked structure role got deleted: structure_guild_id %s, structure_role_id: %s",
             entry.guild.id,
             entry.target.id,
         )
 
         structure_logs_channel = self.bot.get_channel(
-            (await guilds_database.get_guild(discord_id=entry.guild.id)).logs_channel_id
+            (await models.StructureGuild.objects.get(discord_id=entry.guild.id)).logs_channel_id
         )
         rrs_logs_channel = self.bot.get_channel(settings.LogsServer.rrs_logs_channel_id)
         for rrs_rule in active_linked_structure_rules:
-            await rrs_rule.edit(disabled=True)
+            await rrs_rule.update(disabled=True)
             embed = disnake.Embed(
                 color=disnake.Color.dark_red(),
                 title="Linked RRS role got deleted",
@@ -591,13 +589,11 @@ class RRSCore(commands.Cog):
         role_is_added: bool,
     ) -> bool:
         # todo: impement asap
-        linked_rules = [
-            rule
-            for rule in await rrs_database.roles.get_rrs_roles(
-                structure_role_id=role.id
-            )
-            if not rule.disabled
-        ]
+        linked_rules = await models.RRSRole.objects.filter(
+                structure_role_id=role.id,
+                disabled=False
+        )
+
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if not plasmo_guild:
             logger.critical("Unable to locate plasmo guild")
