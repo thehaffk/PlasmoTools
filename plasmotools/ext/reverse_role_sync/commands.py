@@ -384,9 +384,9 @@ class RRSCommands(commands.Cog):
     async def register_rrs_entry(
         self,
         inter: ApplicationCommandInteraction,
-        structure_guild_id: str,
-        structure_role_id: str,
-        plasmo_role_id: str,
+        structure_guild_id: int = commands.Param(large=True),
+        structure_role_id: int = commands.Param(large=True),
+        plasmo_role_id: int = commands.Param(large=True),
         disabled: bool = False,
     ):
         """
@@ -401,23 +401,6 @@ class RRSCommands(commands.Cog):
         disabled: is disabled
         """
         await inter.response.defer(ephemeral=True)
-        if not (all([
-            structure_guild_id.isdigit(),
-            structure_role_id.isdigit(),
-            plasmo_role_id.isdigit(),
-        ])):
-            return await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Некорректный формат ID",
-                ),
-                ephemeral=True,
-            )
-
-        structure_guild_id = int(structure_guild_id)
-        structure_role_id = int(structure_role_id)
-        plasmo_role_id = int(plasmo_role_id)
 
         structure_guild = self.bot.get_guild(structure_guild_id)
         if structure_guild is None:
