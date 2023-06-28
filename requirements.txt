@@ -7,3 +7,5 @@ coloredlogs~=15.0.1
 pymysql==1.1.0
 black
 PyNaCl
+orm[sqlite]
+databases>=0.7.0

@@ -6,6 +6,7 @@ from disnake.ext import commands
 from disnake.ext import commands
 
 from plasmotools import settings
+from plasmotools.utils import models
 from plasmotools.utils.database import rrs as rrs_database
 from plasmotools.utils.database.plasmo_structures import guilds as guilds_database
 
@@ -385,9 +386,6 @@ class RRSCore(commands.Cog):
 
         ...  # todo: Process roles in not_permitted_..
 
-
-
-
     async def _update_rrs_rule(self, rule_id: int, rrs_rule=None, db_guild=None):
         """
         Checks if RRS rule is valid, if not, disables it
@@ -620,10 +618,11 @@ class RRSCore(commands.Cog):
     # async def scheduled_sync(self):
     #     ...
 
-    # @commands.Cog.listener()
-    # async def on_ready(self):
-    #     if not self.sync_all_players.is_running():
-    #         await self.sync_all_players.start()
+    @commands.Cog.listener()
+    async def on_ready(self):
+        # if not self.sync_all_players.is_running():
+        #     await self.sync_all_players.start()
+        print(await models.RRSRole.objects.all())
 
     async def cog_load(self):
         logger.info("%s loaded", __name__)
