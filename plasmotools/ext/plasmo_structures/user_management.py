@@ -11,7 +11,8 @@ from plasmotools import checks, settings
 from plasmotools.checks import is_guild_registered
 from plasmotools.ext.reverse_role_sync import core
 from plasmotools.utils import models
-from plasmotools.utils.autocompleters.plasmo_structures import role_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import \
+    role_autocompleter
 from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)

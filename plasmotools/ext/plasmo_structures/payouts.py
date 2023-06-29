@@ -10,14 +10,13 @@ from disnake.ext import commands
 
 from plasmotools import checks, settings
 from plasmotools.checks import is_guild_registered
-from plasmotools.utils import api, formatters
-from plasmotools.utils import models
+from plasmotools.utils import api, formatters, models
 from plasmotools.utils.api import bank
 from plasmotools.utils.api.tokens import get_token_scopes
-from plasmotools.utils.autocompleters.bank import search_bank_cards_autocompleter
-from plasmotools.utils.autocompleters.plasmo_structures import (
-    payouts_projects_autocompleter,
-)
+from plasmotools.utils.autocompleters.bank import \
+    search_bank_cards_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import \
+    payouts_projects_autocompleter
 from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)

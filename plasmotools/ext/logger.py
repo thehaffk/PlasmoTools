@@ -11,8 +11,7 @@ from disnake.ext import commands
 from disnake.utils import escape_markdown
 
 from plasmotools import settings
-from plasmotools.utils import api
-from plasmotools.utils import models
+from plasmotools.utils import api, models
 from plasmotools.utils.api import messenger
 
 logger = logging.getLogger(__name__)

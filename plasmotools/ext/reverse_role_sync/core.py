@@ -3,7 +3,6 @@ import logging
 
 import disnake
 from disnake.ext import commands
-from disnake.ext import commands
 
 from plasmotools import settings
 from plasmotools.utils import models
@@ -575,7 +574,9 @@ class RRSCore(commands.Cog):
             )
             try:
                 await structure_logs_channel.send(embed=embed)
-            except disnake.HTTPException as e:  # in case of server raids (role is being deleted, it can be raid)
+            except (
+                disnake.HTTPException
+            ) as e:  # in case of server raids (role is being deleted, it can be raid)
                 logger.warning(
                     "Unable to send log message to structure logs channel because of %s",
                     e.text,
