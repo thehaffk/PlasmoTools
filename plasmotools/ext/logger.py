@@ -8,6 +8,7 @@ import re
 
 import disnake
 from disnake.ext import commands
+from disnake.utils import escape_markdown
 
 from plasmotools import settings
 from plasmotools.utils import api
@@ -116,7 +117,7 @@ class PlasmoLogger(commands.Cog):
                     sync_reason_raw[0] if sync_reason_raw else "Не указана"
                 ).strip()
                 sync_reason = (
-                    sync_reason.replace("_", "\_").replace("\n", "\\n")
+                    escape_markdown(sync_reason).replace("\n", "\\n")
                     if sync_reason
                     else "Не указана"
                 )
@@ -156,7 +157,7 @@ class PlasmoLogger(commands.Cog):
                 "**"
                 + ("Выдал: " if is_role_added else "Снял: ")
                 + "**"
-                + operation_author.display_name
+                + escape_markdown(operation_author.display_name)
                 + " "
                 + operation_author.mention
                 + "\n"
@@ -172,7 +173,7 @@ class PlasmoLogger(commands.Cog):
             if is_role_added
             else disnake.Color.dark_red(),
             title=f"{user.display_name}  - Роль {role.name} {'добавлена' if is_role_added else 'снята'}",
-            description=description_text.replace("_", "\_"),
+            description=description_text,
         )
         logs_guild = self.bot.get_guild(settings.LogsServer.guild_id)
         log_channel = logs_guild.get_channel(settings.LogsServer.role_logs_channel_id)
@@ -216,9 +217,7 @@ class PlasmoLogger(commands.Cog):
                            Состоит в общинах: `Waiting for API response`
 
                            {chosen_emoji} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
-                                       """.replace(
-                    "_", "\_"
-                ),
+                                       """,
             ).set_thumbnail(url="https://rp.plo.su/avatar/" + member.display_name)
         )
 
@@ -257,28 +256,30 @@ class PlasmoLogger(commands.Cog):
             for warn in warns:
                 warns_text += f"⚠ Выдал **{warn['helper']}** <t:{warn['date']}:R>\n {warn['message']}\n"
 
-        log_embed = disnake.Embed(
+        log_embed = disnake.Embed(  # todo: replace <R with disnake utils thingy
             title=f"⚡ {nickname} получил бан",
             color=disnake.Color.dark_red(),
             description=f"""
             Причина: **{reason.strip()}**
             {'> Примечание: rows - это количество строк(логов) в базе данных. Т.е. - количество выкопанных блоков'
             if 'rows' in reason else ''}
-            Профиль [Plasmo](https://rp.plo.su/u/{nickname}) | {member.mention}
+            Профиль [Plasmo](https://rp.plo.su/u/{escape_markdown(nickname)}) | {member.mention}
             
             {warns_text.strip()}
             
-            {('Получил бан: <t:' + str(ban_time) + ':R>') if ban_time > 0 else ''}
+            {('Получил бан: <t:' + str(ban_time) + ':R>') if ban_time > 0 else ''}  
             Наиграно за текущий сезон: {user_stats.get('all', 0) / 3600:.2f} ч.
-            {'Состоит в общинах:' if user_data.get('teams') else ''} {', '.join([('[' + team['name'] 
-                                                                                  + '](https://rp.plo.su/t/' 
-                                                                                  + team['url'] + ')')
-                        for team in user_data.get('teams', [])])}
+            {'Состоит в общинах:' if user_data.get('teams') else ''} {', '.join([('[' + team['name']
+                                                                                                  + 
+                                                                                  '](https://rp.plo.su/t/'
+                                                                                                  +
+                                                                                  team['url'] +
+                                                                                  ')')
+                                                                                                 for team in 
+                                                                                 user_data.get('teams', [])])}
             
             {chosen_emoji} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
-                        """.replace(
-                "_", "\_"
-            ),
+                        """,
         ).set_thumbnail(url="https://rp.plo.su/avatar/" + nickname)
 
         await ban_message.edit(embed=log_embed)

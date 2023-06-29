@@ -3,9 +3,11 @@ import logging
 import disnake
 from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
+from disnake.utils import escape_markdown
 
 from plasmotools import checks, settings
 from plasmotools.utils import models
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -311,14 +313,16 @@ class RRSCommands(commands.Cog):
             if structure_guild and structure_role:
                 embed.add_field(
                     name="Structure role members",
-                    value=(
-                        ", ".join(
-                            [
-                                f"{member.display_name} {member.mention}"
-                                for member in structure_role.members
-                            ]
+                    value=escape_markdown(
+                        (
+                            ", ".join(
+                                [
+                                    f"{member.display_name} {member.mention}"
+                                    for member in structure_role.members
+                                ]
+                            )
                         )
-                    ).replace("_", "\_"),
+                    ),
                 )
 
             return await inter.edit_original_message(
@@ -362,7 +366,8 @@ class RRSCommands(commands.Cog):
                 if not structure_role or not plasmo_role:
                     await entry.update(disabled=True)
                 roles_text += (
-                    f"**{entry.id}.** {structure_role} **->** {plasmo_role} **|** {len(structure_role.members) if structure_role else 'role not found'} "
+                    f"**{entry.id}.** {structure_role} **->** {plasmo_role} **|** "
+                    f"{len(structure_role.members) if structure_role else 'role not found'} "
                     f"{'** Disabled**' if entry.disabled else ''}\n"
                 ) + (
                     f"SRID: {structure_role.id}\n"
@@ -406,11 +411,7 @@ class RRSCommands(commands.Cog):
         structure_guild = self.bot.get_guild(structure_guild_id)
         if structure_guild is None:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Сервер структуры не найден",
-                ),
+                embed=build_simple_embed("Сервер структуры не найден", failure=True),
                 ephemeral=True,
             )
             return
@@ -418,11 +419,7 @@ class RRSCommands(commands.Cog):
         structure_role = structure_guild.get_role(structure_role_id)
         if structure_role is None:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Роль в структуре не найдена",
-                ),
+                embed=build_simple_embed("Роль в структуре не найдена", failure=True),
                 ephemeral=True,
             )
             return
@@ -437,10 +434,8 @@ class RRSCommands(commands.Cog):
             plasmo_role = plasmo_guild.get_role(plasmo_role_id)
             if plasmo_role is None:
                 await inter.send(
-                    embed=disnake.Embed(
-                        color=disnake.Color.dark_red(),
-                        title="Ошибка",
-                        description="Роль в Plasmo RP не найдена",
+                    embed=build_simple_embed(
+                        "Роль в Plasmo RP не найдена",
                     ),
                     ephemeral=True,
                 )

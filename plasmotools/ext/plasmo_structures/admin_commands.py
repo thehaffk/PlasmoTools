@@ -6,6 +6,7 @@ from disnake.ext import commands
 
 from plasmotools import checks
 from plasmotools.utils import models
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -47,10 +48,8 @@ class AdminCommands(commands.Cog):
             },
         )
         await inter.send(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title="Успех",
-                description=f"Сервер {inter.guild.name} отредактирован в базе данных",
+            embed=build_simple_embed(
+                f"Сервер {inter.guild.name} отредактирован в базе данных",
             ).add_field(
                 name="guild data",
                 value=f"""
@@ -86,10 +85,8 @@ class AdminCommands(commands.Cog):
         ).delete()
 
         await inter.send(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title="Успех",
-                description=f"Сервер {inter.guild.name} и все привязанные к нему проекты и роли "
+            embed=build_simple_embed(
+                f"Сервер {inter.guild.name} и все привязанные к нему проекты и роли "
                 "удалены из базы данных",
             ),
             ephemeral=True,

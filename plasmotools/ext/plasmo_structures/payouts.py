@@ -18,6 +18,7 @@ from plasmotools.utils.autocompleters.bank import search_bank_cards_autocomplete
 from plasmotools.utils.autocompleters.plasmo_structures import (
     payouts_projects_autocompleter,
 )
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -89,24 +90,23 @@ class Payouts(commands.Cog):
         await inter.response.defer(ephemeral=True)
         await inter.edit_original_message(
             embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
+                color=disnake.Color.yellow(),
                 title="Верифицирую токен...",
             ),
         )
         scopes = await get_token_scopes(plasmo_bearer_token)
         if "bank:transfer" not in scopes and "bank:manage" not in scopes:
             await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Указан неправильный токен. ||Missing bank:manage / bank:transfer scopes||\n"
+                embed=build_simple_embed(
+                    "Указан неправильный токен. ||Missing bank:manage / bank:transfer scopes||\n"
                     f"Получите новый в [поддержке DDT]({settings.DevServer.support_invite})",
+                    failure=True,
                 ),
             )
             return
         await inter.edit_original_message(
             embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
+                color=disnake.Color.yellow(),
                 title="Регистрирую проект...",
             ),
         )
@@ -165,11 +165,7 @@ class Payouts(commands.Cog):
             ).exists()
         ):
             return await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Проект не найден",
-                ),
+                embed=build_simple_embed("Проект не найден", failure=True),
                 ephemeral=True,
             )
 
@@ -188,9 +184,8 @@ class Payouts(commands.Cog):
             else db_project.webhook_url,
         )
         await inter.send(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title="Проект отредактирован",
+            embed=build_simple_embed(
+                "Проект отредактирован",
             ),
             ephemeral=True,
         )
@@ -219,9 +214,8 @@ class Payouts(commands.Cog):
             id=project_id, guild_discord_id=inter.guild.id
         ).delete()
         await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title="Проект удален",
+            embed=build_simple_embed(
+                "Проект удален",
             ),
         )
 
@@ -273,21 +267,16 @@ class Payouts(commands.Cog):
 
         if amount <= 0 or amount > 69420:
             await interaction.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Сумма выплаты должна находиться в диапазоне 0 < `amount` <= 69420)",
+                embed=build_simple_embed(
+                    "Сумма выплаты должна находиться в диапазоне 0 < `amount` <= 69420)",
+                    failure=True,
                 ),
             )
             return False
 
         if user.bot:
             await interaction.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Ботам выплачивать нельзя",
-                ),
+                embed=build_simple_embed("Ботам выплачивать нельзя", failure=True),
             )
             return False
 
@@ -305,10 +294,8 @@ class Payouts(commands.Cog):
                 not in plasmo_user.roles
             ):
                 await interaction.edit_original_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.dark_red(),
-                        title="Ошибка",
-                        description="Выплаты возможны только игрокам Plasmo RP",
+                    embed=build_simple_embed(
+                        "Выплаты возможны только игрокам Plasmo RP", failure=True
                     ),
                 )
                 return False
@@ -346,10 +333,9 @@ class Payouts(commands.Cog):
 
             if len(user_cards) == 0:
                 await interaction.edit_original_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.dark_red(),
-                        title="Ошибка",
-                        description="Не удалось найти карту для выплаты, Plasmo Tools уведомит игрока об этом",
+                    embed=build_simple_embed(
+                        "Не удалось найти карту для выплаты, Plasmo Tools уведомит игрока об этом",
+                        failure=True,
                     ),
                 )
                 try:
@@ -364,12 +350,11 @@ class Payouts(commands.Cog):
                     )
                 except disnake.Forbidden:
                     await interaction.send(
-                        embed=disnake.Embed(
-                            color=disnake.Color.dark_red(),
-                            title="Ошибка",
-                            description=f"У {user.mention} закрыты личные сообщения,"
+                        embed=build_simple_embed(
+                            f"У {user.mention} закрыты личные сообщения,"
                             f" вам придется лично попросить игрока "
                             f"установить карту через /установить-карту-для-выплат",
+                            failure=True,
                         ),
                         ephemeral=True,
                     )
@@ -401,10 +386,8 @@ class Payouts(commands.Cog):
         )
         if from_card == user_card:
             await interaction.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Невозможно первести алмазы на эту карту",
+                embed=build_simple_embed(
+                    "Невозможно первести алмазы на эту карту", failure=True
                 ),
             )
             return False
@@ -417,10 +400,8 @@ class Payouts(commands.Cog):
         )
         if not status:
             await interaction.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="API вернуло ошибку: **" + error_message + "**",
+                embed=build_simple_embed(
+                    "API вернуло ошибку: **" + error_message + "**", failure=True
                 ),
             )
             return False
@@ -450,10 +431,9 @@ class Payouts(commands.Cog):
                 )
             except disnake.errors.NotFound:
                 await interaction.edit_original_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.dark_red(),
-                        title="Ошибка",
-                        description="Не удалось получить доступ к вебхуку. Оплата прошла, но игрок не был оповещен",
+                    embed=build_simple_embed(
+                        "Не удалось получить доступ к вебхуку. Оплата прошла, но игрок не был оповещен",
+                        failure=True,
                     ),
                 )
 
@@ -475,10 +455,8 @@ class Payouts(commands.Cog):
         )
 
         await interaction.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title="Успех",
-                description=f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
+            embed=build_simple_embed(
+                f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
                 f"карту {formatters.format_bank_card(user_card)}",
             ),
         )
@@ -532,11 +510,7 @@ class Payouts(commands.Cog):
         await inter.response.defer(ephemeral=True)
         if not project_id.isdigit():
             await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Проект не найден",
-                ),
+                embed=build_simple_embed("Проект не найден", failure=True),
             )
             return
         try:
@@ -545,10 +519,8 @@ class Payouts(commands.Cog):
             )
         except orm.NoMatch:
             await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description=f"Проект {project_id} не найден",
+                embed=build_simple_embed(
+                    f"Проект {project_id} не найден", failure=True
                 ),
             )
             return
@@ -581,10 +553,8 @@ class Payouts(commands.Cog):
                 raise ValueError
         except ValueError:
             await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Не удалось распознать номер карты",
+                embed=build_simple_embed(
+                    "Не удалось распознать номер карты", failure=True
                 ),
             )
             return
@@ -598,10 +568,8 @@ class Payouts(commands.Cog):
         api_card = await api.bank.get_card_data(card_id)
         if api_card is None:
             await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Не удалось получить данные о карте",
+                embed=build_simple_embed(
+                    "Не удалось получить данные о карте", failure=True
                 ),
             )
             return
@@ -613,9 +581,8 @@ class Payouts(commands.Cog):
             },
         )
         await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                description="Карта для выплат успешно обновлена\n"
+            embed=build_simple_embed(
+                "Карта для выплат успешно обновлена\n"
                 f" {formatters.format_bank_card(card_id)} - {api_card['name']}\n"
                 f"Принадлежит {api_card['holder']}",
             )

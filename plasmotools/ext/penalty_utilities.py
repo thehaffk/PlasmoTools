@@ -6,6 +6,7 @@ from disnake.ext import commands, tasks
 
 from plasmotools import checks, settings
 from plasmotools.utils import api
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +83,8 @@ class PenaltyUtilities(commands.Cog):
         Manual check all penalties
         """
         await inter.send(
-            embed=disnake.Embed(
-                description="Running manual penalty check...",
-                color=disnake.Color.dark_green(),
+            embed=build_simple_embed(
+                "Running manual penalty check...",
             ),
             ephemeral=True,
         )

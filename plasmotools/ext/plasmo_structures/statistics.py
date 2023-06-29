@@ -5,6 +5,7 @@ from disnake.ext import commands
 
 from plasmotools import checks, settings
 from plasmotools.utils import api
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +43,9 @@ class StructureStatictics(commands.Cog):
         )
         if len(role.members) > 80:
             return await inter.edit_original_message(
-                embed=disnake.Embed(
-                    title="Ошибка",
-                    description="Подсчет статистики для роли с более чем 80 участниками временно недоступен",
+                embed=build_simple_embed(
+                    "Подсчет статистики для роли с более чем 80 участниками временно недоступен",
+                    failure=True,
                 )
             )
 

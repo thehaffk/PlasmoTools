@@ -10,6 +10,7 @@ from disnake.ext import commands
 from plasmotools import settings
 from plasmotools.ext.plasmo_structures.payouts import Payouts
 from plasmotools.utils import models
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +54,8 @@ class FastInterpolPayouts(commands.Cog):
     ) -> bool:
         if message.author == inter.author:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Нельзя выплачивать самому себе",
+                embed=build_simple_embed(
+                    "Нельзя выплачивать самому себе", failure=True
                 ),
                 ephemeral=True,
             )
@@ -67,11 +66,10 @@ class FastInterpolPayouts(commands.Cog):
         reacted_users.append([])
         if self.bot.user in reacted_users[0]:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="На сообщении стоит реакция ✅ от PlasmoTools, нельзя выплатить второй раз.\n\n"
+                embed=build_simple_embed(
+                    "На сообщении стоит реакция ✅ от PlasmoTools, нельзя выплатить второй раз.\n\n"
                     "Администраторы могут убрать эту реакцию и выплата будет вновь доступна",
+                    failure=True,
                 ),
                 ephemeral=True,
             )
@@ -99,10 +97,9 @@ class FastInterpolPayouts(commands.Cog):
                 break
         if rank is None:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Не удалось найти ранговую роль, невозможно вычислить размер выплаты",
+                embed=build_simple_embed(
+                    "Не удалось найти ранговую роль, невозможно вычислить размер выплаты",
+                    failure=True,
                 ),
                 ephemeral=True,
             )
@@ -111,11 +108,7 @@ class FastInterpolPayouts(commands.Cog):
         payouts_cog: Optional[Payouts] = self.bot.get_cog("Payouts")
         if payouts_cog is None:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Неизвестная ошибка",
-                ),
+                embed=build_simple_embed("Неизвестная ошибка", failure=True),
                 ephemeral=True,
             )
             raise RuntimeError("Payouts cog not found")
@@ -155,10 +148,9 @@ class FastInterpolPayouts(commands.Cog):
                 break
         if rank is None:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Не удалось найти ранговую роль, невозможно вычислить размер выплаты",
+                embed=build_simple_embed(
+                    "Не удалось найти ранговую роль, невозможно вычислить размер выплаты",
+                    failure=True,
                 ),
                 ephemeral=True,
             )
@@ -167,11 +159,7 @@ class FastInterpolPayouts(commands.Cog):
         payouts_cog: Optional[Payouts] = self.bot.get_cog("Payouts")
         if payouts_cog is None:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Неизвестная ошибка",
-                ),
+                embed=build_simple_embed("Неизвестная ошибка", failure=True),
                 ephemeral=True,
             )
             raise RuntimeError("Payouts cog not found")
@@ -211,10 +199,9 @@ class FastInterpolPayouts(commands.Cog):
                 break
         if rank is None:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Не удалось найти ранговую роль, невозможно вычислить размер выплаты",
+                embed=build_simple_embed(
+                    "Не удалось найти ранговую роль, невозможно вычислить размер выплаты",
+                    failure=True,
                 ),
                 ephemeral=True,
             )
@@ -228,10 +215,8 @@ class FastInterpolPayouts(commands.Cog):
         )
         if len(finded_groups) == 0:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Сообщение написано не по форме ⚠",
+                embed=build_simple_embed(
+                    "Сообщение написано не по форме ⚠", failure=True
                 ),
                 ephemeral=True,
                 components=[
@@ -277,24 +262,19 @@ class FastInterpolPayouts(commands.Cog):
         if event_duration < 10:
             await message.add_reaction("⚠")
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Маловато ⚠",
-                ),
+                embed=build_simple_embed("Маловато ⚠", failure=True),
                 ephemeral=True,
             )
             return
         elif event_duration > 180:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description=f"Многовато минут, такое вручную выплачивайте ⚠\n"
+                embed=build_simple_embed(
+                    f"Многовато минут, такое вручную выплачивайте ⚠\n"
                     f"Чтобы не выплатить миллион алмазов из-за бага, в боте установлен лимит - 180 минут. "
                     f"Если что, выплата должна быть такой:\n"
                     f"**{rank['event_10min_payout'] * ((event_duration + 3) // 10)} "
                     f"= {rank['event_10min_payout']} * (({event_duration} + 3)/ 10)**",
+                    failure=True,
                 ),
                 ephemeral=True,
             )
@@ -311,11 +291,7 @@ class FastInterpolPayouts(commands.Cog):
         payouts_cog: Optional[Payouts] = self.bot.get_cog("Payouts")
         if payouts_cog is None:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Неизвестная ошибка",
-                ),
+                embed=build_simple_embed("Неизвестная ошибка", failure=True),
                 ephemeral=True,
             )
             raise RuntimeError("Payouts cog not found")

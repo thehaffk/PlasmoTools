@@ -6,6 +6,7 @@ from disnake.ext import commands, tasks
 
 from plasmotools import checks, settings
 from plasmotools.utils import api, formatters
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -221,10 +222,8 @@ class BACSynchronization(commands.Cog):
         )
         if await self._sync(user):
             await inter.edit_original_message(
-                embed=disnake.Embed(
-                    title="✅ Синхронизация завершена",
-                    description="Успешно",
-                    color=disnake.Color.dark_green(),
+                embed=build_simple_embed(
+                    "Синхронизация завершена",
                 )
             )
             return True

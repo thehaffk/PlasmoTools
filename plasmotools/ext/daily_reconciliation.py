@@ -5,6 +5,7 @@ from disnake.ext import commands, tasks
 
 from plasmotools import settings
 from plasmotools.utils import api
+from plasmotools.utils.embeds import build_simple_embed
 from plasmotools.utils.formatters import build_progressbar
 
 logger = logging.getLogger(__name__)
@@ -231,7 +232,7 @@ class DailyReconciliation(commands.Cog):
                 )
 
         await self.bot.get_channel(settings.LogsServer.daily_check_channel_id).send(
-            embed=disnake.Embed(title="Complete", color=disnake.Color.dark_green())
+            embed=build_simple_embed("Complete", failure=False)
         )
         await log_message.unpin()
 

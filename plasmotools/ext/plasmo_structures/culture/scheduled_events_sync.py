@@ -5,6 +5,7 @@ from disnake.ext import commands
 
 from plasmotools import settings
 from plasmotools.utils.api import messenger
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +81,7 @@ class ScheduledEventsSync(commands.Cog):
         if not view.decision:
             return await confirm_msg.delete()
         await confirm_msg.edit(
-            embed=disnake.Embed(title="Ваш ивент отправлен на модерацию"),
+            embed=build_simple_embed("Ваш ивент отправлен на модерацию"),
             components=[],
             content="",
         )

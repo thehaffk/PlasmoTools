@@ -8,6 +8,7 @@ from disnake.ext import commands
 from plasmotools import settings
 from plasmotools.ext.plasmo_structures.payouts import Payouts
 from plasmotools.utils import models
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +25,8 @@ class FastInfrastructurePayouts(commands.Cog):
     ) -> bool:
         if message.author == inter.author:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Нельзя выплачивать самому себе",
+                embed=build_simple_embed(
+                    "Нельзя выплачивать самому себе", failure=True
                 ),
                 ephemeral=True,
             )
@@ -38,11 +37,10 @@ class FastInfrastructurePayouts(commands.Cog):
         reacted_users.append([])
         if self.bot.user in reacted_users[0]:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="На сообщении стоит реакция ✅ от PlasmoTools, нельзя выплатить второй раз.\n\n"
+                embed=build_simple_embed(
+                    "На сообщении стоит реакция ✅ от PlasmoTools, нельзя выплатить второй раз.\n\n"
                     "Администраторы могут убрать эту реакцию и выплата будет вновь доступна",
+                    failure=True,
                 ),
                 ephemeral=True,
             )
@@ -66,11 +64,7 @@ class FastInfrastructurePayouts(commands.Cog):
         payouts_cog: Optional[Payouts] = self.bot.get_cog("Payouts")
         if payouts_cog is None:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Неизвестная ошибка",
-                ),
+                embed=build_simple_embed("Неизвестная ошибка", failure=True),
                 ephemeral=True,
             )
             raise RuntimeError("Payouts cog not found")
@@ -107,11 +101,7 @@ class FastInfrastructurePayouts(commands.Cog):
         payouts_cog: Optional[Payouts] = self.bot.get_cog("Payouts")
         if payouts_cog is None:
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description="Неизвестная ошибка",
-                ),
+                embed=build_simple_embed("Неизвестная ошибка", failure=True),
                 ephemeral=True,
             )
             raise RuntimeError("Payouts cog not found")

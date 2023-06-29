@@ -140,9 +140,8 @@ class UserManagement(commands.Cog):
             },
         )
         await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title=f"Роль `{name}` обновлена",
+            embed=build_simple_embed(
+                f"Роль `{name}` обновлена",
             ),
         )
 
@@ -164,9 +163,8 @@ class UserManagement(commands.Cog):
             role_discord_id=role.id, guild_discord_id=inter.guild_id
         ).delete()
         await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title="Роль удалена",
+            embed=build_simple_embed(
+                "Роль удалена",
             )
         )
 
@@ -209,20 +207,17 @@ class UserManagement(commands.Cog):
                 webhook = Webhook.from_url(webhook_url, session=session)
                 if webhook is None:
                     await inter.send(
-                        embed=disnake.Embed(
-                            color=disnake.Color.dark_red(),
-                            title="Ошибка",
-                            description="Не удалось получить вебхук. Проверьте правильность ссылки.",
+                        embed=build_simple_embed(
+                            "Не удалось получить вебхук. Проверьте правильность ссылки",
+                            failure=True,
                         ),
                         ephemeral=True,
                     )
                     return
                 elif webhook.guild_id != inter.guild.id:
                     await inter.send(
-                        embed=disnake.Embed(
-                            color=disnake.Color.dark_red(),
-                            title="Ошибка",
-                            description="Вебхук не принадлежит этому серверу.",
+                        embed=build_simple_embed(
+                            "Вебхук не принадлежит этому серверу.", failure=True
                         ),
                         ephemeral=True,
                     )
@@ -235,9 +230,8 @@ class UserManagement(commands.Cog):
         )
 
         await inter.send(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title="Роль отредактирована",
+            embed=build_simple_embed(
+                "Роль отредактирована",
             ),
             ephemeral=True,
         )
@@ -311,10 +305,9 @@ class UserManagement(commands.Cog):
         hire_anyway = False
         if db_role.role_discord_id in [role.id for role in user.roles]:
             await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description=f"У пользователя уже есть роль <@&{db_role.role_discord_id}>",
+                embed=build_simple_embed(
+                    f"У пользователя уже есть роль <@&{db_role.role_discord_id}>",
+                    failure=True,
                 ),
                 components=[
                     disnake.ui.Button(
@@ -341,10 +334,8 @@ class UserManagement(commands.Cog):
         # Check for permissions
         if inter.author.top_role.position <= structure_role.position:
             return await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Error",
-                    description="Вы не можете управлять этой ролью",
+                embed=build_simple_embed(
+                    "Вы не можете управлять этой ролью", failure=True
                 ),
                 ephemeral=True,
             )
@@ -381,11 +372,7 @@ class UserManagement(commands.Cog):
                 )
                 if rrs_result is False:
                     return await inter.edit_original_message(
-                        embed=disnake.Embed(
-                            color=disnake.Color.dark_red(),
-                            title="Ошибка",
-                            description="Операция отклонена RRS",
-                        )
+                        embed=build_simple_embed("Операция отклонена RRS", failure=True)
                     )
 
         try:
@@ -416,10 +403,9 @@ class UserManagement(commands.Cog):
                     reason=f"Unexpected error",
                 )
                 return await inter.edit_original_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.dark_red(),
-                        title="Ошибка",
-                        description="Не удалось получить вебхук для отправки уведомления",
+                    embed=build_simple_embed(
+                        "Не удалось получить вебхук для отправки уведомления",
+                        failure=True,
                     ),
                 )
 
@@ -428,10 +414,8 @@ class UserManagement(commands.Cog):
         )
 
         await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title="Done",
-                description="User was successfully hired.",
+            embed=build_simple_embed(
+                "User was successfully hired.",
             ),
         )
 
@@ -504,10 +488,9 @@ class UserManagement(commands.Cog):
         fire_anyway = False
         if db_role.role_discord_id not in [role.id for role in user.roles]:
             await inter.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Ошибка",
-                    description=f"У пользователя нет роли <@&{db_role.role_discord_id}>",
+                embed=build_simple_embed(
+                    f"У пользователя нет роли <@&{db_role.role_discord_id}>",
+                    failure=True,
                 ),
                 components=[
                     disnake.ui.Button(
@@ -570,10 +553,8 @@ class UserManagement(commands.Cog):
                 )
                 if rrs_result is False:
                     return await inter.edit_original_message(
-                        embed=disnake.Embed(
-                            color=disnake.Color.dark_red(),
-                            title="Ошибка",
-                            description="Операция была отменена RRS",
+                        embed=build_simple_embed(
+                            "Операция была отменена RRS", failure=True
                         )
                     )
 
@@ -604,10 +585,8 @@ class UserManagement(commands.Cog):
                     reason=f"Unexpected error",
                 )
                 return await inter.edit_original_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.dark_red(),
-                        title="Ошибка",
-                        description="Не удалось получить доступ к вебхуку",
+                    embed=build_simple_embed(
+                        "Не удалось получить доступ к вебхуку", failure=True
                     ),
                 )
 
@@ -616,11 +595,7 @@ class UserManagement(commands.Cog):
         )
 
         await inter.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title="Done",
-                description="The user was successfully fired.",
-            ),
+            embed=build_simple_embed("The user was successfully fired"),
         )
 
     async def cog_load(self):

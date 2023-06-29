@@ -146,7 +146,10 @@ class RRSCore(commands.Cog):
                 plasmo_role = plasmo_guild.get_role(rule.plasmo_role_id)
                 if not plasmo_role:
                     continue
-                active_rules_string += f"{rule.id}. `{plasmo_role.name}` - `{structure_guild.name}` - `{structure_role.name}`\n"
+                active_rules_string += (
+                    f"{rule.id}. `{plasmo_role.name}`"
+                    f" - `{structure_guild.name}` - `{structure_role.name}`\n"
+                )
 
         embed.add_field(
             name="Активные роли",
