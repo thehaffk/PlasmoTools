@@ -8,7 +8,10 @@ logger = logging.getLogger(__name__)
 
 
 async def get_user_data(
-    nick: str = None, discord_id: int = None, plasmo_id: int = None
+    nick: str = None,
+    discord_id: int = None,
+    plasmo_id: int = None,
+    fields: tuple[str] = ("stats", "warns", "teams"),
 ) -> Optional[dict]:
     """
     Get user data by nick, discord_id or plasmo_id.
@@ -23,7 +26,7 @@ async def get_user_data(
         params["discord_id"] = discord_id
     if plasmo_id is not None:
         params["plasmo_id"] = plasmo_id
-    params["fields"] = "stats,warns,teams"
+    params["fields"] = ",".join(fields)
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(

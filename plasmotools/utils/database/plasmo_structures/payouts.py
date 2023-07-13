@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional, List
+from typing import List, Optional
 
 import aiosqlite
 
@@ -92,7 +92,6 @@ class PayoutEntry:
         await self.push()
 
     async def delete(self):
-
         async with aiosqlite.connect(PATH) as db:
             await db.execute(
                 """DELETE FROM structure_payouts_history WHERE project_id = ?""",

@@ -4,11 +4,12 @@ import logging
 from typing import List, Union
 
 import disnake
-from disnake.ext import tasks, commands
+from disnake.ext import commands, tasks
 
 from plasmotools import settings
 from plasmotools.utils.database import rrs as rrs_database
-from plasmotools.utils.database.plasmo_structures import guilds as guilds_database
+from plasmotools.utils.database.plasmo_structures import \
+    guilds as guilds_database
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 # todo: force role sync
 # todo: scheduled sync
 # todo: check for player role
+# todo: rewrite all with on_audit smth
 
 # RRS default scenario:
 # listen to role changes at structure
@@ -116,16 +118,24 @@ class RRSCore(commands.Cog):
         self.bot = bot
 
     async def generate_profile_embed(self, user: disnake.Member) -> disnake.Embed:
-        all_rrs_rules = await rrs_database.get_rrs_roles()
+        all_rrs_rules = await rrs_database.roles.get_rrs_roles()
         embed = disnake.Embed(
-            title=f"RRS Profile - {user.display_name}",
+            title=f"Профиль RRS - {user.display_name}",
             color=disnake.Colour.dark_green(),
         )
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if not plasmo_guild:
-            logger.critical("Unable to connect to Plasmo Guild")
+            if settings.DEBUG:
+                logger.debug(
+                    "Unable to create conection with Plasmo Guild, but debug mode is on"
+                )
+            else:
+                logger.critical("Unable to connect to Plasmo Guild")
             embed.description = (
                 "Не удалось подключиться к дискорду Plasmo, сбилдить профиль не удалось"
+                + "\n Debug mode is enabled, RRS is working only in debug guilds"
+                if settings.DEBUG
+                else ""
             )
             return embed
         plasmo_member = plasmo_guild.get_member(user.id)
@@ -181,7 +191,7 @@ class RRSCore(commands.Cog):
             return
         if await guilds_database.get_guild(
             before.guild.id
-        ) is None or not await rrs_database.get_rrs_roles(
+        ) is None or not await rrs_database.roles.get_rrs_roles(
             structure_guild_id=before.guild.id
         ):
             return
@@ -305,9 +315,9 @@ class RRSCore(commands.Cog):
     ) -> bool:
         # todo: refactor
 
-        db_rules: List[rrs_database.RRSRole] = await rrs_database.get_rrs_roles(
-            structure_role_id=role.id
-        )
+        db_rules: List[
+            rrs_database.roles.RRSRole
+        ] = await rrs_database.roles.get_rrs_roles(structure_role_id=role.id)
         db_rules = [rule for rule in db_rules if not rule.disabled]
         if not db_rules:
             return True
@@ -516,7 +526,7 @@ class RRSCore(commands.Cog):
                         )
             else:
                 head_user = operation_author
-            db_action = await rrs_database.register_action(
+            db_action = await rrs_database.actions.register_action(
                 structure_role_id=role.id,
                 user_id=member.id,
                 author_id=operation_author.id,
@@ -537,7 +547,7 @@ class RRSCore(commands.Cog):
                     )
             else:
                 plasmo_role_removed = True
-                attached_db_roles = await rrs_database.get_rrs_roles(
+                attached_db_roles = await rrs_database.roles.get_rrs_roles(
                     plasmo_role_id=plasmo_role.id
                 )
                 attached_db_roles = [
@@ -589,7 +599,7 @@ class RRSCore(commands.Cog):
         """
         all_rules = [
             rule
-            for rule in await rrs_database.get_rrs_roles()
+            for rule in await rrs_database.roles.get_rrs_roles()
             if not rule.disabled
             and rule.plasmo_role_id not in settings.disallowed_to_rrs_roles
         ]
@@ -761,7 +771,12 @@ class RRSCore(commands.Cog):
     async def sync_all_players(self):
         plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
         if not plasmo_guild:
-            logger.critical("Unable to connect to Plasmo Guild")
+            if settings.DEBUG:
+                logger.debug(
+                    "Unable to create conection with Plasmo Guild, but debug mode is on"
+                )
+            else:
+                logger.critical("Unable to connect to Plasmo Guild")
             return
         for user in plasmo_guild.members:
             await self.sync_user(user, "Синхронизация всех игроков")
@@ -771,7 +786,11 @@ class RRSCore(commands.Cog):
         if member.guild.id == settings.PlasmoRPGuild.guild_id:
             await self.sync_user(member, "Пользователь вышел из дискорда Plasmo RP")
         elif (
-            len(await rrs_database.get_rrs_roles(structure_guild_id=member.guild.id))
+            len(
+                await rrs_database.roles.get_rrs_roles(
+                    structure_guild_id=member.guild.id
+                )
+            )
             > 0
         ):
             await self.sync_user(member, "Пользователь вышел из дискорда структуры")
@@ -819,7 +838,7 @@ class RRSCore(commands.Cog):
                 continue
             rrs_rules = [
                 rule
-                for rule in await rrs_database.get_rrs_roles(
+                for rule in await rrs_database.roles.get_rrs_roles(
                     plasmo_role_id=removed_role.id
                 )
                 if not rule.disabled
@@ -891,7 +910,7 @@ class RRSCore(commands.Cog):
             pass
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(client):

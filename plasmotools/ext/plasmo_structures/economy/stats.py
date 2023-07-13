@@ -2,10 +2,9 @@ import logging
 from typing import List
 
 import disnake
-from disnake import Localized
-from disnake.ext import tasks, commands
+from disnake.ext import commands
 
-from plasmotools import settings
+from plasmotools import checks, settings
 from plasmotools.utils.api import banker
 
 logger = logging.getLogger(__name__)
@@ -22,7 +21,10 @@ async def generate_bankers_stats_embeds(days=7) -> List[disnake.Embed]:
     bankers = sorted(bankers.items(), key=lambda x: x[1], reverse=True)
     bankers_top = "\n`№. transactions` - user\n"
     for index, _banker in enumerate(bankers[:99]):
-        bankers_top += f"`{index + 1}. {' ' * (3 - len(str(_banker[1])) + 2 - len(str(index + 1)))}{_banker[1]}` - {_banker[0]} \n"
+        bankers_top += (
+            f"`{index + 1}. {' ' * (3 - len(str(_banker[1])) + 2 - len(str(index + 1)))}{_banker[1]}` - "
+            f"{disnake.utils.escape_markdown(_banker[0])} \n"
+        )
     if len(bankers) > 100:
         bankers_top += f"100 - {len(bankers) + 1} hidden"
     main_statistics_embed = disnake.Embed(
@@ -56,7 +58,7 @@ async def generate_banker_stats_embeds(
     total_earned = 0
     for transaction in transactions:
         if transaction["action"] == 0:
-            total_earned += 2
+            total_earned += 8  # todo: change if 4th season will have different numbers
             continue
         if transaction["amount"] <= 62:
             total_earned += 1
@@ -96,11 +98,10 @@ class BankerStats(commands.Cog):
         self.bot = bot
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
     @commands.slash_command(
-        name=Localized("banker-stats", key="BANKER_STATS_COMMAND_NAME"),
-        description=Localized(key="BANKER_STATS_COMMAND_DESCRIPTION"),
+        name="banker-stats",
         dm_permission=False,
         guild_ids=[
             settings.economy_guild.discord_id,
@@ -108,30 +109,22 @@ class BankerStats(commands.Cog):
             settings.LogsServer.guild_id,
         ],
     )
+    @checks.blocked_users_slash_command_check()
     @commands.default_member_permissions(administrator=True)
     async def bankers_stats(
         self,
         inter: disnake.ApplicationCommandInteraction,
-        days: int = commands.Param(
-            gt=0,
-            lt=366,
-            default=7,
-            name=Localized(key="BANKER_STATS_DAYS_NAME"),
-            description=Localized(key="BANKER_STATS_DAYS_DESCRIPTION"),
-        ),
-        user: disnake.Member = commands.Param(
-            default=None,
-            name=Localized(key="BANKER_STATS_USER_NAME"),
-            description=Localized(key="BANKER_STATS_USER_DESCRIPTION"),
-        ),
+        days: int = commands.Param(gt=0, lt=366, default=7),
+        user: disnake.Member = commands.Param(default=None),
     ):
         """
-        Show statistics of all bankers / detailed by one employee
+        Show statistics of all bankers / detailed by one employee {{BANKER_STATS_COMMAND}}
 
         Parameters
         ----------
-        days: Number of days for which you need to get statistics
-        user: The user whose statistics you want to get
+        inter
+        days: Number of days for which you need to get statistics {{BANKER_STATS_DAYS}}
+        user: The user whose statistics you want to get {{BANKER_STATS_USER}}
         """
         await inter.send(
             embed=disnake.Embed(

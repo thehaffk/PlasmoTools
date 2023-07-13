@@ -44,9 +44,11 @@ class ScheduledEventsSync(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
 
-
     @commands.Cog.listener("on_guild_scheduled_event_create")
     async def on_guild_scheduled_event_create(self, event: disnake.GuildScheduledEvent):
+        if event.creator.bot:
+            return
+
         monitored_guild_id = settings.culture_guild.discord_id
         target_guild_id = settings.PlasmoRPGuild.guild_id
         mod_channel_id = settings.PlasmoRPGuild.moderators_channel_id
@@ -162,7 +164,7 @@ class ScheduledEventsSync(commands.Cog):
             )
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(client):

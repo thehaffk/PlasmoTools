@@ -4,7 +4,7 @@ from random import randint
 import disnake
 from disnake.ext import commands
 
-from plasmotools import settings
+from plasmotools import checks, settings
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +81,7 @@ class PlasmoLoto(commands.Cog):
         name="loto",
         guild_ids=[settings.culture_guild.discord_id, settings.DevServer.guild_id],
     )
+    @checks.blocked_users_slash_command_check()
     @commands.default_member_permissions(administrator=True)
     async def loto(self, inter: disnake.ApplicationCommandInteraction, ticket: int = 1):
         """
@@ -88,6 +89,7 @@ class PlasmoLoto(commands.Cog):
 
         Parameters
         ----------
+        inter
         ticket: Номер билета, с которого нужно начать генерацию
         """
         await inter.send(
@@ -101,7 +103,7 @@ class PlasmoLoto(commands.Cog):
         Called when disnake bot object is ready
         """
 
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(bot: disnake.ext.commands.Bot):

@@ -17,13 +17,15 @@
     "FIRE_ROLE_DESCRIPTION": "Роль [⚠️ Выбирайте только из списка!]",
     "FIRE_REASON_NAME": "причина",
     "FIRE_REASON_DESCRIPTION": "Причина увольнения",
+    "FIRE_PLAYER_NAME": "игрок",
 
-    "EVERYONE_SYNC_COMMAND_NAME": "синхронизировать-весь-сервер",
-    "EVERYONE_SYNC_COMMAND_DESCRIPTION": "синхронизировать-весь-сервер",
+    "EVERYONE_SYNC_NAME": "синхронизировать-весь-сервер",
+    "EVERYONE_SYNC_DESCRIPTION": "синхронизировать-весь-сервер",
 
     "HIRE_COMMAND_NAME": "нанять",
     "HIRE_COMMAND_DESCRIPTION": "Нанять пользователя на роль",
     "HIRE_PLAYER_DESCRIPTION": "Игрок, которого вы хотите нанять",
+    "HIRE_PLAYER_NAME": "игрок",
     "HIRE_ROLE_NAME": "роль",
     "HIRE_ROLE_DESCRIPTION": "Роль [⚠️ Выбирайте только из списка!]",
     "HIRE_REASON_NAME": "комментарий",
@@ -37,6 +39,7 @@
 
     "PAYOUT_COMMAND_NAME": "выплата",
     "PAYOUT_COMMAND_DESCRIPTION": "Выплатить алмазы игроку",
+    "PAYOUT_PLAYER_NAME": "игрок",
     "PAYOUT_PLAYER_DESCRIPTION": "Игрок, которому нужно выплатить",
     "PAYOUT_AMOUNT_NAME": "сумма",
     "PAYOUT_AMOUNT_DESCRIPTION": "Сумма, которую нужно выплатить игроку",
@@ -88,7 +91,6 @@
     "EVENT_INTERPOL_BUTTON_NAME": "Ивент",
     "FAKE_CALL_INTERPOL_BUTTON_NAME": "Ложный вызов",
     "TEN_PENALTIES_INTERPOL_BUTTON_NAME": "10 Штрафов",
-
 
     "CALL_INFRASTUCTURE_BUTTON_NAME": "Вызов",
     "BREAKAGE_INFRASTUCTURE_BUTTON_NAME": "Поломка"

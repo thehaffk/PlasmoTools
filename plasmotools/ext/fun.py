@@ -4,7 +4,7 @@ from random import choice, randint
 
 import disnake
 from disnake import StageInstance
-from disnake.ext import tasks, commands
+from disnake.ext import commands
 
 from plasmotools import settings
 
@@ -46,6 +46,18 @@ class Fun(commands.Cog):
     async def on_message(self, message: disnake.Message):
         if message.content == self.bot.user.mention:
             try:
+                if randint(1, 1000) == 4:
+                    for answer_string in [
+                        "Блять, дружище",
+                        "сходи нахуй",
+                        "вы меня заебали с пингами своими",
+                    ]:
+                        async with message.channel.typing():
+                            await asyncio.sleep(3)
+                            await message.reply(content=answer_string)
+                        await asyncio.sleep(1)
+                    return
+
                 if message.author.id in self.bot.owner_ids:
                     await message.add_reaction("<:KOMAP:995730375504568361>")
                 else:
@@ -59,13 +71,12 @@ class Fun(commands.Cog):
         elif self.bot.user.id in [user.id for user in message.mentions]:
             async with message.channel.typing():
                 await asyncio.sleep(1)
-                if randint(1, 1000) == 1:
-                    await message.reply("пошел нахуй")
 
-        if " комар " in (" " + message.content + " ").lower():
+        if "комар" in (message.content or "").lower():
             if randint(1, 10) == 1:
                 await message.channel.send(content=choice(komaru_gifs))
-        if randint(0, 1) == 1:
+
+        if randint(0, 1):
             for word in settings.word_emojis:
                 if word == message.content:
                     try:
@@ -81,7 +92,7 @@ class Fun(commands.Cog):
         await voice_client.disconnect(force=True)
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(client):

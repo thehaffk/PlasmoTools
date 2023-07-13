@@ -2,9 +2,9 @@ import logging
 from typing import List
 
 import disnake
-from disnake.ext import tasks, commands
+from disnake.ext import commands, tasks
 
-from plasmotools import settings
+from plasmotools import checks, settings
 from plasmotools.utils import api
 
 logger = logging.getLogger(__name__)
@@ -74,6 +74,7 @@ class PenaltyUtilities(commands.Cog):
         guild_ids=[settings.DevServer.guild_id, settings.LogsServer.guild_id],
         dm_permission=False,
     )
+    @checks.blocked_users_slash_command_check()
     async def manual_penalty_check(self, inter: disnake.ApplicationCommandInteraction):
         """
         Manual check all penalties
@@ -88,7 +89,7 @@ class PenaltyUtilities(commands.Cog):
         await self.check_all_penalties()
 
     async def cog_load(self):
-        logger.info("%s Ready", __name__)
+        logger.info("%s loaded", __name__)
 
 
 def setup(client):

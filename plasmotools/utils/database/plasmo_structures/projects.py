@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional, List
+from typing import List, Optional
 
 import aiosqlite
 
@@ -81,7 +81,6 @@ class Project:
         await self.push()
 
     async def delete(self):
-
         async with aiosqlite.connect(PATH) as db:
             await db.execute(
                 """DELETE FROM structure_projects WHERE id = ?""",

@@ -1,7 +1,3 @@
-"""
-Config file for Plasmo Tools
-"""
-
 import logging
 import os
 from builtins import bool
@@ -13,23 +9,33 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-
-DEBUG = bool(os.getenv("BOT_DEBUG", 0))
-TOKEN = os.getenv("TOKEN")
-PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN", None)
-PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
 DATABASE_PATH = "./data.sqlite"
 
+DEBUG = bool(int(os.getenv("BOT_DEBUG", "0")))
+TOKEN = os.getenv("TOKEN", None)
+PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN", None)
+PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
 if PT_PLASMO_TOKEN is None:
-    logger.critical("Plasmo oauth2 token not found")
+    logger.critical("PLASMO_TOKEN is missing")
 if PT_PLASMO_COOKIES is None:
-    logger.critical("Plasmo rp_token not found")
+    logger.critical("PLASMO_COOKIE is missing")
 
-__version__ = "1.5.8" + ("a" if DEBUG else "")
-
-# todo: update version?
+__version__ = "1.5.10" + ("-alpha" if DEBUG else "")
 
 help_url = "https://thfk.notion.site/Plasmo-Tools-help-a5874f7c3a56433ea2c3816527740fa0"
+
+oauth2_url_for_projects = "https://rp.plo.su/oauth2?client_id=FHHGpr8ZbZb35ZFvwSgD9EMbvkQF35ZFvwSgD9EMbvkQGpr8&redirect_uri=https://pt.haffk.tech/oauth/&response_type=token&scope=bank:manage%20bank:history%20bank:search%20user:notifications%20bank:penalties"
+
+blocked_users_ids = [
+    744193929746055168,  # TheMeko
+]
+
+owner_ids = [
+    737501414141591594,  # thehaffk
+    222718720127139840,  # Apehum
+    191836876980748298,  # KPidS
+    1017063823548616785,  # haffk alt
+]
 
 
 class LogsServer:
@@ -43,11 +49,14 @@ class LogsServer:
     rrs_verification_channel_id = 1060912903257079878
     leave_logs_channel_id = 1057983888229670922
     moderators_channel_id = 1073654991417507931
+    daily_check_channel_id = 1118522037565141002
 
     roles_notifications_role_id = 1046524223377637416
     errors_notifications_role_id = 876056190726045716
     rrs_verifications_notifications_role_id = 843154786726445105
     moderator_role_id = 875736652977418292
+
+    pride_month_event_id = 1103678285570904204
 
 
 class Emojis:
@@ -83,6 +92,7 @@ word_emojis = {
     "симпл": Emojis.s1mple,
     "ДИАНА": Emojis.diana,
     "помидоры": Emojis.ru_flag,
+    "комар": Emojis.komaru,
 }
 
 
@@ -190,61 +200,105 @@ class GCAGuild:
 @dataclass()
 class PlasmoStructureGuild:
     alias: str
+    name: str
     discord_id: int
     invite_url: str
     player_role_id: int
     structure_head_role_id: int
     public_chat_channel_id: int
+    pt_logs_channel_id: int
+    original_avatar_url: str
 
 
 structure_guilds = []
 
-court_guild = PlasmoStructureGuild(
-    alias="court",
-    discord_id=923224449728274492,
-    invite_url="https://discord.gg/qySEyGhehx",
-    player_role_id=953578699075256361,
-    structure_head_role_id=923238538160517141,
-    public_chat_channel_id=971004067885236264,
-)
-structure_guilds.append(court_guild)
-
 interpol_guild = PlasmoStructureGuild(
     alias="interpol",
+    name="Интерпол",
     discord_id=813451608871796766,
     invite_url="https://discord.gg/asuwsDe6FY",
     player_role_id=878987593482657833,
     structure_head_role_id=813451633085120563,
     public_chat_channel_id=813451608871796770,
+    pt_logs_channel_id=957050026100666428,
+    original_avatar_url="https://i.imgur.com/lpUKyvx.png",
 )
 structure_guilds.append(interpol_guild)
 
-infrastructure_guild = PlasmoStructureGuild(
-    alias="infrastructure",
-    discord_id=756750263351771146,
-    invite_url="https://discord.gg/BGvWMkdTV7",
-    player_role_id=810985435903557685,
-    structure_head_role_id=810975933888200795,
-    public_chat_channel_id=810985283532488714,
-)
-structure_guilds.append(infrastructure_guild)
-
 economy_guild = PlasmoStructureGuild(
     alias="economy",
+    name="Экономика",
     discord_id=866301587525861376,
     invite_url="https://discord.gg/6sKKGPuhRk",
     player_role_id=866308194992128040,
     structure_head_role_id=866586305830715412,
     public_chat_channel_id=866310422066757672,
+    pt_logs_channel_id=996269148738945064,
+    original_avatar_url="https://i.imgur.com/uFDbkB4.png",
 )
 structure_guilds.append(economy_guild)
 
+infrastructure_guild = PlasmoStructureGuild(
+    alias="infrastructure",
+    name="Инфраструктура",
+    discord_id=756750263351771146,
+    invite_url="https://discord.gg/BGvWMkdTV7",
+    player_role_id=810985435903557685,
+    structure_head_role_id=810975933888200795,
+    public_chat_channel_id=810985283532488714,
+    pt_logs_channel_id=996263550324588644,
+    original_avatar_url="https://i.imgur.com/p1xzKXD.png",
+)
+structure_guilds.append(infrastructure_guild)
+
+court_guild = PlasmoStructureGuild(
+    alias="court",
+    name="Суд",
+    discord_id=923224449728274492,
+    invite_url="https://discord.gg/qySEyGhehx",
+    player_role_id=953578699075256361,
+    structure_head_role_id=923238538160517141,
+    public_chat_channel_id=971004067885236264,
+    pt_logs_channel_id=996268192349569066,
+    original_avatar_url="https://i.imgur.com/nsB3iXj.png",
+)
+structure_guilds.append(court_guild)
+
 culture_guild = PlasmoStructureGuild(
     alias="culture",
+    name="Культура",
     discord_id=841392525499826186,
     invite_url="https://discord.gg/vS6hzZzMFw",
     player_role_id=841403623639351316,
     structure_head_role_id=841403071887966230,
     public_chat_channel_id=841395461222432848,
+    pt_logs_channel_id=922174128675504148,  # чердак
+    original_avatar_url="https://i.imgur.com/Rivylr8.png",
 )
 structure_guilds.append(culture_guild)
+
+mko_guild = PlasmoStructureGuild(
+    alias="mko",
+    name="МКО",
+    discord_id=814490777526075433,
+    invite_url="https://discord.gg/yTzj56CXpp",
+    player_role_id=874736916686319718,
+    structure_head_role_id=1046142021343137802,
+    public_chat_channel_id=874736383279919144,
+    pt_logs_channel_id=1005216573419696218,
+    original_avatar_url="https://i.imgur.com/Mssu73W.png",
+)
+structure_guilds.append(mko_guild)
+
+gca_guild = PlasmoStructureGuild(
+    alias="gca",
+    name="Большой Апелляционный Суд",
+    discord_id=855532780187156501,
+    invite_url="https://discord.gg/6A9AtFKz8b",
+    player_role_id=860799590721388574,
+    structure_head_role_id=928698857666269305,
+    public_chat_channel_id=860511686490325042,
+    pt_logs_channel_id=960901660970987590,
+    original_avatar_url="https://i.imgur.com/N66WYog.png",
+)
+structure_guilds.append(gca_guild)
