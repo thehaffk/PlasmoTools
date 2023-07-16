@@ -17,27 +17,27 @@ logger = logging.getLogger(__name__)
 interpol_ranks = {
     935606863075090503: {
         "name": "Рядовой",
-        "fake_call_payout": 3,
-        "event_10min_payout": 2,
-        "ten_penalties_payout": 10,
+        "fake_call_payout": 2,
+        "event_10min_payout": 1,
+        "ten_penalties_payout": 5,
     },
     935607349681475584: {
         "name": "Сержант",
-        "fake_call_payout": 5,
-        "event_10min_payout": 3,
-        "ten_penalties_payout": 20,
+        "fake_call_payout": 4,
+        "event_10min_payout": 2,
+        "ten_penalties_payout": 10,
     },
     935607425917132903: {
         "name": "Полковник",
-        "fake_call_payout": 8,
-        "event_10min_payout": 4,
-        "ten_penalties_payout": 30,
+        "fake_call_payout": 6,
+        "event_10min_payout": 3,
+        "ten_penalties_payout": 15,
     },
     1014506371649118329: {
         "name": "Генерал",
-        "fake_call_payout": 10,
-        "event_10min_payout": 5,
-        "ten_penalties_payout": 40,
+        "fake_call_payout": 8,
+        "event_10min_payout": 4,
+        "ten_penalties_payout": 20,
     },
 }
 fake_call_project_id = 1 if settings.DEBUG else 3
