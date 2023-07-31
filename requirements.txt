@@ -1,11 +1,6 @@
-aiohttp==3.8.4
-disnake==2.9.0
-python-dotenv==1.0.0
-aiomysql==0.2.0
-aiosqlite==0.19.0
-coloredlogs~=15.0.1
-pymysql==1.1.0
-black
+disnake
+python-dotenv
+coloredlogs
 PyNaCl
 orm[sqlite]
-databases>=0.7.0
+databases

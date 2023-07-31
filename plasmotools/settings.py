@@ -32,7 +32,7 @@ oauth2_url_for_projects = (
 )
 
 blocked_users_ids = [
-    # 744193929746055168,  # TheMeko
+    744193929746055168,  # TheMeko
 ]
 
 owner_ids = [
