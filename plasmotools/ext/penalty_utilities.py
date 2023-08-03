@@ -16,11 +16,9 @@ class PenaltyUtilities(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_member_ban(self, guild: disnake.Guild, member: disnake.Member):
-        if guild.id != settings.PlasmoRPGuild.guild_id:
-            return False
-
-        await self.check_all_penalties()
+    async def on_member_ban(self, guild: disnake.Guild, **kwargs):
+        if guild.id == settings.PlasmoRPGuild.guild_id:
+            await self.check_all_penalties()
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -49,9 +47,10 @@ class PenaltyUtilities(commands.Cog):
         expired_penalties = await api.bank.get_penalties("expired")
         on_check_penalties = await api.bank.get_penalties("check")
 
-        # todo: alert when helper cannot manage penalty
+        # Checking if penalty "user" is banned
         banned_players: List[str] = []
         active_players: List[str] = []
+
         for penalty in active_penalties + expired_penalties + on_check_penalties:
             if penalty["user"] in active_players:
                 continue
@@ -71,6 +70,33 @@ class PenaltyUtilities(commands.Cog):
             else:
                 active_players.append(penalty["user"])
                 continue
+
+
+        # TODO This when ill have a access to penalty API
+        # Checking if user who owns the penalty is capable of managing it
+        # (admin, helper, interpol, keeper, soviet-helper)
+        can_manage_penalties: List[str] = []
+        cannot_manage_penalties: List[str] = []
+
+        # for penalty in active_penalties + expired_penalties + on_check_penalties:
+        #     if penalty["helper"] in can_manage_penalties:
+        #         continue
+        #
+        #     if penalty["user"] in banned_players or penalty["user"] == "PlasmoTools":
+        #         await self.
+        #         continue
+        #
+        #     user_data = await api.user.get_user_data(nick=penalty["user"])
+        #     if user_data is None:
+        #         logger.warning("User %s not found", penalty["user"])
+        #         continue
+        #
+        #     if roles check:
+        #         banned_players.append(penalty["user"])
+        #         await self.
+        #     else:
+        #         active_players.append(penalty["user"])
+        #         continue
 
     @commands.slash_command(
         name="manual-penalty-check",

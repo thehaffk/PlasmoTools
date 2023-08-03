@@ -547,7 +547,7 @@ class Payouts(commands.Cog):
         """
         await inter.response.defer(ephemeral=True)
         try:
-            card_id = int(card.replace(" ", "").replace("EB-", "").replace("ЕВ-", ""))
+            card_id = int(card.replace(" ", "").replace("EB-", "").replace("ЕВ-", "").replace("DD-", ""))
             if card_id < 0 or card_id > 9999:
                 raise ValueError
         except ValueError:

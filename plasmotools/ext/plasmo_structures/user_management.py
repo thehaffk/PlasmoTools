@@ -9,7 +9,6 @@ from disnake.ext import commands
 
 from plasmotools import checks, settings
 from plasmotools.checks import is_guild_registered
-from plasmotools.ext.reverse_role_sync import core
 from plasmotools.utils import models
 from plasmotools.utils.autocompleters.plasmo_structures import \
     role_autocompleter
@@ -353,9 +352,9 @@ class UserManagement(commands.Cog):
         if comment is not None and comment.strip() != "":
             embed.add_field(name="Комментарий", value=comment)
 
-        rrs_cog: Optional[core.RRSCore] = None
+        rrs_cog = None
         if not hire_anyway:
-            rrs_cog: Optional[core.RRSCore] = self.bot.get_cog(
+            rrs_cog = self.bot.get_cog(
                 "RRSCore"
             )  # todo: refactoring
             if rrs_cog is not None:
@@ -536,9 +535,9 @@ class UserManagement(commands.Cog):
         if reason is not None and reason.strip() != "":
             embed.add_field(name="Причина", value=reason)
 
-        rrs_cog: Optional[core.RRSCore] = None
+        rrs_cog = None
         if not fire_anyway:
-            rrs_cog: Optional[core.RRSCore] = self.bot.get_cog("RRSCore")
+            rrs_cog = self.bot.get_cog("RRSCore")
             if rrs_cog is not None:
                 await inter.edit_original_message(
                     embed=disnake.Embed(

@@ -67,6 +67,10 @@ class StructureStatictics(commands.Cog):
             )
         stats_text += "` all  month  week` user \n"
         for user_stats in sorted(users, key=lambda _: _[-1], reverse=True):
+            if user_stats[0].display_name == "PlasmoTools":
+                stats_text += f"`   0 -   0 -   0 ` {self.bot.user.mention}"
+                continue
+
             stats_text += (
                 "`" + " " * (4 - len(str(user_stats[1]))) + str(user_stats[1]) + " - "
             )

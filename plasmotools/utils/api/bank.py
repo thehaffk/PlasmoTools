@@ -71,14 +71,14 @@ async def search_cards(token: str, query: str, silent: bool = False) -> list:
             return []
 
 
-async def get_card_data(card_id: int, silent: bool = False) -> Optional[dict]:
+async def get_card_data(card_id: int, bank_prefix: str = "EB", silent: bool = False) -> Optional[dict]:
     # https://rp.plo.su/api/bank/cards?ids=EB-0000
     async with aiohttp.ClientSession(
         headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
     ) as session:
         async with session.get(
             "https://rp.plo.su/api/bank/cards",
-            params={"ids": formatters.format_bank_card(card_id)},
+            params={"ids": formatters.format_bank_card(card_id, bank_prefix=bank_prefix)},
         ) as resp:
             response_json = {}
             if (
@@ -102,12 +102,10 @@ async def get_penalties(tab: str = "active", offset=0) -> List[dict]:
             headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
         ) as session:
             penalties = []
-            offset = 0
             async with session.get(
                 "https://rp.plo.su/api/bank/penalties/helper?",
                 params={"tab": tab, "offset": 0, "count": 100},
             ) as resp:
-                response_json = {}
                 if resp.status != 200 or not (response_json := await resp.json()).get(
                     "status", False
                 ):

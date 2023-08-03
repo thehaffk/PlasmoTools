@@ -39,9 +39,9 @@ async def generate_banker_stats_embeds(
     user: disnake.Member, days: int = 7
 ) -> List[disnake.Embed]:
     banker_stats_embed = disnake.Embed(
-        title=f"Banker statistics for {user.display_name} for last {days} days",
+        title=f"Статистика банкира {user.display_name} за {days} дн.",
         color=disnake.Color.dark_green(),
-        description="`Roles:`" + ", ".join([role.mention for role in user.roles[1:]]),
+        description="`Роли:`" + ", ".join([role.mention for role in user.roles[1:]]),
     )
 
     transactions = await banker.get_banker_transactions(days)
@@ -58,7 +58,7 @@ async def generate_banker_stats_embeds(
     total_earned = 0
     for transaction in transactions:
         if transaction["action"] == 0:
-            total_earned += 8  # todo: change if 4th season will have different numbers
+            total_earned += 4
             continue
         if transaction["amount"] <= 62:
             total_earned += 1

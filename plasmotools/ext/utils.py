@@ -1,13 +1,11 @@
 import asyncio
 import logging
-from typing import Optional
 
 import disnake
 from disnake import ApplicationCommandInteraction, Localized
 from disnake.ext import commands
 
 from plasmotools import checks, settings
-from plasmotools.ext.reverse_role_sync.core import RRSCore
 from plasmotools.utils import formatters
 from plasmotools.utils.api import bank, messenger, utils
 from plasmotools.utils.api.user import get_user_data
@@ -114,7 +112,7 @@ class Utils(commands.Cog):
                 inline=False,
             )
         embeds = [api_embed]
-        rrs_cog: Optional[RRSCore] = self.bot.get_cog("RRSCore")
+        rrs_cog = self.bot.get_cog("RRSCore")
         if rrs_cog is not None:
             embeds.append(await rrs_cog.generate_profile_embed(member))
         return embeds
@@ -219,7 +217,7 @@ class Utils(commands.Cog):
                 description=f"""
 Plasmo Tools - многофункциональный бот для дискорд сервера Plasmo RP и государственных структур
     
-Прочитать описание функционала и получить гайд по командам можно по ссылке: [notion.so]({settings.help_url})
+Прочитать описание функционала и получить гайд по командам можно по ссылке: [notion.so]({settings.HELP_URL})
 Сервер поддержки: [discord.com/invite]({settings.DevServer.support_invite})
                 """,
             ),

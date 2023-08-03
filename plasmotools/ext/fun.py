@@ -39,7 +39,7 @@ class Fun(commands.Cog):
         self.bot = bot
 
     @commands.command("самоуничтожение")
-    async def four_command(self, ctx: commands.Context):
+    async def selfdestruction_command(self, ctx: commands.Context):
         await ctx.message.reply("https://imgur.com/8t9M1K9", mention_author=False)
 
     @commands.Cog.listener()
@@ -60,6 +60,7 @@ class Fun(commands.Cog):
 
                 if message.author.id in self.bot.owner_ids:
                     await message.add_reaction("<:KOMAP:995730375504568361>")
+
                 else:
                     await message.add_reaction("😡")
 
@@ -67,6 +68,8 @@ class Fun(commands.Cog):
                     await message.reply(settings.Gifs.dont_ping_me)
 
             except disnake.Forbidden:
+                pass
+            except disnake.HTTPException:
                 pass
         elif self.bot.user.id in [user.id for user in message.mentions]:
             async with message.channel.typing():
