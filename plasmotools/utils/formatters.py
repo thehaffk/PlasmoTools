@@ -10,6 +10,15 @@ def format_bank_card(number: Optional[int], bank_prefix: str = "EB") -> str:
     return bank_prefix + "-" + "0" * (4 - len(str(number))) + str(number)
 
 
+def format_patent_number(number: Optional[int]) -> str:
+    """
+    Format patent number.
+    """
+    if number is None:
+        return "????"
+    return "0" * (4 - len(str(number))) + str(number)
+
+
 def build_progressbar(cursor: int, total_count: int) -> str:
     """
     Build progressbar with given numbers
@@ -24,5 +33,5 @@ def build_progressbar(cursor: int, total_count: int) -> str:
         return "🟩" * 10
 
     return "🟩" * int((cursor // (total_count // 10))) + "🟥" * (
-        10 - int((cursor // (total_count // 10)))
+            10 - int((cursor // (total_count // 10)))
     )

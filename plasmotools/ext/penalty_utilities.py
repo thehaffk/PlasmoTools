@@ -16,7 +16,7 @@ class PenaltyUtilities(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_member_ban(self, guild: disnake.Guild, **kwargs):
+    async def on_member_ban(self, guild: disnake.Guild, member: disnake.Member):
         if guild.id == settings.PlasmoRPGuild.guild_id:
             await self.check_all_penalties()
 
@@ -70,7 +70,6 @@ class PenaltyUtilities(commands.Cog):
             else:
                 active_players.append(penalty["user"])
                 continue
-
 
         # TODO This when ill have a access to penalty API
         # Checking if user who owns the penalty is capable of managing it

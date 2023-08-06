@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 async def role_autocompleter(
-    inter: disnake.ApplicationCommandInteraction, **kwargs
+    inter: disnake.ApplicationCommandInteraction, user_input: str
 ) -> dict[str, str]:
     if inter.guild is None:
         return {}
@@ -28,7 +28,8 @@ async def role_autocompleter(
 
 
 async def payouts_projects_autocompleter(
-    inter: disnake.ApplicationCommandInteraction, **kwargs,
+    inter: disnake.ApplicationCommandInteraction,
+    user_input: str,
 ) -> dict[str, str]:
     """
     Returns a list of projects from this guild, where is_active is true and from_card is not null

@@ -3,9 +3,14 @@ import logging
 import disnake
 from disnake import InteractionTimedOut
 from disnake.ext import commands
-from disnake.ext.commands.errors import (CheckFailure, MissingPermissions,
-                                         MissingRole, NoPrivateMessage,
-                                         NotOwner)
+from disnake.ext.commands.errors import (
+    CheckFailure,
+    MissingPermissions,
+    MissingRole,
+    NoPrivateMessage,
+    NotOwner,
+    CommandInvokeError,
+)
 
 from plasmotools import settings
 from plasmotools.utils.embeds import build_simple_embed
@@ -14,6 +19,10 @@ logger = logging.getLogger(__name__)
 
 
 class GuildIsNotRegistered(commands.CheckFailure):
+    pass
+
+
+class BankAPIError(Exception):
     pass
 
 
@@ -101,17 +110,24 @@ class ErrorHandler(commands.Cog):
             return
         elif isinstance(error, InteractionTimedOut):
             logger.error(error)
+        elif isinstance(error, disnake.HTTPException):
+            logger.error(error)  # todo: ебучий 401 unauthorized
+            print(error.__str__())
+            raise error
         else:
             logger.error(error)
-            await inter.send(
-                embed=disnake.Embed(
-                    title="Error",
-                    description=f"Возникла неожиданная ошибка.\n\n`{error}`"
-                    f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
-                    color=disnake.Color.dark_red(),
-                ),
-                ephemeral=True,
-            )
+            try:
+                await inter.send(
+                    embed=disnake.Embed(
+                        title="Error",
+                        description=f"Возникла неожиданная ошибка.\n\n`{error}`"
+                        f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
+                        color=disnake.Color.dark_red(),
+                    ),
+                    ephemeral=True,
+                )
+            except disnake.HTTPException:
+                pass
             await self.bot.get_channel(settings.DevServer.errors_channel_id).send(
                 embed=disnake.Embed(
                     title="⚠⚠⚠",

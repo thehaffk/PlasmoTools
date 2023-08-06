@@ -13,10 +13,10 @@ from plasmotools.checks import is_guild_registered
 from plasmotools.utils import api, formatters, models
 from plasmotools.utils.api import bank
 from plasmotools.utils.api.tokens import get_token_scopes
-from plasmotools.utils.autocompleters.bank import \
-    search_bank_cards_autocompleter
-from plasmotools.utils.autocompleters.plasmo_structures import \
-    payouts_projects_autocompleter
+from plasmotools.utils.autocompleters.bank import search_bank_cards_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import (
+    payouts_projects_autocompleter,
+)
 from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
@@ -547,7 +547,12 @@ class Payouts(commands.Cog):
         """
         await inter.response.defer(ephemeral=True)
         try:
-            card_id = int(card.replace(" ", "").replace("EB-", "").replace("ЕВ-", "").replace("DD-", ""))
+            card_id = int(
+                card.replace(" ", "")
+                .replace("EB-", "")
+                .replace("ЕВ-", "")
+                .replace("DD-", "")
+            )
             if card_id < 0 or card_id > 9999:
                 raise ValueError
         except ValueError:

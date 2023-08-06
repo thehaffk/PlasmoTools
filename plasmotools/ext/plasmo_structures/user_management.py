@@ -10,8 +10,7 @@ from disnake.ext import commands
 from plasmotools import checks, settings
 from plasmotools.checks import is_guild_registered
 from plasmotools.utils import models
-from plasmotools.utils.autocompleters.plasmo_structures import \
-    role_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import role_autocompleter
 from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
@@ -354,9 +353,7 @@ class UserManagement(commands.Cog):
 
         rrs_cog = None
         if not hire_anyway:
-            rrs_cog = self.bot.get_cog(
-                "RRSCore"
-            )  # todo: refactoring
+            rrs_cog = self.bot.get_cog("RRSCore")  # todo: refactoring
             if rrs_cog is not None:
                 await inter.edit_original_message(
                     embed=disnake.Embed(
@@ -444,9 +441,9 @@ class UserManagement(commands.Cog):
         Parameters
         ----------
         inter
-        reason: Reason{{FIRE_PLAYER}}
-        user: Player {{FIRE_ROLE}}
-        role: Role [⚠ Choose from autocomplete!] {{FIRE_REASON}}
+        user: Player {{FIRE_PLAYER}}
+        role: Role [⚠ Choose from autocomplete!] {{FIRE_ROLE}}
+        reason: Reason {{FIRE_REASON}}
         """
         await inter.response.defer(ephemeral=True)
         if not role.isdigit():

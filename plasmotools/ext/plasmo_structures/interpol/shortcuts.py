@@ -41,8 +41,8 @@ interpol_ranks = {
         "ten_penalties_payout": 40,
     },
 }
-fake_call_project_id = 1 if settings.DEBUG else 3
-events_project_id = 1 if settings.DEBUG else 4
+fake_call_project_id = 3
+events_project_id = 4
 
 
 class FastInterpolPayouts(commands.Cog):
