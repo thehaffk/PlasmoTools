@@ -112,7 +112,9 @@ class ErrorHandler(commands.Cog):
             logger.error(error)
         elif isinstance(error, disnake.HTTPException):
             logger.error(error)  # todo: ебучий 401 unauthorized
-            print(error.__str__())
+            print("Error:", error.__str__())
+            if "Invalid Webhook Token" in error.text:
+                return
             raise error
         else:
             logger.error(error)

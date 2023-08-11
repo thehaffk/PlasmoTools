@@ -33,5 +33,5 @@ def build_progressbar(cursor: int, total_count: int) -> str:
         return "🟩" * 10
 
     return "🟩" * int((cursor // (total_count // 10))) + "🟥" * (
-            10 - int((cursor // (total_count // 10)))
+        10 - int((cursor // (total_count // 10)))
     )

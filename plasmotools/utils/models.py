@@ -123,6 +123,31 @@ class PersonalSettings(orm.Model):
     }
 
 
+class Patent(orm.Model):
+    tablename = "patents"
+    registry = models
+    fields = {
+        "id": orm.Integer(primary_key=True),
+        "subject": orm.String(max_length=256),
+        "is_art": orm.Boolean(),
+        "map_ids": orm.String(max_length=1024, allow_null=True),
+        "owner_ids": orm.String(max_length=1024),
+        "registration_date": orm.DateTime(),
+        "banker_id": orm.BigInteger(),
+        "status": orm.String(
+            max_length=16, default="WAIT"
+        ),  # WAIT, APPROVED, REJECTED, AUTOAPPROVED
+        "moderator_id": orm.BigInteger(allow_null=True),
+        "message_id": orm.BigInteger(allow_null=True),
+        "total_price": orm.Integer(),
+        "price_breakdown": orm.String(max_length=256),  # Example: 15;5;10
+        "is_payment_on_hold": orm.Boolean(default=True),
+        "from_card": orm.String(max_length=2 + 1 + 4),
+        "is_refunded": orm.Boolean(default=False),
+        "is_lamination_skipped": orm.Boolean(default=False),
+    }
+
+
 async def setup_database():
     logger.info("Creating tables")
     await models.create_all()
