@@ -1090,7 +1090,7 @@ class BankerPatents(commands.Cog):
             owner_ids=";".join([str(owner.id) for owner in patent_owners]),
             registration_date=datetime.datetime.now(),
             banker_id=inter.author.id,
-            status="AUTOAPROOVED" if is_mapart else "WAIT",
+            status="WAIT",
             moderator_id=self.bot.user.id if is_mapart else None,
             message_id=None,
             total_price=total_patent_price,
@@ -1230,9 +1230,36 @@ class BankerPatents(commands.Cog):
 
         # todo: send to moderation / send to #Патенты channel
 
+    async def _get_patent_embed(
+        self, patent_id: int, for_internal_use: bool = False
+    ) -> disnake.Embed:
+        ...
+
+    async def _send_patent_to_moderation(self, patent_id: int):
+        ...
+
     @commands.Cog.listener("on_button_click")
     async def on_patent_review(self, inter: MessageInteraction):
         ...
+
+    @commands.command(name="fake-map")
+    @commands.is_owner()
+    async def fake_map_command(
+        self, ctx: commands.GuildContext, map_number: int, patent_id: int
+    ):
+        try:
+            await ctx.message.delete()
+            await self.bot.get_channel(1137803532943233154).send(
+                embed=disnake.Embed(
+                    description=f"{ctx.author.mention} запатентовал карту #{map_number} в dd_testworld"
+                    f" (патент #{formatters.format_patent_number(patent_id)}, владелец: {ctx.author.mention})",
+                )
+            )
+        except disnake.Forbidden:
+            pass
+
+    # todo: apps -> revoke patent
+    # todo: command to create or manage patent
 
     async def cog_load(self):
         logger.info("%s loaded", __name__)
