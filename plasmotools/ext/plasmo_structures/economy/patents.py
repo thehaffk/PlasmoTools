@@ -1137,7 +1137,7 @@ class BankerPatents(commands.Cog):
                     "\n`Согласие на ламинирование:` есть"
                 )
                 mc_command_owner = "PlasmoTools"
-                unlaminated_map_numbers = map_numbers.copy()
+                non_laminated_map_numbers = map_numbers.copy()
                 laminated_map_numbers = []
                 for _ in range(len(map_numbers)):
                     patent_helper_embed.description = f"""Поочередно возьмите в основную руку все части арта \
@@ -1145,7 +1145,7 @@ class BankerPatents(commands.Cog):
 
 Команда: `/patent {mc_command_owner} {db_patent.id}`
 
-Осталось заламинировать: **{', '.join('#' + str(map_number) for map_number in unlaminated_map_numbers)}**
+Осталось заламинировать: **{', '.join('#' + str(map_number) for map_number in non_laminated_map_numbers)}**
 Заламинированные карты: **{', '.join('#' + str(map_number) for map_number in laminated_map_numbers)}**
 
 Бот автоматически поймет когда вы запатентовали карту и оповестит вас 
@@ -1174,12 +1174,12 @@ class BankerPatents(commands.Cog):
                             db_patent.id
                         ):
                             return False
-                        if int(results[0][1]) not in unlaminated_map_numbers:
+                        if int(results[0][1]) not in non_laminated_map_numbers:
                             return False
 
                         # result[0]: banker_id, card_number, world_name, patent_id, owner_id
                         laminated_map_numbers.append(int(results[0][1]))
-                        unlaminated_map_numbers.remove(int(results[0][1]))
+                        non_laminated_map_numbers.remove(int(results[0][1]))
                         return True
 
                     try:
@@ -1252,7 +1252,7 @@ class BankerPatents(commands.Cog):
             await self.bot.get_channel(1137803532943233154).send(
                 embed=disnake.Embed(
                     description=f"{ctx.author.mention} запатентовал карту #{map_number} в dd_testworld"
-                    f" (патент #{formatters.format_patent_number(patent_id)}, владелец: {ctx.author.mention})",
+                    f" (патент #{formatters.format_patent_number(patent_id)}, владелец: {self.bot.user.mention})",
                 )
             )
         except disnake.Forbidden:
@@ -1260,6 +1260,8 @@ class BankerPatents(commands.Cog):
 
     # todo: apps -> revoke patent
     # todo: command to create or manage patent
+    # todo: /get-patent id:
+    # todo: patents in profiles?
 
     async def cog_load(self):
         logger.info("%s loaded", __name__)
