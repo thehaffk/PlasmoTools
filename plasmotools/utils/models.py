@@ -62,8 +62,8 @@ class StructurePayout(orm.Model):
         "user_id": orm.BigInteger(),
         "payer_id": orm.BigInteger(),
         "is_paid": orm.Boolean(),
-        "from_card": orm.Integer(),
-        "to_card": orm.Integer(),
+        "from_card_str": orm.String(max_length=2 + 1 + 4),
+        "to_card_str": orm.String(max_length=2 + 1 + 4),
         "amount": orm.Integer(),
         "message": orm.String(max_length=256, allow_blank=True),
         "date": orm.DateTime(),
@@ -80,7 +80,7 @@ class StructureProject(orm.Model):
         ),
         "is_active": orm.Boolean(default=False),
         "guild_discord_id": orm.Integer(),
-        "from_card": orm.Integer(),
+        "from_card_str": orm.String(max_length=2 + 1 + 4),
         "plasmo_bearer_token": orm.String(
             max_length=256,
         ),
@@ -113,7 +113,7 @@ class PersonalSettings(orm.Model):
     fields = {
         "id": orm.Integer(primary_key=True),
         "discord_id": orm.BigInteger(unique=True),
-        "saved_card": orm.Integer(allow_null=True),
+        "saved_card_str": orm.String(max_length=2 + 1 + 4),
         "bearer_token": orm.String(max_length=256, allow_null=True),
         "rp_token": orm.String(max_length=256, allow_null=True),
         "blocked": orm.Boolean(default=False),
@@ -142,7 +142,7 @@ class Patent(orm.Model):
         "total_price": orm.Integer(),
         "price_breakdown": orm.String(max_length=256),  # Example: 15;5;10
         "is_payment_on_hold": orm.Boolean(default=True),
-        "from_card": orm.String(max_length=2 + 1 + 4),
+        "from_card_str": orm.String(max_length=2 + 1 + 4),
         "is_refunded": orm.Boolean(default=False),
         "is_lamination_skipped": orm.Boolean(default=False),
     }

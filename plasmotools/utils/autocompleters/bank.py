@@ -41,12 +41,16 @@ async def search_bank_cards_autocompleter(
                 cards = {
                     (
                         "💳 "
-                        + formatters.format_bank_card(card["id"])
+                        + formatters.format_bank_card(
+                            card["id"], bank_prefix=card["bank_code"]
+                        )
                         + " - "
                         + card["holder"]
                         + " - "
                         + card["name"]
-                    ): str(card["id"])
+                    ): formatters.format_bank_card(
+                        card["id"], bank_prefix=card["bank_code"]
+                    )
                     for card in response_cards
                 }
                 if len(cards) == 0:

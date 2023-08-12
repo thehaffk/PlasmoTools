@@ -49,7 +49,7 @@ async def payouts_projects_autocompleter(
     db_projects = {
         project.name: str(project.id)
         for project in db_projects
-        if project.from_card is not None and project.from_card != -1
+        if project.from_card_str is not None and project.from_card_str != ""
     }
     if len(db_projects) == 0:
         db_projects = {"Нет доступных проектов": "69420"}

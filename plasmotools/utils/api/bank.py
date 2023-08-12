@@ -13,13 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 async def transfer(
-    from_card: int,
-    to_card: int,
+    from_card_str: int,
+    to_card_str: int,
     amount: int,
     token: str,
     message: str = "via PlasmoTools",
-    from_card_bank: str = "EB",
-    to_card_bank: str = "EB",
 ) -> Tuple[bool, str]:
     """
     Transfer money from one card to another.
@@ -28,8 +26,8 @@ async def transfer(
         async with session.post(
             "https://rp.plo.su/api/bank/transfer",
             json={
-                "from": formatters.format_bank_card(from_card, from_card_bank),
-                "to": formatters.format_bank_card(to_card, to_card_bank),
+                "from": from_card_str,
+                "to": to_card_str,
                 "amount": amount,
                 "message": message,
             },
@@ -48,23 +46,19 @@ async def transfer(
 
 
 async def bill(
-    from_card: int,
-    to_card: int,
+    from_card_str: str,
+    to_card_str: str,
     amount: int,
     token: str,
     message: str = "via PlasmoTools",
-    from_card_bank: str = "EB",
-    to_card_bank: str = "EB",
 ):
     # POST plasmorp.com/api/bank/bill
     async with aiohttp.ClientSession() as session:
         async with session.post(
             "https://rp.plo.su/api/bank/bill",
             json={
-                "from": formatters.format_bank_card(
-                    from_card, bank_prefix=from_card_bank
-                ),
-                "to": formatters.format_bank_card(to_card, bank_prefix=to_card_bank),
+                "from": from_card_str,
+                "to": to_card_str,
                 "amount": amount,
                 "message": message,
             },
@@ -182,7 +176,7 @@ async def search_cards(token: str, query: str, silent: bool = False) -> list:
 
 
 async def get_card_data(
-    card_id: int, bank_prefix: str = "EB", supress_warnings: bool = False
+    card_str: str, supress_warnings: bool = False
 ) -> Optional[dict]:
     # https://rp.plo.su/api/bank/cards?ids=??-0000
     async with aiohttp.ClientSession(
@@ -190,9 +184,7 @@ async def get_card_data(
     ) as session:
         async with session.get(
             "https://rp.plo.su/api/bank/cards",
-            params={
-                "ids": formatters.format_bank_card(card_id, bank_prefix=bank_prefix)
-            },
+            params={"ids": card_str},
         ) as resp:
             response_json = {}
             if (

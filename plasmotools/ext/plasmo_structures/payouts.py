@@ -72,7 +72,9 @@ class Payouts(commands.Cog):
         name: str,
         webhook_url: str,
         plasmo_bearer_token: str,
-        from_card: int = commands.Param(gt=0, lt=10000),
+        from_card_str: int = commands.Param(
+            autocomplete=search_bank_cards_autocompleter
+        ),
     ):
         """
         Зарегистрировать проект
@@ -82,7 +84,7 @@ class Payouts(commands.Cog):
         inter
         name: Название проекта, например "Интерпол"
         webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/api/webhooks/...)
-        from_card: Номер карты, с которой будет производиться выплата
+        from_card_str: Карта, с которой будет производиться выплата
         plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
         """
         # todo: autocomplete for from_card
@@ -114,7 +116,7 @@ class Payouts(commands.Cog):
             is_active=True,
             guild_discord_id=inter.guild.id,
             webhook_url=webhook_url,
-            from_card=from_card,
+            from_card_str=from_card_str,
             plasmo_bearer_token=plasmo_bearer_token,
         )
         await inter.edit_original_message(
@@ -123,7 +125,7 @@ class Payouts(commands.Cog):
                 title="Проект успешно зарегистрирован",
                 description=f"Проект: {name}\n"
                 f"Вебхук: {webhook_url}\n"
-                f"Карта: {from_card}\n"
+                f"Карта: {from_card_str}\n"
                 f"Токен: ||{plasmo_bearer_token[:-5]}...||\n"
                 f"ID: {db_project.id}",
             ),
@@ -141,7 +143,7 @@ class Payouts(commands.Cog):
         name: Optional[str] = None,
         webhook_url: Optional[str] = None,
         is_active: Optional[bool] = None,
-        from_card: Optional[int] = commands.Param(default=None),
+        from_card_id: Optional[int] = commands.Param(default=None),
         plasmo_bearer_token: Optional[str] = None,
     ):
         """
@@ -154,7 +156,7 @@ class Payouts(commands.Cog):
         webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.com/api/webhooks/{id}/{token})
         is_active: Доступен ли проект
         name: Название проекта, например "Интерпол" или "Постройка суда"
-        from_card: Номер карты, с которой будет производиться выплата
+        from_card_id: Номер карты, с которой будет производиться выплата
         plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
         """
         await inter.response.defer(ephemeral=True)
@@ -174,7 +176,9 @@ class Payouts(commands.Cog):
         await db_project.update(
             name=name if name is not None else db_project.name,
             is_active=is_active if is_active is not None else db_project.is_active,
-            from_card=from_card if from_card is not None else db_project.from_card,
+            from_card_string=formatters.format_bank_card(from_card_id)
+            if from_card_id is not None
+            else db_project.from_card_string,
             plasmo_bearer_token=plasmo_bearer_token
             if plasmo_bearer_token is not None
             else db_project.plasmo_bearer_token,
@@ -307,13 +311,13 @@ class Payouts(commands.Cog):
         else:
             plasmo_user = user
 
-        from_card = project.from_card
-        user_card = (
+        from_card_str = project.from_card_str
+        user_card_str = (
             await models.PersonalSettings.objects.get_or_create(
                 discord_id=user.id, defaults={}
             )
-        )[0].saved_card
-        if user_card is None:
+        )[0].saved_card_str
+        if user_card_str is None:
             user_cards = sorted(
                 [
                     card
@@ -321,7 +325,10 @@ class Payouts(commands.Cog):
                         token=project.plasmo_bearer_token,
                         query=plasmo_user.display_name,
                     )
-                    if card["id"] != from_card
+                    if formatters.format_bank_card(
+                        card["id"], bank_prefix=card["bank_code"]
+                    )
+                    != from_card_str
                     and card["holder_type"] == 0  # User
                     and card["holder"]
                     == plasmo_user.display_name  # fixme: new nicknames system
@@ -359,14 +366,16 @@ class Payouts(commands.Cog):
                     )
                 return False
 
-            user_card: int = user_cards[0]["id"]
+            user_card_str = formatters.format_bank_card(
+                user_cards[0]["id"], bank_prefix=user_cards[0]["bank_code"]
+            )
             try:
                 await user.send(
                     embed=disnake.Embed(
                         color=disnake.Color.dark_red(),
                         title="⚠ У вас не установлена карта для выплат",
                         description=f"Вы не установили карту для выплат. Бот установил карту "
-                        f"**{formatters.format_bank_card(user_card)}** как основную.\n\n"
+                        f"**{user_card_str}** как основную.\n\n"
                         f"Воспользуйтесь **/установить-карту-для-выплат**, если хотите получать выплаты "
                         f"на другую карту",
                     )
@@ -375,7 +384,7 @@ class Payouts(commands.Cog):
                 pass
 
             await models.PersonalSettings.objects.filter(discord_id=user.id).update(
-                saved_card=user_card
+                saved_card_str=user_card_str
             )
 
         await interaction.edit_original_message(
@@ -383,17 +392,17 @@ class Payouts(commands.Cog):
                 color=disnake.Color.yellow(), description="Перевожу алмазы..."
             )
         )
-        if from_card == user_card:
+        if from_card_str == user_card_str:
             await interaction.edit_original_message(
                 embed=build_simple_embed(
-                    "Невозможно первести алмазы на эту карту", failure=True
+                    "Невозможно перевести алмазы на эту карту", failure=True
                 ),
             )
             return False
         status, error_message = await bank.transfer(
             token=project.plasmo_bearer_token,
-            from_card=from_card,
-            to_card=user_card,
+            from_card_str=from_card_str,
+            to_card_str=user_card_str,
             amount=amount,
             message=transaction_message,
         )
@@ -445,10 +454,10 @@ class Payouts(commands.Cog):
                 name="Комментарий к переводу", value=transaction_message, inline=False
             )
             .add_field("Проект", project.name, inline=False)
-            .add_field("С карты", formatters.format_bank_card(from_card), inline=False)
+            .add_field("С карты", from_card_str, inline=False)
             .add_field(
                 "На карту",
-                formatters.format_bank_card(user_card),
+                user_card_str,
                 inline=False,
             )
         )
@@ -456,7 +465,7 @@ class Payouts(commands.Cog):
         await interaction.edit_original_message(
             embed=build_simple_embed(
                 f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
-                f"карту {formatters.format_bank_card(user_card)}",
+                f"карту {user_card_str}",
             ),
         )
         # todo: save failed payments and retry them later
@@ -465,16 +474,16 @@ class Payouts(commands.Cog):
             user_id=user.id,
             payer_id=interaction.author.id,
             is_paid=True,
-            from_card=from_card,
-            to_card=user_card,
+            from_card_str=from_card_str,
+            to_card_str=user_card_str,
             amount=amount,
             message=message,
             date=datetime.datetime.now(),
         )
         await self.bot.get_channel(settings.DevServer.transactions_channel_id).send(
             embed=disnake.Embed(
-                description=f"{formatters.format_bank_card(from_card)} -> "
-                f"{amount} {settings.Emojis.diamond} -> {formatters.format_bank_card(user_card)}\n"
+                description=f"{from_card_str} -> "
+                f"{amount} {settings.Emojis.diamond} -> {user_card_str}\n"
                 f"Author {interaction.author.display_name} {interaction.author.mention}\n Message: {message}",
             )
         )
@@ -533,7 +542,8 @@ class Payouts(commands.Cog):
     async def set_saved_card(
         self,
         inter: disnake.ApplicationCommandInteraction,
-        card: str = commands.Param(
+        card_str: str = commands.Param(
+            name="card",
             autocomplete=search_bank_cards_autocompleter,
         ),
     ):
@@ -543,25 +553,9 @@ class Payouts(commands.Cog):
         Parameters
         ----------
         inter
-        card: Card number, format: 9000 or EB-9000. EB-0142 -> 142. EB-3666 -> 3666 {{SET_PAYOUTS_CARD_PARAM}}
+        card_str: Card number, format: EB-9000. EB-0142. DD-0009 {{SET_PAYOUTS_CARD_PARAM}}
         """
         await inter.response.defer(ephemeral=True)
-        try:
-            card_id = int(
-                card.replace(" ", "")
-                .replace("EB-", "")
-                .replace("ЕВ-", "")
-                .replace("DD-", "")
-            )
-            if card_id < 0 or card_id > 9999:
-                raise ValueError
-        except ValueError:
-            await inter.edit_original_message(
-                embed=build_simple_embed(
-                    "Не удалось распознать номер карты", failure=True
-                ),
-            )
-            return
 
         await inter.edit_original_message(
             embed=disnake.Embed(
@@ -569,7 +563,7 @@ class Payouts(commands.Cog):
             )
         )
 
-        api_card = await api.bank.get_card_data(card_id)
+        api_card = await api.bank.get_card_data(card_str)
         if api_card is None:
             await inter.edit_original_message(
                 embed=build_simple_embed(
@@ -581,13 +575,14 @@ class Payouts(commands.Cog):
         await models.PersonalSettings.objects.update_or_create(
             discord_id=inter.author.id,
             defaults={
-                "saved_card": card_id,
+                "saved_card_ыек": card_str,
             },
         )
+
         await inter.edit_original_message(
             embed=build_simple_embed(
                 "Карта для выплат успешно обновлена\n"
-                f" {formatters.format_bank_card(card_id)} - {api_card['name']}\n"
+                f" {card_str} - {api_card['name']}\n"
                 f"Принадлежит {api_card['holder']}",
             )
         )
