@@ -113,7 +113,7 @@ class PersonalSettings(orm.Model):
     fields = {
         "id": orm.Integer(primary_key=True),
         "discord_id": orm.BigInteger(unique=True),
-        "saved_card_str": orm.String(max_length=2 + 1 + 4),
+        "saved_card_str": orm.String(max_length=2 + 1 + 4, allow_null=True),
         "bearer_token": orm.String(max_length=256, allow_null=True),
         "rp_token": orm.String(max_length=256, allow_null=True),
         "blocked": orm.Boolean(default=False),

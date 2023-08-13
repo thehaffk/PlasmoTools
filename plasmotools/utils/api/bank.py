@@ -155,7 +155,7 @@ async def search_cards(token: str, query: str, silent: bool = False) -> list:
         try:
             async with session.get(
                 "https://rp.plo.su/api/bank/search/cards",
-                params={"value": str(query)},
+                params={"value": str(query)[:16]},
                 headers={
                     "Authorization": f"Bearer {token}",
                 },

@@ -143,7 +143,8 @@ class Payouts(commands.Cog):
         name: Optional[str] = None,
         webhook_url: Optional[str] = None,
         is_active: Optional[bool] = None,
-        from_card_id: Optional[int] = commands.Param(default=None),
+        from_card_str: Optional[str] = commands.Param(name="from_card",
+                                                      default=None, autocomplete=search_bank_cards_autocompleter),
         plasmo_bearer_token: Optional[str] = None,
     ):
         """
@@ -156,7 +157,7 @@ class Payouts(commands.Cog):
         webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.com/api/webhooks/{id}/{token})
         is_active: Доступен ли проект
         name: Название проекта, например "Интерпол" или "Постройка суда"
-        from_card_id: Номер карты, с которой будет производиться выплата
+        from_card_str: Номер карты, с которой будет производиться выплата
         plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
         """
         await inter.response.defer(ephemeral=True)
@@ -176,9 +177,9 @@ class Payouts(commands.Cog):
         await db_project.update(
             name=name if name is not None else db_project.name,
             is_active=is_active if is_active is not None else db_project.is_active,
-            from_card_string=formatters.format_bank_card(from_card_id)
-            if from_card_id is not None
-            else db_project.from_card_string,
+            from_card_str=from_card_str
+            if from_card_str is not None
+            else db_project.from_card_str,
             plasmo_bearer_token=plasmo_bearer_token
             if plasmo_bearer_token is not None
             else db_project.plasmo_bearer_token,
@@ -248,7 +249,7 @@ class Payouts(commands.Cog):
         for project in db_projects:
             embed.add_field(
                 name=f"{project.name} - {'Активен' if project.is_active else 'Неактивен'}  ",
-                value=f"{project.id} / {formatters.format_bank_card(project.from_card)} / "
+                value=f"{project.id} / {formatters.format_bank_card(project.from_card_str)} / "
                 f"||{project.plasmo_bearer_token[:-5]}...||\n"
                 f"||{project.webhook_url}||",
                 inline=False,
@@ -258,29 +259,32 @@ class Payouts(commands.Cog):
 
     async def payout(
         self,
-        interaction: disnake.Interaction,
         user: disnake.Member,
         amount: int,
         project,
         message: str,
         transaction_message: str = None,
+        interaction: Optional[disnake.Interaction] = None,
+        author: Optional[disnake.Member] = None
     ) -> bool:
         if transaction_message is None:
             transaction_message = message
 
         if amount <= 0 or amount > 69420:
-            await interaction.edit_original_message(
-                embed=build_simple_embed(
-                    "Сумма выплаты должна находиться в диапазоне 0 < `amount` <= 69420)",
-                    failure=True,
-                ),
-            )
+            if interaction is not None:
+                await interaction.edit_original_message(
+                    embed=build_simple_embed(
+                        "Сумма выплаты должна находиться в диапазоне 0 < `amount` <= 69420)",
+                        failure=True,
+                    ),
+                )
             return False
 
         if user.bot:
-            await interaction.edit_original_message(
-                embed=build_simple_embed("Ботам выплачивать нельзя", failure=True),
-            )
+            if interaction is not None:
+                await interaction.edit_original_message(
+                    embed=build_simple_embed("Ботам выплачивать нельзя", failure=True),
+                )
             return False
 
         if not settings.DEBUG:
@@ -296,18 +300,20 @@ class Payouts(commands.Cog):
                 )
                 not in plasmo_user.roles
             ):
-                await interaction.edit_original_message(
-                    embed=build_simple_embed(
-                        "Выплаты возможны только игрокам Plasmo RP", failure=True
-                    ),
-                )
+                if interaction is not None:
+                    await interaction.edit_original_message(
+                        embed=build_simple_embed(
+                            "Выплаты возможны только игрокам Plasmo RP", failure=True
+                        ),
+                    )
                 return False
-            await interaction.edit_original_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.yellow(),
-                    description="Получаю карту для выплаты...",
+            if interaction is not None:
+                await interaction.edit_original_message(
+                    embed=disnake.Embed(
+                        color=disnake.Color.yellow(),
+                        description="Получаю карту для выплаты...",
+                    )
                 )
-            )
         else:
             plasmo_user = user
 
@@ -338,12 +344,13 @@ class Payouts(commands.Cog):
             )
 
             if len(user_cards) == 0:
-                await interaction.edit_original_message(
-                    embed=build_simple_embed(
-                        "Не удалось найти карту для выплаты, Plasmo Tools уведомит игрока об этом",
-                        failure=True,
-                    ),
-                )
+                if interaction is not None:
+                    await interaction.edit_original_message(
+                        embed=build_simple_embed(
+                            "Не удалось найти карту для выплаты, Plasmo Tools уведомит игрока об этом",
+                            failure=True,
+                        ),
+                    )
                 try:
                     await user.send(
                         embed=disnake.Embed(
@@ -355,15 +362,19 @@ class Payouts(commands.Cog):
                         )
                     )
                 except disnake.Forbidden:
-                    await interaction.send(
-                        embed=build_simple_embed(
-                            f"У {user.mention} закрыты личные сообщения,"
-                            f" вам придется лично попросить игрока "
-                            f"установить карту через /установить-карту-для-выплат",
-                            failure=True,
-                        ),
-                        ephemeral=True,
-                    )
+                    if interaction is not None:
+                        await interaction.send(
+                            embed=build_simple_embed(
+                                f"У {user.mention} закрыты личные сообщения,"
+                                f" вам придется лично попросить игрока "
+                                f"установить карту через /установить-карту-для-выплат",
+                                failure=True,
+                            ),
+                            ephemeral=True,
+                        )
+                    else:
+                        pt_logs_channel = ...
+                        # todo: send log in pt_logs channel
                 return False
 
             user_card_str = formatters.format_bank_card(
@@ -386,18 +397,19 @@ class Payouts(commands.Cog):
             await models.PersonalSettings.objects.filter(discord_id=user.id).update(
                 saved_card_str=user_card_str
             )
-
-        await interaction.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.yellow(), description="Перевожу алмазы..."
-            )
-        )
-        if from_card_str == user_card_str:
+        if interaction is not None:
             await interaction.edit_original_message(
-                embed=build_simple_embed(
-                    "Невозможно перевести алмазы на эту карту", failure=True
-                ),
+                embed=disnake.Embed(
+                    color=disnake.Color.yellow(), description="Перевожу алмазы..."
+                )
             )
+        if from_card_str == user_card_str:
+            if interaction is not None:
+                await interaction.edit_original_message(
+                    embed=build_simple_embed(
+                        "Невозможно перевести алмазы на эту карту", failure=True
+                    ),
+                )
             return False
         status, error_message = await bank.transfer(
             token=project.plasmo_bearer_token,
@@ -407,18 +419,23 @@ class Payouts(commands.Cog):
             message=transaction_message,
         )
         if not status:
-            await interaction.edit_original_message(
-                embed=build_simple_embed(
-                    "API вернуло ошибку: **" + error_message + "**", failure=True
-                ),
-            )
+            if interaction is not None:
+                await interaction.edit_original_message(
+                    embed=build_simple_embed(
+                        "API вернуло ошибку: **" + error_message + "**", failure=True
+                    ),
+                )
+            else:
+                # todo: send to pt_logs channel
+                ...
             return False
-        await interaction.edit_original_message(
-            embed=disnake.Embed(
-                color=disnake.Color.yellow(),
-                description="Отправляю оповещение о выплате...",
+        if interaction is not None:
+            await interaction.edit_original_message(
+                embed=disnake.Embed(
+                    color=disnake.Color.yellow(),
+                    description="Отправляю оповещение о выплате...",
+                )
             )
-        )
 
         embed = disnake.Embed(
             color=disnake.Color.dark_green(),
@@ -438,18 +455,21 @@ class Payouts(commands.Cog):
                     embed=embed,
                 )
             except disnake.errors.NotFound:
-                await interaction.edit_original_message(
-                    embed=build_simple_embed(
-                        "Не удалось получить доступ к вебхуку. Оплата прошла, но игрок не был оповещен",
-                        failure=True,
-                    ),
-                )
+                if interaction is not None:
+                    await interaction.edit_original_message(
+                        embed=build_simple_embed(
+                            "Не удалось получить доступ к вебхуку. Оплата прошла, но игрок не был оповещен",
+                            failure=True,
+                        ),
+                    )
 
         db_guild = await models.StructureGuild.objects.get(
-            discord_id=interaction.guild.id
+            discord_id=interaction.guild.id if interaction is not None else author.guild.id
         )
         await self.bot.get_channel(db_guild.logs_channel_id).send(
-            embed=embed.add_field("Выплатил", interaction.author.mention, inline=False)
+            embed=embed.add_field("Выплатил",
+                                  interaction.author.mention if interaction is not None else author.mention,
+                                  inline=False)
             .add_field(
                 name="Комментарий к переводу", value=transaction_message, inline=False
             )
@@ -461,18 +481,18 @@ class Payouts(commands.Cog):
                 inline=False,
             )
         )
-
-        await interaction.edit_original_message(
-            embed=build_simple_embed(
-                f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
-                f"карту {user_card_str}",
-            ),
-        )
+        if interaction is not None:
+            await interaction.edit_original_message(
+                embed=build_simple_embed(
+                    f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
+                    f"карту {user_card_str}",
+                ),
+            )
         # todo: save failed payments and retry them later
         await models.StructurePayout.objects.create(
             project_id=project.id,
             user_id=user.id,
-            payer_id=interaction.author.id,
+            payer_id=interaction.author.id if interaction is not None else author.id,
             is_paid=True,
             from_card_str=from_card_str,
             to_card_str=user_card_str,
@@ -480,23 +500,23 @@ class Payouts(commands.Cog):
             message=message,
             date=datetime.datetime.now(),
         )
+        author = interaction if interaction is not None else author
         await self.bot.get_channel(settings.DevServer.transactions_channel_id).send(
             embed=disnake.Embed(
                 description=f"{from_card_str} -> "
                 f"{amount} {settings.Emojis.diamond} -> {user_card_str}\n"
-                f"Author {interaction.author.display_name} {interaction.author.mention}\n Message: {message}",
+                f"Author {author.display_name} {author.mention}\n Message: {message}",
             )
         )
         return True
 
-    @commands.guild_only()
-    @commands.slash_command(dm_permission=False, name="payout")
+    @is_guild_registered()
     @checks.blocked_users_slash_command_check()
     @commands.default_member_permissions(administrator=True)
-    @is_guild_registered()
+    @commands.slash_command(dm_permission=False, name="payout")
     async def payout_command(
         self,
-        inter: ApplicationCommandInteraction,
+        inter: disnake.GuildCommandInteraction,
         user: disnake.Member = commands.Param(),
         amount: int = commands.Param(),
         project_id: str = commands.Param(
@@ -533,7 +553,7 @@ class Payouts(commands.Cog):
             )
             return
 
-        await self.payout(inter, user, amount, db_project, message)
+        await self.payout(interaction=inter, user=user, amount=amount, project=db_project, message=message)
 
     @commands.slash_command(
         name="set-payouts-card",
