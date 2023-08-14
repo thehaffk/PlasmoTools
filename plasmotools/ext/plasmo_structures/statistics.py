@@ -66,8 +66,7 @@ class StructureStatictics(commands.Cog):
             )
         stats_text += "` all  month  week` user \n"
         for user_stats in sorted(users, key=lambda _: _[-1], reverse=True):
-            if user_stats[0].display_name == "PlasmoTools":
-                stats_text += f"`   0 -   0 -   0 ` {self.bot.user.mention}"
+            if user_stats[0].id == self.bot.user.id:
                 continue
 
             stats_text += (
