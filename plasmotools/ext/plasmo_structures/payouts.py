@@ -595,7 +595,7 @@ class Payouts(commands.Cog):
         await models.PersonalSettings.objects.update_or_create(
             discord_id=inter.author.id,
             defaults={
-                "saved_card_ыек": card_str,
+                "saved_card_str": card_str,
             },
         )
 
