@@ -1,7 +1,9 @@
 import disnake
 
 
-def build_simple_embed(description: str, failure: bool = False, without_title: bool = False) -> disnake.Embed:
+def build_simple_embed(
+    description: str, failure: bool = False, without_title: bool = False
+) -> disnake.Embed:
     return disnake.Embed(
         title=("Ошибка" if failure else "Успех") if not without_title else None,
         description=description,

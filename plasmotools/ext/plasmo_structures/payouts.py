@@ -143,8 +143,9 @@ class Payouts(commands.Cog):
         name: Optional[str] = None,
         webhook_url: Optional[str] = None,
         is_active: Optional[bool] = None,
-        from_card_str: Optional[str] = commands.Param(name="from_card",
-                                                      default=None, autocomplete=search_bank_cards_autocompleter),
+        from_card_str: Optional[str] = commands.Param(
+            name="from_card", default=None, autocomplete=search_bank_cards_autocompleter
+        ),
         plasmo_bearer_token: Optional[str] = None,
     ):
         """
@@ -265,7 +266,7 @@ class Payouts(commands.Cog):
         message: str,
         transaction_message: str = None,
         interaction: Optional[disnake.Interaction] = None,
-        author: Optional[disnake.Member] = None
+        author: Optional[disnake.Member] = None,
     ) -> bool:
         if transaction_message is None:
             transaction_message = message
@@ -464,12 +465,18 @@ class Payouts(commands.Cog):
                     )
 
         db_guild = await models.StructureGuild.objects.get(
-            discord_id=interaction.guild.id if interaction is not None else author.guild.id
+            discord_id=interaction.guild.id
+            if interaction is not None
+            else author.guild.id
         )
         await self.bot.get_channel(db_guild.logs_channel_id).send(
-            embed=embed.add_field("Выплатил",
-                                  interaction.author.mention if interaction is not None else author.mention,
-                                  inline=False)
+            embed=embed.add_field(
+                "Выплатил",
+                interaction.author.mention
+                if interaction is not None
+                else author.mention,
+                inline=False,
+            )
             .add_field(
                 name="Комментарий к переводу", value=transaction_message, inline=False
             )
@@ -554,7 +561,13 @@ class Payouts(commands.Cog):
             )
             return
 
-        await self.payout(interaction=inter, user=user, amount=amount, project=db_project, message=message)
+        await self.payout(
+            interaction=inter,
+            user=user,
+            amount=amount,
+            project=db_project,
+            message=message,
+        )
 
     @commands.slash_command(
         name="set-payouts-card",

@@ -24,14 +24,14 @@ logger = logging.getLogger(__name__)
 
 class PatentTypeView(disnake.ui.View):
     def __init__(
-            self,
+        self,
     ):
         super().__init__(timeout=600)
         self.is_mapart = None
 
     @disnake.ui.button(label="Мапарт", style=disnake.ButtonStyle.green, emoji="🗾")
     async def mapart_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.is_mapart = True
         await interaction.response.defer(ephemeral=True)
@@ -39,7 +39,7 @@ class PatentTypeView(disnake.ui.View):
 
     @disnake.ui.button(label="Другое", style=disnake.ButtonStyle.green, emoji="💡")
     async def other_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.is_mapart = False
         await interaction.response.defer(ephemeral=True)
@@ -49,7 +49,7 @@ class PatentTypeView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.is_mapart = None
         await interaction.response.send_message(
@@ -69,7 +69,7 @@ class MapsCountView(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, emoji="1️⃣")
     async def one_map_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         self.maps_count = 1
@@ -77,7 +77,7 @@ class MapsCountView(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, emoji="2️⃣")
     async def two_maps_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         self.maps_count = 2
@@ -85,7 +85,7 @@ class MapsCountView(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, emoji="4️⃣")
     async def four_maps_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         self.maps_count = 4
@@ -93,7 +93,7 @@ class MapsCountView(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, emoji="6️⃣")
     async def six_maps_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         self.maps_count = 6
@@ -103,7 +103,7 @@ class MapsCountView(disnake.ui.View):
         label="Ввести вручную", style=disnake.ButtonStyle.green, emoji="✏️", row=0
     )
     async def specify_count_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_modal(
             title="Создание патента",
@@ -124,7 +124,7 @@ class MapsCountView(disnake.ui.View):
             modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
                 "modal_submit",
                 check=lambda i: i.custom_id == "specify_maps_count_modal"
-                                and i.author.id == interaction.author.id,
+                and i.author.id == interaction.author.id,
                 timeout=600,
             )
         except asyncio.TimeoutError:
@@ -161,7 +161,7 @@ class MapsCountView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.maps_count = None
         await interaction.response.send_message(
@@ -180,7 +180,7 @@ class ClientSelectView(disnake.ui.View):
 
     @disnake.ui.user_select(max_values=1)
     async def user_select(
-            self, select: disnake.ui.UserSelect, interaction: disnake.MessageInteraction
+        self, select: disnake.ui.UserSelect, interaction: disnake.MessageInteraction
     ):
         if len(select.values) != 1:
             await interaction.send(
@@ -213,7 +213,7 @@ class ClientSelectView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.client = None
         await interaction.response.send_message(
@@ -235,7 +235,7 @@ class ConfirmationView(disnake.ui.View):
         label="Подтвердить", style=disnake.ButtonStyle.green, emoji="✅", row=0
     )
     async def confirm_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         self.decision = True
@@ -245,7 +245,7 @@ class ConfirmationView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
             embed=build_simple_embed("Создание патента отменено"), ephemeral=True
@@ -267,14 +267,14 @@ class PatentOwnersView(disnake.ui.View):
         max_values=16, min_values=1, placeholder="Выберите владельцев патента", row=0
     )
     async def user_select(
-            self, select: disnake.ui.UserSelect, interaction: disnake.MessageInteraction
+        self, select: disnake.ui.UserSelect, interaction: disnake.MessageInteraction
     ):
         await interaction.send(
             f"Выбрано:"
             + ", ".join([user.mention for user in select.values])
             + "\n\nНажмите "
-              "**✅ Все владельцы выбраны** "
-              "если выбраны все владельцы патента",
+            "**✅ Все владельцы выбраны** "
+            "если выбраны все владельцы патента",
             ephemeral=True,
         )
         self.patent_owners = select.values
@@ -285,7 +285,7 @@ class PatentOwnersView(disnake.ui.View):
         label="Все владельцы выбраны", style=disnake.ButtonStyle.green, emoji="✅", row=1
     )
     async def confirm(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         if len(self.patent_owners) < 1:
@@ -304,7 +304,7 @@ class PatentOwnersView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=2
     )
     async def cancel(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.patent_owners = None
         await interaction.response.send_message(
@@ -327,7 +327,7 @@ class PatentNameView(disnake.ui.View):
         label="Ввести название", style=disnake.ButtonStyle.green, emoji="✏️", row=0
     )
     async def specify_name_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_modal(
             title="Создание патента",
@@ -348,7 +348,7 @@ class PatentNameView(disnake.ui.View):
             modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
                 "modal_submit",
                 check=lambda i: i.custom_id == "specify_name_modal"
-                                and i.author.id == interaction.author.id,
+                and i.author.id == interaction.author.id,
                 timeout=600,
             )
         except asyncio.TimeoutError:
@@ -367,7 +367,7 @@ class PatentNameView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.patent_name = None
         await interaction.response.send_message(
@@ -391,7 +391,7 @@ class BankCardSelectionView(disnake.ui.View):
         label="Ввести номер карты", style=disnake.ButtonStyle.green, emoji="✏️", row=0
     )
     async def specify_card_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_modal(
             title="Создание патента",
@@ -412,7 +412,7 @@ class BankCardSelectionView(disnake.ui.View):
             modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
                 "modal_submit",
                 check=lambda i: i.custom_id == "specify_card_modal"
-                                and i.author.id == interaction.author.id,
+                and i.author.id == interaction.author.id,
                 timeout=600,
             )
         except asyncio.TimeoutError:
@@ -467,7 +467,7 @@ class BankCardSelectionView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.card_id = None
         await interaction.response.send_message(
@@ -488,7 +488,7 @@ class ConfirmOrDenyView(disnake.ui.View):
         label="Подтвердить", style=disnake.ButtonStyle.green, emoji="✅", row=0
     )
     async def confirm_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -499,7 +499,7 @@ class ConfirmOrDenyView(disnake.ui.View):
         label="Отказаться", style=disnake.ButtonStyle.gray, emoji="❌", row=0
     )
     async def deny_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -521,7 +521,7 @@ class SpecifyMapNumberView(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, emoji="✏️", row=0)
     async def specify_map_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_modal(
             title="Создание патента",
@@ -542,7 +542,7 @@ class SpecifyMapNumberView(disnake.ui.View):
             modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
                 "modal_submit",
                 check=lambda i: i.custom_id == "specify_map_number_modal"
-                                and i.author.id == interaction.author.id,
+                and i.author.id == interaction.author.id,
                 timeout=600,
             )
         except asyncio.TimeoutError:
@@ -590,7 +590,7 @@ class SpecifyMapNumberView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.map_number = None
         await interaction.response.send_message(
@@ -603,12 +603,14 @@ class SpecifyMapNumberView(disnake.ui.View):
 
 
 async def _get_patent_embed(
-        patent_id: int, for_internal_use: bool = False
+    patent_id: int, for_internal_use: bool = False
 ) -> disnake.Embed:
     db_patent = await models.Patent.objects.filter(id=patent_id).first()
     if db_patent is None:
-        return build_simple_embed(f"Патент " + formatters.format_patent_number(patent_id) + " не найден",
-                                  failure=True)
+        return build_simple_embed(
+            f"Патент " + formatters.format_patent_number(patent_id) + " не найден",
+            failure=True,
+        )
 
     if for_internal_use:
         patent_embed = disnake.Embed(
@@ -636,7 +638,6 @@ async def _get_patent_embed(
         return patent_embed
 
     if not for_internal_use:
-
         if db_patent.status in ["APPROVED", "AUTOAPPROVED"]:
             patent_color = disnake.Color.green()
         elif db_patent.status in "REJECTED":
@@ -651,7 +652,9 @@ async def _get_patent_embed(
 
         patent_embed.description = f"`Субъект:` {db_patent.subject}\n"
         if db_patent.is_art:
-            map_numbers = [("#" + str(map_number)) for map_number in db_patent.map_ids.split(";")]
+            map_numbers = [
+                ("#" + str(map_number)) for map_number in db_patent.map_ids.split(";")
+            ]
             if len(map_numbers) == 1:
                 patent_embed.description += f"`Номер карты:` {map_numbers[0]}\n"
             else:
@@ -663,7 +666,9 @@ async def _get_patent_embed(
         if len(owner_ids) == 1:
             patent_embed.description += f"`Владелец:` <@{owner_ids[0]}>\n"
         else:
-            patent_embed.description += f"`Владельцы:` {', '.join([f'<@{owner}>' for owner in owner_ids])}\n"
+            patent_embed.description += (
+                f"`Владельцы:` {', '.join([f'<@{owner}>' for owner in owner_ids])}\n"
+            )
 
         patent_statuses = {
             "WAIT": "⏳ Ожидает рассмотрения",
@@ -706,8 +711,8 @@ class BankerPatents(commands.Cog):
             plasmo_inter_author = plasmo_guild.get_member(inter.author)
 
             if (
-                    not plasmo_inter_author
-                    or plasmo_banker_role not in plasmo_inter_author.roles
+                not plasmo_inter_author
+                or plasmo_banker_role not in plasmo_inter_author.roles
             ):
                 await inter.edit_original_message(
                     embed=build_simple_embed(
@@ -796,8 +801,8 @@ class BankerPatents(commands.Cog):
             )
             await patent_price_confirm_view.wait()
             if (
-                    patent_price_confirm_view.decision is None
-                    or patent_price_confirm_view.decision is False
+                patent_price_confirm_view.decision is None
+                or patent_price_confirm_view.decision is False
             ):
                 return await inter.delete_original_response()
             if not patent_price_confirm_view.decision:
@@ -885,8 +890,8 @@ class BankerPatents(commands.Cog):
         )
         await patent_price_confirm_view.wait()
         if (
-                patent_price_confirm_view.decision is None
-                or patent_price_confirm_view.decision is False
+            patent_price_confirm_view.decision is None
+            or patent_price_confirm_view.decision is False
         ):
             return await inter.delete_original_response()
         if not patent_price_confirm_view.decision:
@@ -950,7 +955,7 @@ class BankerPatents(commands.Cog):
             patent_name = patent_name_view.patent_name
         del patent_name_view
         patent_preview_embed.description = (
-                f"`Субъект:` {patent_name}\n" + patent_preview_embed.description
+            f"`Субъект:` {patent_name}\n" + patent_preview_embed.description
         )
 
         # Выбор владельцев
@@ -981,10 +986,10 @@ class BankerPatents(commands.Cog):
         patent_owners = patent_owners_view.patent_owners
         del patent_owners_view
         patent_preview_embed.description += (
-                "\n`Владел"
-                + ("ец" if len(patent_owners) == 1 else "ьцы")
-                + ":` "
-                + ", ".join([user.mention for user in patent_owners])
+            "\n`Владел"
+            + ("ец" if len(patent_owners) == 1 else "ьцы")
+            + ":` "
+            + ", ".join([user.mention for user in patent_owners])
         )
 
         # Выбор карты
@@ -1038,8 +1043,8 @@ class BankerPatents(commands.Cog):
             await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
                 embed=disnake.Embed(
                     description=f"{formatters.format_bank_card(number=4, bank_prefix='DD')}"
-                                f" -> {formatters.format_bank_card(number=card_number, bank_prefix=card_bank)}\n"
-                                f"Не удалось выставить счет. Ошибка: {e}\n"
+                    f" -> {formatters.format_bank_card(number=card_number, bank_prefix=card_bank)}\n"
+                    f"Не удалось выставить счет. Ошибка: {e}\n"
                 )
             )
             return
@@ -1058,11 +1063,11 @@ class BankerPatents(commands.Cog):
         await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
             embed=disnake.Embed(
                 description=f"{settings.DD_BANK_PATENTS_CARD}"
-                            f" -> {formatters.format_bank_card(number=card_number, bank_prefix=card_bank)}\n"
-                            f"Счет {bill_id} на {total_patent_price} алм. выставлен на карту {card_number}\n"
-                            f"`Банкир:` {inter.author.mention}\n`Клиент:` {client.mention}\n"
-                            f"`Сообщение:` "
-                            + f"Оплата патента на {patent_name}. Банкир {inter.author.display_name}"
+                f" -> {formatters.format_bank_card(number=card_number, bank_prefix=card_bank)}\n"
+                f"Счет {bill_id} на {total_patent_price} алм. выставлен на карту {card_number}\n"
+                f"`Банкир:` {inter.author.mention}\n`Клиент:` {client.mention}\n"
+                f"`Сообщение:` "
+                + f"Оплата патента на {patent_name}. Банкир {inter.author.display_name}"
             )
         )
         patent_helper_embed.description = f"""Прочитайте вслух или отправьте в чат текст
@@ -1151,7 +1156,9 @@ class BankerPatents(commands.Cog):
                 discord_id=owner.id,
                 even_if_offline=False,
             )
-            await self.bot.get_channel(settings.ECONOMY_PATENTS_NUMBERS_CHANNEL_ID).send(str(db_patent.id))
+            await self.bot.get_channel(
+                settings.ECONOMY_PATENTS_NUMBERS_CHANNEL_ID
+            ).send(str(db_patent.id))
         await asyncio.sleep(10)
 
         patent_preview_embed.title = "Патент " + formatters.format_patent_number(
@@ -1217,7 +1224,7 @@ class BankerPatents(commands.Cog):
                         if len(results) != 1:
                             return False
                         if results[0][3] != formatters.format_patent_number(
-                                db_patent.id
+                            db_patent.id
                         ):
                             return False
 
@@ -1309,197 +1316,22 @@ class BankerPatents(commands.Cog):
 
         await self._moderate_patent(patent_id=db_patent.id)
 
-    async def _moderate_patent(self, patent_id: int):
-        db_patent = await models.Patent.objects.get(id=patent_id)
-        if db_patent.status != "WAIT":
-            return False
-
-        if db_patent.is_art:
-            await models.Patent.objects.filter(id=db_patent.id).update(
-                status="AUTOAPPROVED"
-            )
-            public_embed = await _get_patent_embed(patent_id=db_patent.id, for_internal_use=False)
-            internal_embed = await _get_patent_embed(patent_id=db_patent.id, for_internal_use=True)
-            patent_message = await self.bot.get_channel(settings.ECONOMY_PATENTS_PUBLIC_CHANNEL_ID).send(
-                embed=public_embed,
-                content=", ".join([("<@" + owner_id + ">") for owner_id in db_patent.owner_ids.split(";")])
-            )
-            await self.bot.get_channel(settings.ECONOMY_PATENTS_MODERATOR_CHANNEL_ID).send(
-                embed=internal_embed
-            )
-            await models.Patent.objects.filter(id=db_patent.id).update(
-                message_id=patent_message.id)
-            await self._payout_for_patent(patent_id=patent_id)
-            return
-
-    async def _process_moderator_decision(self, patent_id: int, approoved: bool, moderator_id: int):
-        ...
-
-    async def _payout_for_patent(self, patent_id: int):
-        db_patent = await models.Patent.objects.get(id=patent_id)
-        if db_patent.status == "WAIT" or not db_patent.is_payment_on_hold or db_patent.is_refunded:
-            return False
-
-        payouts_cog = self.bot.get_cog("Payouts")
-        if payouts_cog is None:
-            await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                embed=build_simple_embed(description="Unable to get Payments cog", failure=True)
-            )
-            raise RuntimeError("Payouts cog unavailable")
-
-        patents_payout_project = await models.StructureProject.objects.filter(
-            name="Патенты",
-            guild_discord_id=settings.economy_guild.discord_id,
-            from_card_str=settings.DD_BANK_PATENTS_CARD
-        ).first()
-        if patents_payout_project is None:
-            await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                embed=build_simple_embed(description="Unable to get projects for payout", failure=True)
-            )
-            raise RuntimeError("Unable to get projects for payout")
-
-        if db_patent.status in ["APPROVED", "AUTOAPPROVED"]:
-            economics_price, moderator_price, banker_price = tuple(map(int, db_patent.price_breakdown.split(";")))
-
-            if economics_price > 0:
-                payment_status, error = await bank_api.transfer(
-                    from_card_str=settings.DD_BANK_PATENTS_CARD,
-                    to_card_str=settings.ECONOMY_PATENTS_TREASURY_CARD,
-                    amount=economics_price,
-                    token=settings.PT_PLASMO_TOKEN,
-                    message=f"Налог за оформление патента {formatters.format_patent_number(db_patent.id)}"
-                )
-                await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                    content=("<@&" + str(
-                        settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">") if not payment_status else None,
-                    embed=disnake.Embed(
-                        description=f"{settings.DD_BANK_PATENTS_CARD} -> {settings.ECONOMY_PATENTS_TREASURY_CARD}\n"
-                                    f"`Amount:` {economics_price}\n`Message:` "
-                                    f"Налог за оформление патента {formatters.format_patent_number(db_patent.id)}\n"
-                                    f"`Статус:` {payment_status}"
-                    )
-                )
-            if moderator_price > 0:
-                moderator = self.bot.get_guild(settings.economy_guild.discord_id).get_member(db_patent.moderator_id)
-                if moderator is None or moderator.id == self.bot.user.id:
-                    await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                        embed=build_simple_embed(description=f"Unable to get moderator for patent {db_patent.id}",
-                                                 failure=True)
-                    )
-                else:
-                    payment_status = await payouts_cog.payout(
-                        user=moderator,
-                        amount=moderator_price,
-                        project=patents_payout_project,
-                        message="За модерацию патента",
-                        transaction_message="За модерирование патента " + formatters.format_patent_number(db_patent.id),
-                        author=self.bot.get_guild(settings.economy_guild.discord_id).get_member(self.bot.user.id)
-                    )
-                    await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                        content=("<@&" + str(
-                            settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">") if not payment_status else None,
-                        embed=disnake.Embed(
-                            description=f"{settings.DD_BANK_PATENTS_CARD} -> {moderator.mention}\n"
-                                        f"`Amount:` {moderator_price}\n`Message:` "
-                                        f"За модерирование патента {formatters.format_patent_number(db_patent.id)}\n"
-                                        f"`Статус:` {payment_status}"
-                        )
-                    )
-            if banker_price > 0:
-                banker = self.bot.get_guild(settings.economy_guild.discord_id).get_member(db_patent.banker_id)
-                if banker is None or banker.id == self.bot.user.id:
-                    await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                        embed=build_simple_embed(description=f"Unable to get banker for patent {db_patent.id}",
-                                                 failure=True)
-                    )
-                else:
-                    payment_status = await payouts_cog.payout(
-                        user=banker,
-                        amount=banker_price,
-                        project=patents_payout_project,
-                        message="За оформление патента",
-                        transaction_message="За оформление патента " + formatters.format_patent_number(db_patent.id),
-                        author=self.bot.get_guild(settings.economy_guild.discord_id).get_member(self.bot.user.id)
-                    )
-                    await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                        content=("<@&" + str(
-                            settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">") if not payment_status else None,
-                        embed=disnake.Embed(
-                            description=f"{settings.DD_BANK_PATENTS_CARD} -> {banker.mention}\n"
-                                        f"`Amount:` {banker_price}\n`Message:` "
-                                        f"За оформление патента {formatters.format_patent_number(db_patent.id)}\n"
-                                        f"`Статус:` {payment_status}"
-                        )
-                    )
-
-            await models.Patent.objects.filter(
-                id=db_patent.id
-            ).update(
-                is_payment_on_hold=False
-            )
-
-        if db_patent.status == "REJECTED":
-            economics_price, moderator_price, banker_price = tuple(map(int, db_patent.price_breakdown.split(";")))
-
-            if banker_price > 0:
-                banker = self.bot.get_guild(settings.economy_guild.discord_id).get_member(db_patent.banker_id)
-                if banker is None or banker.id == self.bot.user.id:
-                    await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                        embed=build_simple_embed(description=f"Unable to get banker for patent {db_patent.id}",
-                                                 failure=True)
-                    )
-                else:
-                    payment_status = await payouts_cog.payout(
-                        user=banker,
-                        amount=banker_price,
-                        project=patents_payout_project,
-                        message="За оформление патента",
-                        transaction_message="За оформление отклонённого патента "
-                                            + formatters.format_patent_number(db_patent.id),
-                        author=self.bot.get_guild(settings.economy_guild.discord_id).get_member(self.bot.user.id)
-                    )
-                    await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                        content=("<@&" + str(
-                            settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">") if not payment_status else None,
-                        embed=disnake.Embed(
-                            description=f"{settings.DD_BANK_PATENTS_CARD} -> {banker.mention}\n"
-                                        f"`Amount:` {banker_price}\n`Message:` "
-                                        f"За оформление отклонённого патента"
-                                        f" {formatters.format_patent_number(db_patent.id)}\n"
-                                        f"`Статус:` {payment_status}"
-                        )
-                    )
-            payment_status, error = await bank_api.transfer(
-                from_card_str=settings.DD_BANK_PATENTS_CARD,
-                to_card_str=db_patent.from_card_str,
-                amount=economics_price + moderator_price,
-                token=settings.PT_PLASMO_TOKEN,
-                message=f"Частичный возврат денег за патент {formatters.format_patent_number(db_patent.id)}"
-            )
-            await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                content=("<@&" + str(
-                    settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">") if not payment_status else None,
-                embed=disnake.Embed(
-                    description=f"{settings.DD_BANK_PATENTS_CARD} -> {settings.ECONOMY_PATENTS_TREASURY_CARD}\n"
-                                f"`Amount:` {economics_price + moderator_price}\n`Message:` "
-                                f"Частичный возврат денег за патент {formatters.format_patent_number(db_patent.id)}\n"
-                                f"`Статус:` {payment_status}"
-                )
-            )
-            await models.Patent.objects.filter(
-                id=db_patent.id
-            ).update(
-                is_payment_on_hold=False,
-                is_refunded=True,
-            )
-
-    @commands.message_command(name="Reject Patent", guild_ids=[settings.economy_guild.discord_id])
+    @commands.message_command(
+        name="Reject Patent", guild_ids=[settings.economy_guild.discord_id]
+    )
     @commands.default_member_permissions(administrator=True)
-    async def reject_patent_message_command(self, inter: MessageInteraction, message: disnake.Message):
+    async def reject_patent_message_command(
+        self, inter: MessageInteraction, message: disnake.Message
+    ):
         await inter.response.defer(ephemeral=True)
-        if message.channel.id != settings.ECONOMY_PATENTS_PUBLIC_CHANNEL_ID or message.author.id != self.bot.user.id:
+        if (
+            message.channel.id != settings.ECONOMY_PATENTS_PUBLIC_CHANNEL_ID
+            or message.author.id != self.bot.user.id
+        ):
             await inter.edit_original_response(
-                embed=build_simple_embed(description="Невозможно отклонить этот патент", failure=True),
+                embed=build_simple_embed(
+                    description="Невозможно отклонить этот патент", failure=True
+                ),
             )
             return
 
@@ -1512,7 +1344,9 @@ class BankerPatents(commands.Cog):
 
         if db_patent.status == "REJECTED":
             await inter.edit_original_response(
-                embed=build_simple_embed(description="Патент уже отклонён", failure=True),
+                embed=build_simple_embed(
+                    description="Патент уже отклонён", failure=True
+                ),
             )
             return
 
@@ -1521,12 +1355,18 @@ class BankerPatents(commands.Cog):
             moderator_id=inter.author.id,
         )
         await self.bot.get_channel(settings.ECONOMY_PATENTS_MODERATOR_CHANNEL_ID).send(
-            embeds=[await _get_patent_embed(patent_id=db_patent.id, for_internal_use=True),
-                    build_simple_embed(description=f"Патент вручную отклонён модератором {inter.author.mention}\n"
-                                                   f"Фича возврата денег за такие отмены не реализована")],
+            embeds=[
+                await _get_patent_embed(patent_id=db_patent.id, for_internal_use=True),
+                build_simple_embed(
+                    description=f"Патент вручную отклонён модератором {inter.author.mention}\n"
+                    f"Фича возврата денег за такие отмены не реализована"
+                ),
+            ],
         )
         await message.edit(
-            embed=await _get_patent_embed(patent_id=db_patent.id, for_internal_use=False),
+            embed=await _get_patent_embed(
+                patent_id=db_patent.id, for_internal_use=False
+            ),
         )
         await inter.edit_original_response(
             embed=build_simple_embed(description="Патент отклонён"),
@@ -1536,23 +1376,275 @@ class BankerPatents(commands.Cog):
     async def on_patent_review(self, inter: MessageInteraction):
         ...
 
-
     @commands.command(name="fake-map")
     @commands.is_owner()
     async def fake_map_command(
-            self, ctx: commands.GuildContext, map_number: int, patent_id: int
+        self, ctx: commands.GuildContext, map_number: int, patent_id: int
     ):
         try:
             await ctx.message.delete()
             await self.bot.get_channel(1137803532943233154).send(
                 embed=disnake.Embed(
                     description=f"{ctx.author.mention} запатентовал карту #{map_number} в dd_testworld"
-                                f" (патент #{formatters.format_patent_number(patent_id)},"
-                                f" владелец: {self.bot.user.mention})",
+                    f" (патент #{formatters.format_patent_number(patent_id)},"
+                    f" владелец: {self.bot.user.mention})",
                 )
             )
         except disnake.Forbidden:
             pass
+
+    async def _moderate_patent(self, patent_id: int):
+        db_patent = await models.Patent.objects.get(id=patent_id)
+        if db_patent.status != "WAIT":
+            return False
+
+        if db_patent.is_art:
+            await models.Patent.objects.filter(id=db_patent.id).update(
+                status="AUTOAPPROVED"
+            )
+            public_embed = await _get_patent_embed(
+                patent_id=db_patent.id, for_internal_use=False
+            )
+            internal_embed = await _get_patent_embed(
+                patent_id=db_patent.id, for_internal_use=True
+            )
+            patent_message = await self.bot.get_channel(
+                settings.ECONOMY_PATENTS_PUBLIC_CHANNEL_ID
+            ).send(
+                embed=public_embed,
+                content=", ".join(
+                    [
+                        ("<@" + owner_id + ">")
+                        for owner_id in db_patent.owner_ids.split(";")
+                    ]
+                ),
+            )
+            await self.bot.get_channel(
+                settings.ECONOMY_PATENTS_MODERATOR_CHANNEL_ID
+            ).send(embed=internal_embed)
+            await models.Patent.objects.filter(id=db_patent.id).update(
+                message_id=patent_message.id
+            )
+            await self._payout_for_patent(patent_id=patent_id)
+            return
+
+    async def _process_moderator_decision(
+        self, patent_id: int, approoved: bool, moderator_id: int
+    ):
+        ...
+
+    async def _payout_for_patent(self, patent_id: int):
+        db_patent = await models.Patent.objects.get(id=patent_id)
+        if (
+            db_patent.status == "WAIT"
+            or not db_patent.is_payment_on_hold
+            or db_patent.is_refunded
+        ):
+            return False
+
+        payouts_cog = self.bot.get_cog("Payouts")
+        if payouts_cog is None:
+            await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
+                embed=build_simple_embed(
+                    description="Unable to get Payments cog", failure=True
+                )
+            )
+            raise RuntimeError("Payouts cog unavailable")
+
+        patents_payout_project = await models.StructureProject.objects.filter(
+            name="Патенты",
+            guild_discord_id=settings.economy_guild.discord_id,
+            from_card_str=settings.DD_BANK_PATENTS_CARD,
+        ).first()
+        if patents_payout_project is None:
+            await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
+                embed=build_simple_embed(
+                    description="Unable to get projects for payout", failure=True
+                )
+            )
+            raise RuntimeError("Unable to get projects for payout")
+
+        if db_patent.status in ["APPROVED", "AUTOAPPROVED"]:
+            economics_price, moderator_price, banker_price = tuple(
+                map(int, db_patent.price_breakdown.split(";"))
+            )
+
+            if economics_price > 0:
+                payment_status, error = await bank_api.transfer(
+                    from_card_str=settings.DD_BANK_PATENTS_CARD,
+                    to_card_str=settings.ECONOMY_PATENTS_TREASURY_CARD,
+                    amount=economics_price,
+                    token=settings.PT_PLASMO_TOKEN,
+                    message=f"Налог за оформление патента {formatters.format_patent_number(db_patent.id)}",
+                )
+                await self.bot.get_channel(
+                    settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
+                ).send(
+                    content=(
+                        "<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">"
+                    )
+                    if not payment_status
+                    else None,
+                    embed=disnake.Embed(
+                        description=f"{settings.DD_BANK_PATENTS_CARD} -> {settings.ECONOMY_PATENTS_TREASURY_CARD}\n"
+                        f"`Amount:` {economics_price}\n`Message:` "
+                        f"Налог за оформление патента {formatters.format_patent_number(db_patent.id)}\n"
+                        f"`Статус:` {payment_status}"
+                    ),
+                )
+            if moderator_price > 0:
+                moderator = self.bot.get_guild(
+                    settings.economy_guild.discord_id
+                ).get_member(db_patent.moderator_id)
+                if moderator is None or moderator.id == self.bot.user.id:
+                    await self.bot.get_channel(
+                        settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
+                    ).send(
+                        embed=build_simple_embed(
+                            description=f"Unable to get moderator for patent {db_patent.id}",
+                            failure=True,
+                        )
+                    )
+                else:
+                    payment_status = await payouts_cog.payout(
+                        user=moderator,
+                        amount=moderator_price,
+                        project=patents_payout_project,
+                        message="За модерацию патента",
+                        transaction_message="За модерирование патента "
+                        + formatters.format_patent_number(db_patent.id),
+                        author=self.bot.get_guild(
+                            settings.economy_guild.discord_id
+                        ).get_member(self.bot.user.id),
+                    )
+                    await self.bot.get_channel(
+                        settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
+                    ).send(
+                        content=(
+                            "<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">"
+                        )
+                        if not payment_status
+                        else None,
+                        embed=disnake.Embed(
+                            description=f"{settings.DD_BANK_PATENTS_CARD} -> {moderator.mention}\n"
+                            f"`Amount:` {moderator_price}\n`Message:` "
+                            f"За модерирование патента {formatters.format_patent_number(db_patent.id)}\n"
+                            f"`Статус:` {payment_status}"
+                        ),
+                    )
+            if banker_price > 0:
+                banker = self.bot.get_guild(
+                    settings.economy_guild.discord_id
+                ).get_member(db_patent.banker_id)
+                if banker is None or banker.id == self.bot.user.id:
+                    await self.bot.get_channel(
+                        settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
+                    ).send(
+                        embed=build_simple_embed(
+                            description=f"Unable to get banker for patent {db_patent.id}",
+                            failure=True,
+                        )
+                    )
+                else:
+                    payment_status = await payouts_cog.payout(
+                        user=banker,
+                        amount=banker_price,
+                        project=patents_payout_project,
+                        message="За оформление патента",
+                        transaction_message="За оформление патента "
+                        + formatters.format_patent_number(db_patent.id),
+                        author=self.bot.get_guild(
+                            settings.economy_guild.discord_id
+                        ).get_member(self.bot.user.id),
+                    )
+                    await self.bot.get_channel(
+                        settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
+                    ).send(
+                        content=(
+                            "<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">"
+                        )
+                        if not payment_status
+                        else None,
+                        embed=disnake.Embed(
+                            description=f"{settings.DD_BANK_PATENTS_CARD} -> {banker.mention}\n"
+                            f"`Amount:` {banker_price}\n`Message:` "
+                            f"За оформление патента {formatters.format_patent_number(db_patent.id)}\n"
+                            f"`Статус:` {payment_status}"
+                        ),
+                    )
+
+            await models.Patent.objects.filter(id=db_patent.id).update(
+                is_payment_on_hold=False
+            )
+
+        if db_patent.status == "REJECTED":
+            economics_price, moderator_price, banker_price = tuple(
+                map(int, db_patent.price_breakdown.split(";"))
+            )
+
+            if banker_price > 0:
+                banker = self.bot.get_guild(
+                    settings.economy_guild.discord_id
+                ).get_member(db_patent.banker_id)
+                if banker is None or banker.id == self.bot.user.id:
+                    await self.bot.get_channel(
+                        settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
+                    ).send(
+                        embed=build_simple_embed(
+                            description=f"Unable to get banker for patent {db_patent.id}",
+                            failure=True,
+                        )
+                    )
+                else:
+                    payment_status = await payouts_cog.payout(
+                        user=banker,
+                        amount=banker_price,
+                        project=patents_payout_project,
+                        message="За оформление патента",
+                        transaction_message="За оформление отклонённого патента "
+                        + formatters.format_patent_number(db_patent.id),
+                        author=self.bot.get_guild(
+                            settings.economy_guild.discord_id
+                        ).get_member(self.bot.user.id),
+                    )
+                    await self.bot.get_channel(
+                        settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
+                    ).send(
+                        content=(
+                            "<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">"
+                        )
+                        if not payment_status
+                        else None,
+                        embed=disnake.Embed(
+                            description=f"{settings.DD_BANK_PATENTS_CARD} -> {banker.mention}\n"
+                            f"`Amount:` {banker_price}\n`Message:` "
+                            f"За оформление отклонённого патента"
+                            f" {formatters.format_patent_number(db_patent.id)}\n"
+                            f"`Статус:` {payment_status}"
+                        ),
+                    )
+            payment_status, error = await bank_api.transfer(
+                from_card_str=settings.DD_BANK_PATENTS_CARD,
+                to_card_str=db_patent.from_card_str,
+                amount=economics_price + moderator_price,
+                token=settings.PT_PLASMO_TOKEN,
+                message=f"Частичный возврат денег за патент {formatters.format_patent_number(db_patent.id)}",
+            )
+            await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
+                content=("<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">")
+                if not payment_status
+                else None,
+                embed=disnake.Embed(
+                    description=f"{settings.DD_BANK_PATENTS_CARD} -> {settings.ECONOMY_PATENTS_TREASURY_CARD}\n"
+                    f"`Amount:` {economics_price + moderator_price}\n`Message:` "
+                    f"Частичный возврат денег за патент {formatters.format_patent_number(db_patent.id)}\n"
+                    f"`Статус:` {payment_status}"
+                ),
+            )
+            await models.Patent.objects.filter(id=db_patent.id).update(
+                is_payment_on_hold=False,
+                is_refunded=True,
+            )
 
     # @commands.slash_command(name="force-patent", guild_ids=[settings.economy_guild.discord_id])
     # @commands.default_member_permissions(administrator=True)
