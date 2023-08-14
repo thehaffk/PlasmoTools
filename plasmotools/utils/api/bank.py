@@ -7,7 +7,6 @@ from aiohttp import ClientOSError
 
 from plasmotools import settings
 from plasmotools.ext.error_handler import BankAPIError
-from plasmotools.utils import formatters
 
 logger = logging.getLogger(__name__)
 

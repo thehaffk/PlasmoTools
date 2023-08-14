@@ -374,7 +374,7 @@ class Payouts(commands.Cog):
                             ephemeral=True,
                         )
                     else:
-                        pt_logs_channel = ...
+                        pass
                         # todo: send log in pt_logs channel
                 return False
 
