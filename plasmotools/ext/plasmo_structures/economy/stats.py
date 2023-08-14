@@ -6,6 +6,7 @@ from disnake.ext import commands
 
 from plasmotools import checks, settings
 from plasmotools.utils.api import banker
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -127,10 +128,9 @@ class BankerStats(commands.Cog):
         user: The user whose statistics you want to get {{BANKER_STATS_USER}}
         """
         await inter.send(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title=f"{settings.Emojis.loading2} Calculating...",
-                description="Collecting statistics can take a long time, please wait...",
+            embed=build_simple_embed(
+                without_title=True,
+                description=f"{settings.Emojis.loading2} Collecting statistics can take a long time, please wait...",
             ),
             ephemeral=True,
         )
@@ -149,10 +149,9 @@ class BankerStats(commands.Cog):
         self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member
     ):
         await inter.send(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title=f"{settings.Emojis.loading2} Calculating...",
-                description="Collecting statistics can take a long time, please wait...",
+            embed=build_simple_embed(
+                without_title=True,
+                description=f"{settings.Emojis.loading2} Collecting statistics can take a long time, please wait...",
             ),
             ephemeral=True,
         )

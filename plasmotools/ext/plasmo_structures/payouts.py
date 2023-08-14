@@ -44,8 +44,8 @@ class Payouts(commands.Cog):
         Помощь по проектам и выплатам {{PROJECTS_COMMAND}}
         """
         await inter.send(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
+            embed=build_simple_embed(
+                without_title=True,
                 description="Проекты в Plasmo Tools - это упрощение системы выплат. Создайте проект через "
                 "/проекты-создать чтобы получить доступ к </payout:1077320503632609291>\n\n"
                 f"**Получение plasmo_token**\n Когда перейдете по ссылке, авторизуйте приложение.\n"
@@ -502,7 +502,8 @@ class Payouts(commands.Cog):
         )
         author = interaction if interaction is not None else author
         await self.bot.get_channel(settings.DevServer.transactions_channel_id).send(
-            embed=disnake.Embed(
+            embed=build_simple_embed(
+                without_title=True,
                 description=f"{from_card_str} -> "
                 f"{amount} {settings.Emojis.diamond} -> {user_card_str}\n"
                 f"Author {author.display_name} {author.mention}\n Message: {message}",

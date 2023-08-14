@@ -353,12 +353,11 @@ class UserManagement(commands.Cog):
 
         rrs_cog = None
         if not hire_anyway:
-            rrs_cog = self.bot.get_cog("RRSCore")  # todo: refactoring
-            if rrs_cog is not None:
+            if (rrs_cog := self.bot.get_cog("RRSCore")) is not None:
                 await inter.edit_original_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.dark_green(),
+                    embed=build_simple_embed(
                         description="Проверка правил RRS...",
+                        without_title=True,
                     )
                 )
                 rrs_result = await rrs_cog.process_UM_structure_role_change(
@@ -537,9 +536,9 @@ class UserManagement(commands.Cog):
             rrs_cog = self.bot.get_cog("RRSCore")
             if rrs_cog is not None:
                 await inter.edit_original_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.dark_green(),
+                    embed=build_simple_embed(
                         description="Проверка правил RRS...",
+                        without_title=True,
                     )
                 )
                 rrs_result = await rrs_cog.process_UM_structure_role_change(

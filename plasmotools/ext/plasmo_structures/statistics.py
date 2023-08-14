@@ -34,10 +34,9 @@ class StructureStatictics(commands.Cog):
         role: Role from which participants need to be shown {{ROLE_STATS_ROLE}}
         """
         await inter.send(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title=f"{settings.Emojis.loading2} Calculating...",
-                description="Collecting statistics can take a long time, please wait...",
+            embed=build_simple_embed(
+                without_title=True,
+                description=f"{settings.Emojis.loading2} Collecting statistics can take a long time, please wait...",
             ),
             ephemeral=True,
         )

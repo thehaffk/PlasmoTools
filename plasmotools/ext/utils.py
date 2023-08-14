@@ -9,6 +9,7 @@ from plasmotools import checks, settings
 from plasmotools.utils import formatters
 from plasmotools.utils.api import bank, messenger, utils
 from plasmotools.utils.api.user import get_user_data
+from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
 
@@ -242,9 +243,10 @@ Plasmo Tools - многофункциональный бот для дискор
             nickname=nickname, message=message, even_if_offline=even_if_offline
         )
         await inter.edit_original_response(
-            embed=disnake.Embed(
+            embed=build_simple_embed(
                 description=f"PlasmoTools -> {nickname}: {message}\n"
-                f"**Message status: {'success' if status else 'fail'}**"
+                f"**Message status: {'success' if status else 'fail'}**",
+                without_title=True,
             )
         )
 
@@ -255,10 +257,9 @@ Plasmo Tools - многофункциональный бот для дискор
         Get treasury balance for server and government structures {{TREASURY_BALANCE_COMMAND}}
         """
         await inter.send(
-            embed=disnake.Embed(
-                color=disnake.Color.dark_green(),
-                title=f"{settings.Emojis.loading2} Calculating...",
-                description="Collecting data can take a long time, please wait...",
+            embed=build_simple_embed(
+                description=f"{settings.Emojis.loading2} Collecting data can take a long time, please wait...",
+                without_title=True,
             ),
             ephemeral=True,
         )
@@ -287,9 +288,9 @@ Plasmo Tools - многофункциональный бот для дискор
         pay2_data = await utils.get_pay2_stats()
         try:
             await ctx.message.reply(
-                embed=disnake.Embed(
+                embed=build_simple_embed(
                     description=disnake.utils.escape_markdown(pay2_data),
-                    color=disnake.Color.dark_green(),
+                    without_title=True,
                 ),
                 delete_after=360,
             )
