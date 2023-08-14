@@ -139,12 +139,11 @@ class Patent(orm.Model):
         ),  # WAIT, APPROVED, REJECTED, AUTOAPPROVED
         "moderator_id": orm.BigInteger(allow_null=True),
         "message_id": orm.BigInteger(allow_null=True),
-        "total_price": orm.Integer(),
         "price_breakdown": orm.String(max_length=256),  # Example: 15;5;10
         "is_payment_on_hold": orm.Boolean(default=True),
         "from_card_str": orm.String(max_length=2 + 1 + 4),
         "is_refunded": orm.Boolean(default=False),
-        "is_lamination_skipped": orm.Boolean(default=False),
+        "is_lamination_skipped": orm.Boolean(default=False, allow_null=True),
     }
 
 
