@@ -492,7 +492,8 @@ class Payouts(commands.Cog):
             await interaction.edit_original_message(
                 embed=build_simple_embed(
                     f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
-                    f"карту {user_card_str}",
+                    f"карту {user_card_str}\n"
+                    f"Комментарий: {message}",
                 ),
             )
         # todo: save failed payments and retry them later
