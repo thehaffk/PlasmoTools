@@ -116,7 +116,6 @@ class BACSynchronization(commands.Cog):
             logger.warning(err)
 
         await self._sync(member)
-        return
 
     @commands.Cog.listener()
     async def on_member_unban(
@@ -179,13 +178,12 @@ class BACSynchronization(commands.Cog):
             if not member.bot:
                 await self._sync(member)
             embed_counter.add_field(
-                name=f"Прогресс...",
+                name="Прогресс...",
                 value=formatters.build_progressbar(counter + 1, len(members)),
             )
 
             if counter % lazy_update_members_count == 0:
                 await inter.edit_original_message(embed=embed_counter)
-            continue
 
         embed_counter.clear_fields()
         embed_counter.add_field(

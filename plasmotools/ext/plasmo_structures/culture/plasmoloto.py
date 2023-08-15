@@ -65,7 +65,7 @@ class LotoView(disnake.ui.View):
         style=disnake.ButtonStyle.green,
     )
     async def generate_ticket(
-        self, button: disnake.ui.Button, interaction: disnake.Interaction
+        self, _: disnake.ui.Button, interaction: disnake.Interaction
     ):
         self.ticket += 1
         await interaction.response.edit_message(

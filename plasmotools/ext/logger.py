@@ -162,7 +162,7 @@ class PlasmoLogger(commands.Cog):
                 + "\n"
             )
 
-        description_text += f"\n"
+        description_text += "\n"
         description_text += "**Роли после изменения:** " + ", ".join(
             [role.name for role in user.roles[1:]]
         )
@@ -183,12 +183,12 @@ class PlasmoLogger(commands.Cog):
         )
         await messenger.send_mc_message(discord_id=user.id, message=mc_message)
         logs_guild_member = logs_guild.get_member(user.id)
-        if logs_guild_member:
-            if (
-                logs_guild.get_role(settings.LogsServer.roles_notifications_role_id)
-                in logs_guild_member.roles
-            ):
-                await logs_guild_member.send(embed=log_embed)
+        if (
+            logs_guild_member
+            and logs_guild.get_role(settings.LogsServer.roles_notifications_role_id)
+            in logs_guild_member.roles
+        ):
+            await logs_guild_member.send(embed=log_embed)
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild: disnake.Guild, member: disnake.Member):
@@ -251,7 +251,7 @@ class PlasmoLogger(commands.Cog):
             warns = user_data.get("warns", [])
             warns = [warn for warn in warns if not warn["revoked"] and warn["force"]]
             if warns:
-                warns_text = f"**Список красных варнов:\n**"
+                warns_text = "**Список красных варнов:\n**"
             for warn in warns:
                 warns_text += f"⚠ Выдал **{warn['helper']}** <t:{warn['date']}:R>\n {warn['message']}\n"
 
@@ -338,7 +338,7 @@ class PlasmoLogger(commands.Cog):
                 )
             except disnake.Forbidden as err:
                 logger.warning(
-                    "Unable to notify %d about warn: %s", (warned_user.id, err)
+                    "Unable to notify %d about warn: %s", warned_user.id, err
                 )
                 return False
 
@@ -356,7 +356,6 @@ class PlasmoLogger(commands.Cog):
             if not settings.DEBUG
             else settings.LogsServer.messages_channel_id
         )
-        # dd_logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
         embed = (
             disnake.Embed(
                 description=f"Guild: **{message.guild}**\n\n"
@@ -398,7 +397,6 @@ class PlasmoLogger(commands.Cog):
             if not settings.DEBUG
             else settings.LogsServer.messages_channel_id
         )
-        # dd_logs_channel = self.bot.get_channel(settings.LogsServer.messages_channel_id)
 
         embed = (
             disnake.Embed(

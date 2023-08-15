@@ -154,7 +154,7 @@ class Utils(commands.Cog):
 
         Parameters
         ----------
-        inter
+
         title: Title field in embed {{EMBED_TITLE}}
         description: Description field in embed {{EMBED_DESCRIPTION}}
         message_content: Content beyond the embed {{EMBED_MESSAGE_CONTENT}}

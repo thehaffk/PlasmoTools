@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import logging
 import re
-from typing import List, Optional
+from typing import Optional, List
 
 import disnake
 from disnake import ApplicationCommandInteraction, MessageInteraction
@@ -31,7 +31,7 @@ class PatentTypeView(disnake.ui.View):
 
     @disnake.ui.button(label="Мапарт", style=disnake.ButtonStyle.green, emoji="🗾")
     async def mapart_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.is_mapart = True
         await interaction.response.defer(ephemeral=True)
@@ -39,7 +39,7 @@ class PatentTypeView(disnake.ui.View):
 
     @disnake.ui.button(label="Другое", style=disnake.ButtonStyle.green, emoji="💡")
     async def other_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.is_mapart = False
         await interaction.response.defer(ephemeral=True)
@@ -49,7 +49,7 @@ class PatentTypeView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.is_mapart = None
         await interaction.response.send_message(
@@ -69,7 +69,7 @@ class MapsCountView(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, emoji="1️⃣")
     async def one_map_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         self.maps_count = 1
@@ -77,7 +77,7 @@ class MapsCountView(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, emoji="2️⃣")
     async def two_maps_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         self.maps_count = 2
@@ -85,7 +85,7 @@ class MapsCountView(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, emoji="4️⃣")
     async def four_maps_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         self.maps_count = 4
@@ -93,7 +93,7 @@ class MapsCountView(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, emoji="6️⃣")
     async def six_maps_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         self.maps_count = 6
@@ -103,7 +103,7 @@ class MapsCountView(disnake.ui.View):
         label="Ввести вручную", style=disnake.ButtonStyle.green, emoji="✏️", row=0
     )
     async def specify_count_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_modal(
             title="Создание патента",
@@ -161,7 +161,7 @@ class MapsCountView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.maps_count = None
         await interaction.response.send_message(
@@ -213,7 +213,7 @@ class ClientSelectView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.client = None
         await interaction.response.send_message(
@@ -235,7 +235,7 @@ class ConfirmationView(disnake.ui.View):
         label="Подтвердить", style=disnake.ButtonStyle.green, emoji="✅", row=0
     )
     async def confirm_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         self.decision = True
@@ -245,7 +245,7 @@ class ConfirmationView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
             embed=build_simple_embed("Создание патента отменено"), ephemeral=True
@@ -283,11 +283,11 @@ class PatentOwnersView(disnake.ui.View):
 
         await interaction.send(
             embed=build_simple_embed(
-                description=f"Выбрано:"
+                description="Выбрано:"
                 + ", ".join([user.mention for user in self.patent_owners])
                 + "\n\nНажмите "
-                "**✅ Все владельцы выбраны** "
-                "если выбраны все владельцы патента",
+                "**✅ Все владельцы выбраны**"
+                " если выбраны все владельцы патента",
                 without_title=True,
             ),
             ephemeral=True,
@@ -300,7 +300,7 @@ class PatentOwnersView(disnake.ui.View):
         label="Все владельцы выбраны", style=disnake.ButtonStyle.green, emoji="✅", row=1
     )
     async def confirm(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
         if len(self.patent_owners) < 1:
@@ -319,7 +319,7 @@ class PatentOwnersView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=2
     )
     async def cancel(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.patent_owners = None
         await interaction.response.send_message(
@@ -342,7 +342,7 @@ class PatentNameView(disnake.ui.View):
         label="Ввести название", style=disnake.ButtonStyle.green, emoji="✏️", row=0
     )
     async def specify_name_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_modal(
             title="Создание патента",
@@ -382,7 +382,7 @@ class PatentNameView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.patent_name = None
         await interaction.response.send_message(
@@ -406,7 +406,7 @@ class BankCardSelectionView(disnake.ui.View):
         label="Ввести номер карты", style=disnake.ButtonStyle.green, emoji="✏️", row=0
     )
     async def specify_card_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_modal(
             title="Создание патента",
@@ -482,7 +482,7 @@ class BankCardSelectionView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.card_id = None
         await interaction.response.send_message(
@@ -503,7 +503,7 @@ class ConfirmOrDenyView(disnake.ui.View):
         label="Подтвердить", style=disnake.ButtonStyle.green, emoji="✅", row=0
     )
     async def confirm_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -514,7 +514,7 @@ class ConfirmOrDenyView(disnake.ui.View):
         label="Отказаться", style=disnake.ButtonStyle.gray, emoji="❌", row=0
     )
     async def deny_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -536,7 +536,7 @@ class SpecifyMapNumberView(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, emoji="✏️", row=0)
     async def specify_map_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_modal(
             title="Создание патента",
@@ -605,7 +605,7 @@ class SpecifyMapNumberView(disnake.ui.View):
         label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌", row=1
     )
     async def cancel_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.map_number = None
         await interaction.response.send_message(
@@ -623,7 +623,7 @@ async def _get_patent_embed(
     db_patent = await models.Patent.objects.filter(id=patent_id).first()
     if db_patent is None:
         return build_simple_embed(
-            f"Патент " + formatters.format_patent_number(patent_id) + " не найден",
+            f"Патент {formatters.format_patent_number(patent_id)} не найден",
             failure=True,
         )
 
@@ -809,7 +809,7 @@ class BankerPatents(commands.Cog):
         if is_mapart:
             # Подтверждение наличия карт на руках
             patent_helper_embed.title = "Подтверждение наличия карт"
-            patent_helper_embed.description = f"""
+            patent_helper_embed.description = """
             Прочитайте вслух или отправьте в чат текст
             ```Чтобы запатентовать арт нужно иметь с собой оригиналы всех карт. Они сейчас у вас на руках?```
 
@@ -875,12 +875,12 @@ class BankerPatents(commands.Cog):
                 )
                 if economy_guild_license_role in economy_guild_member.roles:
                     has_license = True
-            patent_preview_embed.description += f"\n`Лицензия артодела:` " + (
+            patent_preview_embed.description += "\n`Лицензия артодела:` " + (
                 "найдена" if has_license else "не найдена"
             )
             if has_license:
                 patent_price_for_economy -= 10
-                patent_preview_embed.description += f"\n`Скидка по лицензии:` 10"
+                patent_preview_embed.description += "\n`Скидка по лицензии:` 10"
 
         patent_preview_embed.description += (
             f"\n`Распределение цены:` E{patent_price_for_economy}"
@@ -957,7 +957,7 @@ class BankerPatents(commands.Cog):
 
 `Пример 1:` Патент называется "Патент на комара". Вам нужно написать "Комар"
  
-`Пример 2:` Патент называется "Патент на то чтобы создавать баннеры из баннеров".\
+`Пример 2:` Патент называется "Патент на то, чтобы создавать баннеры из баннеров".\
  Вам нужно написать "Создание баннеров из баннеров" 
 
 **Укажите название патента**"""
@@ -1160,7 +1160,7 @@ class BankerPatents(commands.Cog):
                 description=f"Счет {bill_id} на {total_patent_price} алм. оплачен"
             )
         )
-        patent_helper_embed.description = f"""Прочитайте вслух или отправьте в чат текст
+        patent_helper_embed.description = """Прочитайте вслух или отправьте в чат текст
 ```Оплата прошла. Ваш патент регистрируется```
 
 **Это сообщение пропадет через 10 секунд...**"""
@@ -1198,15 +1198,14 @@ class BankerPatents(commands.Cog):
         patent_preview_embed.title = "Патент " + formatters.format_patent_number(
             db_patent.id
         )
-        patent_preview_embed.description += f"\n`Статус оплаты:` оплачено"
+        patent_preview_embed.description += "\n`Статус оплаты:` оплачено"
 
         is_map_lamination_skipped = None
         map_numbers = []
         if is_mapart:
             # Ламинирование карт
-            is_map_lamination_skipped = False
             patent_helper_embed.title = "Ламинирование карт"
-            patent_helper_embed.description = f"""Прочитайте вслух или отправьте в чат текст
+            patent_helper_embed.description = """Прочитайте вслух или отправьте в чат текст
 ```Патент зарегистрирован. Ваш арт можно заламинировать. Ламинирование арта добавит в описание всех карт номер \
 патента и уберет возможность копировать копии оригиналов карт. => вы сможете смело продавать копии арта и никто не \
 сможет их скопировать. Ламинировать ваш арт?``` 
@@ -1286,7 +1285,7 @@ class BankerPatents(commands.Cog):
                         )
                         break
                 map_numbers = laminated_map_numbers
-                patent_helper_embed.description = f"""Прочитайте вслух или отправьте в чат текст
+                patent_helper_embed.description = """Прочитайте вслух или отправьте в чат текст
 ```Все карты успешно заламинированы. Вы можете забрать их. Регистрация патента завершена, если вам нужна физическая \
 версия вашего патента, в виде подписанной главой экономики книги, вы всегда можете обратиться в тикеты в дискорде \
 структуры```
@@ -1301,7 +1300,7 @@ class BankerPatents(commands.Cog):
 
                 # Получение номеров карт
                 patent_helper_embed.title = "Получение номеров карт"
-                for card in range(maps_count):
+                for _ in range(maps_count):
                     patent_helper_embed.description = f"""
                             Введите номера карт в любом порядке.
 
@@ -1324,7 +1323,7 @@ class BankerPatents(commands.Cog):
                         return await inter.delete_original_response()
                     map_numbers.append(specify_card_number_view.map_number)
                     del specify_card_number_view
-                patent_helper_embed.description = f"""Прочитайте вслух или отправьте в чат текст
+                patent_helper_embed.description = """Прочитайте вслух или отправьте в чат текст
 ```Регистрация патента завершена, если вам нужна физическая версия вашего патента, в виде подписанной главой \
 экономики книги, вы всегда можете обратиться в тикеты в дискорде структуры```
 
@@ -1333,7 +1332,7 @@ class BankerPatents(commands.Cog):
                 f"\n`Номера карт:` {', '.join(map(str, map_numbers))}"
             )
         else:
-            patent_helper_embed.description = f"""Прочитайте вслух или отправьте в чат текст
+            patent_helper_embed.description = """Прочитайте вслух или отправьте в чат текст
 ```Регистрация патента завершена. Ваш патент отправлен на модерацию. Решение команды экономики \
 можно будет узнать в дискорде структуры: https://discord.gg/6sKKGPuhRk```
 
@@ -1460,7 +1459,6 @@ class BankerPatents(commands.Cog):
                 settings.ECONOMY_PATENTS_MODERATOR_CHANNEL_ID
             ).send(embed=internal_embed)
             await self._payout_for_patent(patent_id=patent_id)
-            return
         else:
             internal_embed = await _get_patent_embed(
                 patent_id=db_patent.id, for_internal_use=True
@@ -1549,7 +1547,7 @@ class BankerPatents(commands.Cog):
             )
 
             if economics_price > 0:
-                payment_status, error = await bank_api.transfer(
+                payment_status, _ = await bank_api.transfer(
                     from_card_str=settings.DD_BANK_PATENTS_CARD,
                     to_card_str=settings.ECONOMY_PATENTS_TREASURY_CARD,
                     amount=economics_price,
@@ -1702,7 +1700,7 @@ class BankerPatents(commands.Cog):
                             f"`Статус:` {payment_status}"
                         ),
                     )
-            payment_status, error = await bank_api.transfer(
+            payment_status, _ = await bank_api.transfer(
                 from_card_str=settings.DD_BANK_PATENTS_CARD,
                 to_card_str=db_patent.from_card_str,
                 amount=economics_price + moderator_price,

@@ -397,7 +397,7 @@ class UserManagement(commands.Cog):
             except disnake.errors.NotFound:
                 await user.remove_roles(
                     structure_role,
-                    reason=f"Unexpected error",
+                    reason="Unexpected error",
                 )
                 return await inter.edit_original_message(
                     embed=build_simple_embed(
@@ -579,7 +579,7 @@ class UserManagement(commands.Cog):
             except disnake.errors.NotFound:
                 await user.add_roles(
                     structure_role,
-                    reason=f"Unexpected error",
+                    reason="Unexpected error",
                 )
                 return await inter.edit_original_message(
                     embed=build_simple_embed(

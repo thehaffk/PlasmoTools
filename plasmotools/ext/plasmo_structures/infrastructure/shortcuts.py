@@ -76,7 +76,7 @@ class FastInfrastructurePayouts(commands.Cog):
             amount=8,
             project=await models.StructureProject.objects.get(id=fake_call_project_id),
             message=f"За [вызов]({message.jump_url})",
-            transaction_message=f"Автоматическая выплата за вызов",
+            transaction_message="Автоматическая выплата за вызов",
         )
         if result:
             for reaction in message.reactions:

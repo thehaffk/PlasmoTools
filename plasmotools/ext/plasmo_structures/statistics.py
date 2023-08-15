@@ -80,7 +80,7 @@ class StructureStatictics(commands.Cog):
             )
             stats_text += f"{user_stats[0].mention}\n"
         stats_embed = disnake.Embed(
-            title=f"Статистика наигранных часов",
+            title="Статистика наигранных часов",
             description=stats_text,
             color=role.color,
         )

@@ -19,16 +19,14 @@ class ConfirmView(disnake.ui.View):
         self.user = None
 
     @disnake.ui.button(label="Подтвердить", style=disnake.ButtonStyle.green, emoji="✅")
-    async def confirm(
-        self, button: disnake.ui.Button, interaction: disnake.Interaction
-    ):
+    async def confirm(self, _: disnake.ui.Button, interaction: disnake.Interaction):
         self.decision = True
         self.user = interaction.author
         await interaction.response.send_message("Подтверждено", ephemeral=True)
         self.stop()
 
     @disnake.ui.button(label="Отменить", style=disnake.ButtonStyle.gray, emoji="❌")
-    async def cancel(self, button: disnake.ui.Button, interaction: disnake.Interaction):
+    async def cancel(self, _: disnake.ui.Button, interaction: disnake.Interaction):
         self.decision = False
         self.user = interaction.author
         await interaction.response.send_message(

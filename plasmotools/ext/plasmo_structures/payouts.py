@@ -13,10 +13,10 @@ from plasmotools.checks import is_guild_registered
 from plasmotools.utils import api, formatters, models
 from plasmotools.utils.api import bank
 from plasmotools.utils.api.tokens import get_token_scopes
-from plasmotools.utils.autocompleters.bank import \
-    search_bank_cards_autocompleter
-from plasmotools.utils.autocompleters.plasmo_structures import \
-    payouts_projects_autocompleter
+from plasmotools.utils.autocompleters.bank import search_bank_cards_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import (
+    payouts_projects_autocompleter,
+)
 from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
@@ -47,10 +47,10 @@ class Payouts(commands.Cog):
             embed=build_simple_embed(
                 without_title=True,
                 description="Проекты в Plasmo Tools - это упрощение системы выплат. Создайте проект через "
-                "/проекты-создать чтобы получить доступ к </payout:1077320503632609291>\n\n"
-                f"**Получение plasmo_token**\n Когда перейдете по ссылке, авторизуйте приложение.\n"
-                f"Вас перенаправит на сайт, где вам нужно будет скопировать ваш токен из адресной строки:\n"
-                f"pt.haffk.tech/oauth/#access_token=***123TOKEN123**&scope=...&token_type=...",
+                "/проекты-создать, чтобы получить доступ к </payout:1077320503632609291>\n\n"
+                "**Получение plasmo_token**\n Когда перейдете по ссылке, авторизуйте приложение.\n"
+                "Вас перенаправит на сайт, где вам нужно будет скопировать ваш токен из адресной строки:\n"
+                "pt.haffk.tech/oauth/#access_token=***123TOKEN123**&scope=...&token_type=...",
             ),
             ephemeral=True,
             components=[
@@ -357,9 +357,9 @@ class Payouts(commands.Cog):
                         embed=disnake.Embed(
                             color=disnake.Color.dark_red(),
                             title="⚠ Plasmo Tools не смог произвести выплату",
-                            description="Не удалось найти карту для выплаты, чтобы в дальнейшем получать выплаты от "
-                            "структур оформите карту на свой аккаунт или укажите любую карту через "
-                            "/установить-карту-для-выплат",
+                            description="Не удалось найти карту для выплаты, чтобы в дальнейшем получать выплаты от"
+                            " структур оформите карту на свой аккаунт или укажите любую карту через"
+                            " /установить-карту-для-выплат",
                         )
                     )
                 except disnake.Forbidden:
@@ -374,8 +374,16 @@ class Payouts(commands.Cog):
                             ephemeral=True,
                         )
                     else:
-                        pass
-                        # todo: send log in pt_logs channel
+                        db_guild = await models.StructureGuild.objects.get(
+                            discord_id=author.guild.id
+                        ).first()
+                        await self.bot.get_channel(db_guild.logs_channel_id).send(
+                            embed=build_simple_embed(
+                                f"У {user.mention} закрыты личные сообщения, "
+                                f"невозможно оповестить о проблеме с выплатой",
+                                failure=True,
+                            )
+                        )
                 return False
 
             user_card_str = formatters.format_bank_card(
@@ -492,8 +500,7 @@ class Payouts(commands.Cog):
             await interaction.edit_original_message(
                 embed=build_simple_embed(
                     f"{user.mention} получил выплату в размере **{amount}** {settings.Emojis.diamond} на "
-                    f"карту {user_card_str}\n"
-                    f"Комментарий: {message}",
+                    f"карту {user_card_str}",
                 ),
             )
         # todo: save failed payments and retry them later

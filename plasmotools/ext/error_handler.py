@@ -3,9 +3,13 @@ import logging
 import disnake
 from disnake import InteractionTimedOut
 from disnake.ext import commands
-from disnake.ext.commands.errors import (CheckFailure, MissingPermissions,
-                                         MissingRole, NoPrivateMessage,
-                                         NotOwner)
+from disnake.ext.commands.errors import (
+    CheckFailure,
+    MissingPermissions,
+    MissingRole,
+    NoPrivateMessage,
+    NotOwner,
+)
 
 from plasmotools import settings
 from plasmotools.utils.embeds import build_simple_embed
@@ -35,40 +39,36 @@ class ErrorHandler(commands.Cog):
     ):
         if isinstance(error, MissingRole):
             return await inter.send(
-                embed=disnake.Embed(
-                    title="У Вас недостаточно прав.",
+                embed=build_simple_embed(
+                    failure=True,
                     description="Вам нужно "
                     f"иметь роль <@&{error.missing_role}> для использования этой команды.",
-                    color=disnake.Color.dark_red(),
                 ),
                 ephemeral=True,
             )
         elif isinstance(error, MissingPermissions):
             return await inter.send(
-                embed=disnake.Embed(
-                    title="У Вас недостаточно прав.",
+                embed=build_simple_embed(
+                    failure=True,
                     description="Вам нужно "
                     f"иметь пермишен **{error.missing_permissions[0]}** для использования этой команды.",
-                    color=disnake.Color.dark_red(),
                 ),
                 ephemeral=True,
             )
         elif isinstance(error, NotOwner):
             return await inter.send(
-                embed=disnake.Embed(
-                    title="У Вас недостаточно прав.",
+                embed=build_simple_embed(
+                    failure=True,
                     description="Вам нужно быть "
                     "администратором Plasmo или разработчиком бота для использования этой функции.",
-                    color=disnake.Color.dark_red(),
                 ),
                 ephemeral=True,
             )
         elif isinstance(error, NoPrivateMessage):
             return await inter.send(
-                embed=disnake.Embed(
-                    title="Команда недоступна.",
-                    description="`This command cannot be used in private messages.`",
-                    color=disnake.Color.dark_red(),
+                embed=build_simple_embed(
+                    failure=True,
+                    description="Это команда недоступна в DM",
                 ),
                 ephemeral=True,
             )
@@ -82,7 +82,6 @@ class ErrorHandler(commands.Cog):
                 ),
                 ephemeral=True,
             )
-            return
         elif isinstance(error, CheckFailure):
             await inter.send(
                 embed=disnake.Embed(
@@ -93,21 +92,19 @@ class ErrorHandler(commands.Cog):
                 ),
                 ephemeral=True,
             )
-            return
         elif isinstance(error, disnake.errors.NotFound):
             await inter.send(
-                embed=disnake.Embed(
-                    color=disnake.Color.dark_red(),
-                    title="Попробуйте еще раз",
+                embed=build_simple_embed(
+                    failure=True,
+                    description="Попробуйте еще раз",
                 ),
                 ephemeral=True,
             )
-            return
         elif isinstance(error, InteractionTimedOut):
             logger.error(error)
         elif isinstance(error, disnake.HTTPException):
-            logger.error(error)  # todo: ебучий 401 unauthorized
-            print("Error:", error.__str__())
+            logger.error(error)  # ебучий 401 unauthorized
+            # print("Error:", error.__str__())
             if "Invalid Webhook Token" in error.text:
                 return
             raise error
@@ -115,23 +112,21 @@ class ErrorHandler(commands.Cog):
             logger.error(error)
             try:
                 await inter.send(
-                    embed=disnake.Embed(
-                        title="Error",
+                    embed=build_simple_embed(
+                        failure=True,
                         description=f"Возникла неожиданная ошибка.\n\n`{error}`"
                         f"\n\nРепортить баги можно тут - {settings.DevServer.support_invite}",
-                        color=disnake.Color.dark_red(),
                     ),
                     ephemeral=True,
                 )
             except disnake.HTTPException:
                 pass
             await self.bot.get_channel(settings.DevServer.errors_channel_id).send(
-                embed=disnake.Embed(
-                    title="⚠⚠⚠",
+                embed=build_simple_embed(
+                    failure=True,
                     description=f"Возникла неожиданная ошибка.\n\n"
                     f"[digital drugs technologies]({settings.DevServer.support_invite})\n\n"
                     f"`{str(error)[:900]}`",
-                    color=disnake.Color.brand_green(),
                 ).add_field(
                     name="inter data",
                     value=f"{inter.__dict__}"[:1000],

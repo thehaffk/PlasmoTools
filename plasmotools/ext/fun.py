@@ -75,9 +75,8 @@ class Fun(commands.Cog):
             async with message.channel.typing():
                 await asyncio.sleep(1)
 
-        if "комар" in (message.content or "").lower():
-            if randint(1, 10) == 1:
-                await message.channel.send(content=choice(komaru_gifs))
+        if "комар" in (message.content or "").lower() and randint(1, 10) == 1:
+            await message.channel.send(content=choice(komaru_gifs))
 
         if randint(0, 1):
             for word in settings.word_emojis:

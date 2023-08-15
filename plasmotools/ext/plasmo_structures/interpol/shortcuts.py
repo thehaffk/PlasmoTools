@@ -210,7 +210,7 @@ class FastInterpolPayouts(commands.Cog):
         message_text = message.content
 
         finded_groups = re.findall(
-            r"1\.[ ]*([\s\S]+)2\.[ ]*([0-9]{1,2}):([0-9]{2})[ ]*-[ ]*([0-9]{1,2}):([0-9]{2})",
+            r"1\. *([\s\S]+)2\. *(\d{1,2}):(\d{2}) *- *(\d{1,2}):(\d{2})",
             message_text,
         )
         if len(finded_groups) == 0:

@@ -11,9 +11,6 @@ from plasmotools.utils.embeds import build_simple_embed
 logger = logging.getLogger(__name__)
 
 
-# todo: Rewrite with buttons
-
-
 class AdminCommands(commands.Cog):
     def __init__(self, bot: disnake.ext.commands.Bot):
         self.bot = bot
@@ -37,7 +34,7 @@ class AdminCommands(commands.Cog):
         """
         Регистрация/редактирование сервера в базе данных
         """
-        db_guild, created = await models.StructureGuild.objects.update_or_create(
+        db_guild, _ = await models.StructureGuild.objects.update_or_create(
             discord_id=inter.guild.id,
             defaults={
                 "alias": alias,

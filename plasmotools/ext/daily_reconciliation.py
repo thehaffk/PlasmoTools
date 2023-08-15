@@ -186,7 +186,7 @@ class DailyReconciliation(commands.Cog):
                         + "discord roles: "
                         + ",".join(discord_roles),
                     )
-                continue  # Checking for api roles / nickname / in_guild is unnececary if has_access if 0
+                continue  # Checking for api roles / nickname / in_guild is unnececary if it has_access if 0
 
             if sorted(api_roles) != sorted(discord_roles):
                 text = " ROLES ARE NOT THE SAME\n"

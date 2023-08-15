@@ -32,7 +32,6 @@ async def transfer(
             },
             headers={
                 "Authorization": f"Bearer {token}",
-                "content-type": "application/json",
             },
         ) as resp:
             if resp.status != 200 or not (await resp.json()).get("status", False):
@@ -63,7 +62,6 @@ async def bill(
             },
             headers={
                 "Authorization": f"Bearer {token}",
-                "content-type": "application/json",
             },
         ) as resp:
             if resp.status != 200 or not (resp_json := await resp.json()).get(
@@ -117,7 +115,6 @@ async def wait_for_bill(
                     return False, False
                 else:
                     await asyncio.sleep(10)
-                    continue
     return False, False
 
 
@@ -133,9 +130,7 @@ async def cancel_bill(card_str: str, bill_id: int, token: str):
                 "content-type": "application/json",
             },
         ) as resp:
-            if resp.status != 200 or not (resp_json := await resp.json()).get(
-                "status", False
-            ):
+            if resp.status != 200 or not (await resp.json()).get("status", False):
                 errors = (await resp.json()).get("error", [])
                 if isinstance(errors, dict):
                     errors = [errors]
@@ -143,7 +138,6 @@ async def cancel_bill(card_str: str, bill_id: int, token: str):
                     "Unable to cancel a bill: "
                     + ", ".join([error["msg"] for error in errors])
                 )
-    return
 
 
 async def search_cards(token: str, query: str, silent: bool = False) -> list:
