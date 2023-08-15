@@ -5,7 +5,7 @@ import re
 from typing import Optional, List
 
 import disnake
-from disnake import ApplicationCommandInteraction, MessageInteraction
+from disnake import ApplicationCommandInteraction, MessageInteraction, Localized
 from disnake.ext import commands
 
 from plasmotools import settings
@@ -717,9 +717,8 @@ class BankerPatents(commands.Cog):
     )
     async def patent_slash_command(self, inter: ApplicationCommandInteraction):
         """
-        Start registering new patent
+        Start registering new patent  {{PATENT_COMMAND}}
         """
-        # todo: {{PATENT_COMMAND}}
         await inter.response.defer(ephemeral=True)
 
         # Проверка на наличие роли банкира
@@ -1353,7 +1352,8 @@ class BankerPatents(commands.Cog):
         await self._moderate_patent(patent_id=db_patent.id)
 
     @commands.message_command(
-        name="Reject Patent", guild_ids=[settings.economy_guild.discord_id]
+        name=Localized("Reject Patent", key="REJECT_PATENT_MESSAGE_COMMAND_NAME"),
+        guild_ids=[settings.economy_guild.discord_id],
     )
     @commands.default_member_permissions(administrator=True)
     async def reject_patent_message_command(
@@ -1385,7 +1385,6 @@ class BankerPatents(commands.Cog):
                 ),
             )
             return
-
         await models.Patent.objects.filter(id=db_patent.id).update(
             status="REJECTED",
             moderator_id=inter.author.id,
@@ -1407,23 +1406,6 @@ class BankerPatents(commands.Cog):
         await inter.edit_original_response(
             embed=build_simple_embed(description="Патент отклонён"),
         )
-
-    @commands.command(name="fake-map")
-    @commands.is_owner()
-    async def fake_map_command(
-        self, ctx: commands.GuildContext, map_number: int, patent_id: int
-    ):
-        try:
-            await ctx.message.delete()
-            await self.bot.get_channel(1137803532943233154).send(
-                embed=disnake.Embed(
-                    description=f"{ctx.author.mention} запатентовал карту #{map_number} в dd_testworld"
-                    f" (патент #{formatters.format_patent_number(patent_id)},"
-                    f" владелец: {self.bot.user.mention})",
-                )
-            )
-        except disnake.Forbidden:
-            pass
 
     async def _moderate_patent(self, patent_id: int):
         db_patent = await models.Patent.objects.get(id=patent_id)
@@ -1777,12 +1759,6 @@ class BankerPatents(commands.Cog):
     #                                is_lamination_skipped: bool = None,
     #                                ):
     #     ...  # todo: this
-
-    @commands.Cog.listener("on_ready")
-    async def on_ready(self):
-        await self._moderate_patent(patent_id=1)
-        await self._moderate_patent(patent_id=2)
-        await self._moderate_patent(patent_id=3)
 
     async def cog_load(self):
         logger.info("%s loaded", __name__)

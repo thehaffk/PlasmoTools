@@ -93,5 +93,10 @@
     "TEN_PENALTIES_INTERPOL_BUTTON_NAME": "10 Штрафів",
 
     "CALL_INFRASTUCTURE_BUTTON_NAME": "Виклик",
-    "BREAKAGE_INFRASTUCTURE_BUTTON_NAME": "Поломка"
+    "BREAKAGE_INFRASTUCTURE_BUTTON_NAME": "Поломка",
+
+    "PATENT_COMMAND_NAME": "патент",
+    "PATENT_COMMAND_DESCRIPTION": "Оформити патент гравцю",
+
+    "REJECT_PATENT_MESSAGE_COMMAND_NAME": "Скасувати патент"
 }
