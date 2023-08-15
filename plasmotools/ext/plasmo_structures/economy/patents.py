@@ -2,10 +2,11 @@ import asyncio
 import datetime
 import logging
 import re
-from typing import Optional, List
+from typing import List, Optional
 
 import disnake
-from disnake import ApplicationCommandInteraction, MessageInteraction, Localized
+from disnake import (ApplicationCommandInteraction, Localized,
+                     MessageInteraction)
 from disnake.ext import commands
 
 from plasmotools import settings
