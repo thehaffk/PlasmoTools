@@ -10,8 +10,7 @@ from disnake.ext import commands
 from plasmotools import checks, settings
 from plasmotools.checks import is_guild_registered
 from plasmotools.utils import models
-from plasmotools.utils.autocompleters.plasmo_structures import \
-    role_autocompleter
+from plasmotools.utils.autocompleters.plasmo_structures import role_autocompleter
 from plasmotools.utils.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)
@@ -204,7 +203,7 @@ class UserManagement(commands.Cog):
 
         if webhook_url is not None:
             async with aiohttp.ClientSession() as session:
-                webhook = Webhook.from_url(webhook_url, session=session)
+                webhook = await Webhook.from_url(webhook_url, session=session).fetch()
                 if webhook is None:
                     await inter.send(
                         embed=build_simple_embed(
