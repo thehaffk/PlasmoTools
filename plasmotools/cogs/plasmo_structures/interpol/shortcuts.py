@@ -76,6 +76,8 @@ class FastInterpolPayouts(commands.Cog):
             )
             return False
 
+        return True
+
     @commands.message_command(
         name=Localized("Fake call", key="FAKE_CALL_INTERPOL_BUTTON_NAME"),
         guild_ids=[settings.interpol_guild.discord_id],
