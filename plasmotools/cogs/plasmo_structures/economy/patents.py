@@ -5,8 +5,7 @@ import re
 from typing import List, Optional
 
 import disnake
-from disnake import (ApplicationCommandInteraction, Localized,
-                     MessageInteraction)
+from disnake import ApplicationCommandInteraction, Localized, MessageInteraction
 from disnake.ext import commands
 
 from plasmotools import formatters, models, settings
