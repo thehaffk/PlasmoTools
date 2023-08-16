@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Dict, Tuple
 
 import disnake
 from disnake.ext import commands
@@ -14,14 +14,19 @@ logger = logging.getLogger(__name__)
 async def generate_bankers_stats_embeds(days=7) -> List[disnake.Embed]:
     transactions = await banker.get_banker_transactions(days)
 
-    bankers = {}
+    raw_bankers: Dict[str, int] = {}
     for transaction in transactions:
-        if transaction["banker"] not in bankers:
-            bankers[transaction["banker"]] = 0
-        bankers[transaction["banker"]] += 1
-    bankers = sorted(bankers.items(), key=lambda x: x[1], reverse=True)
+        if transaction["banker"] not in raw_bankers:
+            raw_bankers[transaction["banker"]] = 0
+
+        raw_bankers[transaction["banker"]] += 1
+    bankers: List[Tuple[str, int]] = sorted(
+        raw_bankers.items(), key=lambda x: x[1], reverse=True
+    )
     bankers_top = "\n`№. transactions` - user\n"
     for index, _banker in enumerate(bankers[:99]):
+        index: int
+        _banker: Tuple[str, int]
         bankers_top += (
             f"`{index + 1}. {' ' * (3 - len(str(_banker[1])) + 2 - len(str(index + 1)))}{_banker[1]}` - "
             f"{disnake.utils.escape_markdown(_banker[0])} \n"
