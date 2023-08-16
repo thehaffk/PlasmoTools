@@ -1,9 +1,8 @@
 import disnake
 from disnake.ext import commands
 
-from plasmotools import settings
-from plasmotools.ext.error_handler import GuildIsNotRegistered
-from plasmotools.utils import models
+from plasmotools import settings, models
+from plasmotools.cogs.error_handler import GuildIsNotRegistered
 
 
 def blocked_users_slash_command_check():

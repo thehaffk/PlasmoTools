@@ -1,5 +1,6 @@
 import logging
 import logging.handlers
+import os
 import sys
 from pathlib import Path
 
@@ -16,7 +17,7 @@ def setup() -> None:
     root_logger.setLevel(logging.DEBUG if settings.DEBUG else logging.INFO)
 
     # Set up file logging
-    log_file = Path("logs/plasmo-tools.log")
+    log_file = Path(os.path.join("plasmotools", "logs", "plasmo-tools.log"))
     log_file.parent.mkdir(exist_ok=True)
 
     file_handler = logging.handlers.RotatingFileHandler(
