@@ -16,7 +16,7 @@ if PT_PLASMO_TOKEN is None:
 PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
 if PT_PLASMO_COOKIES is None:
     logger.critical("PLASMO_COOKIE is missing")
-__version__ = "1.6.0" + ("-alpha" if DEBUG else "")
+__version__ = "1.6.1" + ("-alpha" if DEBUG else "")
 DATABASE_PATH = "plasmotools.sqlite"
 HELP_URL = "https://digitaldrugs.notion.site/Plasmo-Tools-ultimate-guide-a5874f7c3a56433ea2c3816527740fa0Л"
 oauth2_url_for_projects = (
