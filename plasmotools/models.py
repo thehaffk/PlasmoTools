@@ -11,32 +11,32 @@ models = orm.ModelRegistry(database)
 logger = logging.getLogger(__name__)
 
 
-class RRSRole(orm.Model):
-    tablename = "rrs_roles"
-    registry = models
-    fields = {
-        "id": orm.Integer(primary_key=True),
-        "structure_guild_id": orm.BigInteger(),
-        "structure_role_id": orm.BigInteger(),
-        "plasmo_role_id": orm.BigInteger(),
-        "verified_by_plasmo": orm.Boolean(default=False),
-        "disabled": orm.Boolean(default=False),
-    }
-
-
-class RRSAction(orm.Model):
-    tablename = "rrs_actions"
-    registry = models
-    fields = {
-        "id": orm.Integer(primary_key=True),
-        "structure_role_id": orm.BigInteger(),
-        "target_id": orm.BigInteger(),
-        "author_id": orm.BigInteger(),
-        "approved_by_user_id": orm.BigInteger(),
-        "is_role_granted": orm.Boolean(),
-        "reason": orm.String(max_length=256, allow_blank=True),
-        "date": orm.DateTime(),
-    }
+# class RRSRole(orm.Model):
+#     tablename = "rrs_roles"
+#     registry = models
+#     fields = {
+#         "id": orm.Integer(primary_key=True),
+#         "structure_guild_id": orm.BigInteger(),
+#         "structure_role_id": orm.BigInteger(),
+#         "plasmo_role_id": orm.BigInteger(),
+#         "verified_by_plasmo": orm.Boolean(default=False),
+#         "disabled": orm.Boolean(default=False),
+#     }
+#
+#
+# class RRSAction(orm.Model):
+#     tablename = "rrs_actions"
+#     registry = models
+#     fields = {
+#         "id": orm.Integer(primary_key=True),
+#         "structure_role_id": orm.BigInteger(),
+#         "target_id": orm.BigInteger(),
+#         "author_id": orm.BigInteger(),
+#         "approved_by_user_id": orm.BigInteger(),
+#         "is_role_granted": orm.Boolean(),
+#         "reason": orm.String(max_length=256, allow_blank=True),
+#         "date": orm.DateTime(),
+#     }
 
 
 class StructureGuild(orm.Model):

@@ -125,30 +125,31 @@ class PlasmoLogger(commands.Cog):
                     f"**Причина:** {sync_reason}"
                 )
             if "RRSID" in audit_entry.reason:
-                rrs_entry_id = int(
-                    re.findall(r"RRS \| \w* \| RRSID: (\d+)", audit_entry.reason)[0]
-                )
-                rrs_entry = await models.RRSAction.objects.get(id=rrs_entry_id)
-
-                description_text += f"via Plasmo Tools (ID: {rrs_entry.id})\n"
-
-                rrs_rule = await models.RRSRole.objects.filter(
-                    structure_role_id=rrs_entry.structure_role_id,
-                    plasmo_role_id=role.id,
-                ).first()
-
-                structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
-                structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
-
-                description_text += (
-                    f"**Структура:** {structure_guild.name}\n"
-                    f"**Роль:** {structure_role.name}\n"
-                    f"**Автор:** <@{rrs_entry.author_id}>\n"
-                )
-                if rrs_entry.approved_by_user_id != rrs_entry.author_id:
-                    description_text += (
-                        f"**Авторизовано:** <@{rrs_entry.approved_by_user_id}>\n"
-                    )
+                ...
+                # rrs_entry_id = int(
+                #     re.findall(r"RRS \| \w* \| RRSID: (\d+)", audit_entry.reason)[0]
+                # )
+                # rrs_entry = await models.RRSAction.objects.get(id=rrs_entry_id)
+                #
+                # description_text += f"via Plasmo Tools (ID: {rrs_entry.id})\n"
+                #
+                # rrs_rule = await models.RRSRole.objects.filter(
+                #     structure_role_id=rrs_entry.structure_role_id,
+                #     plasmo_role_id=role.id,
+                # ).first()
+                #
+                # structure_guild = self.bot.get_guild(rrs_rule.structure_guild_id)
+                # structure_role = structure_guild.get_role(rrs_rule.structure_role_id)
+                #
+                # description_text += (
+                #     f"**Структура:** {structure_guild.name}\n"
+                #     f"**Роль:** {structure_role.name}\n"
+                #     f"**Автор:** <@{rrs_entry.author_id}>\n"
+                # )
+                # if rrs_entry.approved_by_user_id != rrs_entry.author_id:
+                #     description_text += (
+                #         f"**Авторизовано:** <@{rrs_entry.approved_by_user_id}>\n"
+                #     )
         else:
             operation_author = audit_entry.user
             description_text += (
