@@ -29,7 +29,7 @@ async def search_bank_cards_autocompleter(
         headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
     ) as session:
         async with session.get(
-            "https://rp.plo.su/api/bank/search/cards",
+            "https://plasmorp.com/api/bank/search/cards",
             params={"value": value},
         ) as response:
             if (

@@ -23,7 +23,7 @@ async def _get_banker_transactions(days, to: int = 0) -> List[dict]:
         ) as session:
             transactions = []
             async with session.get(
-                "https://rp.plo.su/api/bank/banker/transactions",
+                "https://plasmorp.com/api/bank/banker/transactions",
                 params={"to": to, "count": 100},
             ) as resp:
                 response_json = {}

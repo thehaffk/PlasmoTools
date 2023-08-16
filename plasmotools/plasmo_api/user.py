@@ -30,7 +30,7 @@ async def get_user_data(
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                "https://rp.plo.su/api/user/profile", params=params
+                "https://plasmorp.com/api/user/profile", params=params
             ) as resp:
                 if resp.status != 200 or not (response_json := await resp.json()).get(
                     "status", False

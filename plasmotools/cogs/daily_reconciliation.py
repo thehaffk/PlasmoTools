@@ -90,7 +90,7 @@ class DailyReconciliation(commands.Cog):
             Roles: {', '.join(['`' + role.name + '`' for role in member.roles][1:])}
             
             **API**
-            Link: [u/{api_nick}](https://rp.plo.su/u/{api_nick})
+            Link: [u/{api_nick}](https://plasmorp.com/u/{api_nick})
             id: {api_data.get('id', "`MISSING`")}
             discord_id: {api_data.get('discord_id', "`MISSING`")}
             nick: {disnake.utils.escape_markdown(api_data.get('nick', "MISSING"))}
@@ -149,7 +149,7 @@ class DailyReconciliation(commands.Cog):
                     api_roles.append(role)
                 elif role != "default":
                     logger.debug(
-                        "Unknown API roles: %s at https://rp.plo.su/api/user/profile?discord_id=%i",
+                        "Unknown API roles: %s at https://plasmorp.com/api/user/profile?discord_id=%i",
                         role,
                         member.id,
                     )

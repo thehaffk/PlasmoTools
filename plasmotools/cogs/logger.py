@@ -100,7 +100,7 @@ class PlasmoLogger(commands.Cog):
             return
 
         description_text = (
-            f" [u/{user.display_name}](https://rp.plo.su/u/{user.display_name}) "
+            f" [u/{user.display_name}](https://plasmorp.com/u/{user.display_name}) "
             f"| {user.mention}"
         )
         description_text += "\n\n"
@@ -208,7 +208,7 @@ class PlasmoLogger(commands.Cog):
                 color=disnake.Color.dark_red(),
                 description=f"""
                            Причина: `Waiting for API response`
-                           Профиль [Plasmo](https://rp.plo.su/u/{member.display_name}) | {member.mention}
+                           Профиль [Plasmo](https://plasmorp.com/u/{member.display_name}) | {member.mention}
 
                            Получил бан: `Waiting for API response`
                            Наиграно за текущий сезон: `Waiting for API response`
@@ -216,7 +216,7 @@ class PlasmoLogger(commands.Cog):
 
                            {chosen_emoji} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
                                        """,
-            ).set_thumbnail(url="https://rp.plo.su/avatar/" + member.display_name)
+            ).set_thumbnail(url="https://plasmorp.com/avatar/" + member.display_name)
         )
 
         await asyncio.sleep(10)  # Wait for plasmo API to update
@@ -225,7 +225,7 @@ class PlasmoLogger(commands.Cog):
         # for tries in range(10):
         # async with ClientSession() as session:
         #     async with session.get(
-        #         url=f"https://rp.plo.su/api/user/profile?discord_id={member.id}&fields=stats,teams,warns",
+        #         url=f"https://plasmorp.com/api/user/profile?discord_id={member.id}&fields=stats,teams,warns",
         #     ) as response:
         #         try:
         #             user_data = (await response.json())["data"]
@@ -261,7 +261,7 @@ class PlasmoLogger(commands.Cog):
             Причина: **{reason.strip()}**
             {'> Примечание: rows - это количество строк(логов) в базе данных. Т.е. - количество выкопанных блоков'
             if 'rows' in reason else ''}
-            Профиль [Plasmo](https://rp.plo.su/u/{escape_markdown(nickname)}) | {member.mention}
+            Профиль [Plasmo](https://plasmorp.com/u/{escape_markdown(nickname)}) | {member.mention}
             
             {warns_text.strip()}
             
@@ -269,7 +269,7 @@ class PlasmoLogger(commands.Cog):
             Наиграно за текущий сезон: {user_stats.get('all', 0) / 3600:.2f} ч.
             {'Состоит в общинах:' if user_data.get('teams') else ''} {', '.join([('[' + team['name']
                                                                                                   + 
-                                                                                  '](https://rp.plo.su/t/'
+                                                                                  '](https://plasmorp.com/t/'
                                                                                                   +
                                                                                   team['url'] +
                                                                                   ')')
@@ -278,7 +278,7 @@ class PlasmoLogger(commands.Cog):
             
             {chosen_emoji} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})
                         """,
-        ).set_thumbnail(url="https://rp.plo.su/avatar/" + nickname)
+        ).set_thumbnail(url="https://plasmorp.com/avatar/" + nickname)
 
         await ban_message.edit(embed=log_embed)
         await ban_message.publish()
@@ -302,7 +302,7 @@ class PlasmoLogger(commands.Cog):
             title=f"⚡ {nickname} был разбанен",
             color=disnake.Color.dark_green(),
             description=f"""
-            {member.mention} | [u/{nickname}](https://rp.plo.su/u/{nickname})
+            {member.mention} | [u/{nickname}](https://plasmorp.com/u/{nickname})
              
             {random.choice(logo_emojis)} Powered by [digital drugs technologies]({settings.LogsServer.invite_url})""",
         )
