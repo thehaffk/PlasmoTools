@@ -84,7 +84,7 @@ class FastInfrastructurePayouts(commands.Cog):
         result = await payouts_cog.payout(
             interaction=inter,
             user=message.author,
-            amount=8,
+            amount=4,
             project=fake_call_project,
             message=f"За [вызов]({message.jump_url})",
             transaction_message="Автоматическая выплата за вызов",
@@ -136,7 +136,7 @@ class FastInfrastructurePayouts(commands.Cog):
         result = await payouts_cog.payout(
             interaction=inter,
             user=message.author,
-            amount=4,
+            amount=3,
             project=quick_fix_payout_project,
             message=f"За [починку поломки]({message.jump_url})",
             transaction_message="Автоматическая выплата за починку поломки",
