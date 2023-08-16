@@ -5,8 +5,7 @@ import re
 from typing import List, Optional
 
 import disnake
-from disnake import (ApplicationCommandInteraction, Localized,
-                     MessageInteraction)
+from disnake import ApplicationCommandInteraction, Localized, MessageInteraction
 from disnake.ext import commands
 
 from plasmotools import formatters, models, settings
@@ -1817,14 +1816,8 @@ class BankerPatents(commands.Cog):
     async def cog_load(self):
         logger.info("%s loaded", __name__)
 
-    # todo: localization
-    # todo: change token for transactions from PT_TOKEN to token from patents project
-    # todo: apps -> revoke patent
-    # todo: command to create or manage patent
     # todo: /get-patent id:
     # todo: patents in profiles?
-    # todo: manage patents
-    # todo: creating fake patent
     # todo: (maybe) ability to pass payment part if user is bot owner
 
 
