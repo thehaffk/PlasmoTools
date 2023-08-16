@@ -90,7 +90,7 @@ class DailyReconciliation(commands.Cog):
             Roles: {', '.join(['`' + role.name + '`' for role in member.roles][1:])}
             
             **API**
-            Link: [u/{api_nick}](https://rp.plo.su/u/{api_nick})
+            Link: [u/{api_nick}](https://plasmorp.com/u/{api_nick})
             id: {api_data.get('id', "`MISSING`")}
             discord_id: {api_data.get('discord_id', "`MISSING`")}
             nick: {disnake.utils.escape_markdown(api_data.get('nick', "MISSING"))}
@@ -149,7 +149,7 @@ class DailyReconciliation(commands.Cog):
                     api_roles.append(role)
                 elif role != "default":
                     logger.debug(
-                        "Unknown API roles: %s at https://rp.plo.su/api/user/profile?discord_id=%i",
+                        "Unknown API roles: %s at https://plasmorp.com/api/user/profile?discord_id=%i",
                         role,
                         member.id,
                     )
@@ -185,7 +185,7 @@ class DailyReconciliation(commands.Cog):
                         + "discord roles: "
                         + ",".join(discord_roles),
                     )
-                continue  # Checking for plasmo_api roles / nickname / in_guild is unnececary if it has_access if 0
+                continue  # Checking for api roles / nickname / in_guild is unnececary if it has_access if 0
 
             if sorted(api_roles) != sorted(discord_roles):
                 text = " ROLES ARE NOT THE SAME\n"
@@ -219,7 +219,7 @@ class DailyReconciliation(commands.Cog):
             #         member,
             #         api_profile,
             #         "**NICKNAMES DO NOT MATCH:** \n"
-            #         + "plasmo_api          discord\n"
+            #         + "api          discord\n"
             #         + disnake.utils.escape_markdown(
             #             f"'{api_profile.get('nick')}        '{member.display_name}'"
             #         ),

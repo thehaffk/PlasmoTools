@@ -97,7 +97,7 @@ class UserManagement(commands.Cog):
         ----------
         inter
         role: Роль
-        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/plasmo_api/webhooks/...)
+        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/api/webhooks/...)
         available: Доступна ли роль для найма и снятия
         name: Название роли, например "Интерпол"
 
@@ -186,7 +186,7 @@ class UserManagement(commands.Cog):
         ----------
         inter
         role: Роль
-        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discord.com/plasmo_api/webhooks/...)
+        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discord.com/api/webhooks/...)
         available: Доступна ли роль для найма и снятия
         name: Название роли, например "Интерпол"
 
@@ -344,7 +344,7 @@ class UserManagement(commands.Cog):
             description=f"{user.mention} принят на должность **{db_role.name}**",  # todo: gender things
         ).set_author(
             name=plasmo_user.display_name if plasmo_user else user.display_name,
-            icon_url="https://rp.plo.su/avatar/"
+            icon_url="https://plasmorp.com/avatar/"
             + (plasmo_user.display_name if plasmo_user else user.display_name),
         )
         if comment is not None and comment.strip() != "":
@@ -524,7 +524,7 @@ class UserManagement(commands.Cog):
             description=f"{user.mention} уволен с должности **{db_role.name}**",
         ).set_author(
             name=plasmo_user.display_name if plasmo_user else user.display_name,
-            icon_url="https://rp.plo.su/avatar/"
+            icon_url="https://plasmorp.com/avatar/"
             + (plasmo_user.display_name if plasmo_user else user.display_name),
         )
         if reason is not None and reason.strip() != "":

@@ -9,10 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 async def _get_chat_info(nickname: str) -> Optional[dict]:
-    # /plasmo_api/mesenger/chats/user/{nickname}
+    # /api/mesenger/chats/user/{nickname}
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            f"https://rp.plo.su/api/messenger/chats/user/{nickname}",
+            f"https://plasmorp.com/api/messenger/chats/user/{nickname}",
             cookies={
                 "rp_token": settings.PT_PLASMO_COOKIES,
             },
@@ -69,7 +69,7 @@ async def send_mc_message(
     logger.info("PlasmoTools -> %s: %s", nickname, message)
     async with aiohttp.ClientSession() as session:
         async with session.post(
-            "https://rp.plo.su/api/messenger/send",
+            "https://plasmorp.com/api/messenger/send",
             json={
                 "chat_id": chat_id,
                 "content": message,

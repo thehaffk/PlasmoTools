@@ -51,7 +51,7 @@ class Utils(commands.Cog):
             disnake.Embed(
                 title=f"API Profile - {member.display_name}",
                 color=disnake.Color.dark_purple(),
-                url=f"https://rp.plo.su/u/{member_api_profile.get('nick', 'PlasmoTools')}",
+                url=f"https://plasmorp.com/u/{member_api_profile.get('nick', 'PlasmoTools')}",
                 description=f"""
             `Nickname`: {member_api_profile.get('nick', '**-**')}
             `Plasmo ID`: {member_api_profile.get('id', '**-**')}
@@ -67,13 +67,13 @@ class Utils(commands.Cog):
             )
             .set_footer(text="Waiting for redesign")
             .set_thumbnail(
-                url="https://rp.plo.su/avatar/"
+                url="https://plasmorp.com/avatar/"
                 + member_api_profile.get("nick", "PlasmoTools")
             )
         )
         teams_text = ", ".join(
             [
-                f"[{team['name']}](https://rp.plo.su/t/{team['url']})"
+                f"[{team['name']}](https://plasmorp.com/t/{team['url']})"
                 for team in member_api_profile.get("teams", [])
             ]
         )
@@ -166,7 +166,7 @@ class Utils(commands.Cog):
             color=int(color),
         ).set_footer(
             text=inter.author,
-            icon_url=f"https://rp.plo.su/avatar/{inter.author.display_name}",
+            icon_url=f"https://plasmorp.com/avatar/{inter.author.display_name}",
         )
         await inter.edit_original_response(
             embed=embed,

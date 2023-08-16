@@ -20,7 +20,7 @@ __version__ = "1.6.0" + ("-alpha" if DEBUG else "")
 DATABASE_PATH = "plasmotools.sqlite"
 HELP_URL = "https://thfk.notion.site/Plasmo-Tools-help-a5874f7c3a56433ea2c3816527740fa0"
 oauth2_url_for_projects = (
-    "https://rp.plo.su/oauth2?client_id=FHHGpr8ZbZb35ZFvwSgD9EMbvkQF35ZFvwSgD9EMbvkQGpr8"
+    "https://plasmorp.com/oauth2?client_id=FHHGpr8ZbZb35ZFvwSgD9EMbvkQF35ZFvwSgD9EMbvkQGpr8"
     "&redirect_uri=https://pt.haffk.tech/oauth/&response_type=token"
     "&scope=bank:manage%20bank:history%20bank:search%20user:notifications%20bank:penalties"
 )
