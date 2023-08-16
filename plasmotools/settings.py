@@ -3,39 +3,49 @@ import os
 from builtins import bool
 from dataclasses import dataclass
 
-from dotenv import load_dotenv
-
-load_dotenv()
+import dotenv
 
 logger = logging.getLogger(__name__)
 
-DATABASE_PATH = "./data.sqlite"
-
+dotenv.load_dotenv()
 DEBUG = bool(int(os.getenv("BOT_DEBUG", "0")))
 TOKEN = os.getenv("TOKEN", None)
 PT_PLASMO_TOKEN = os.getenv("PLASMO_TOKEN", None)
-PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
 if PT_PLASMO_TOKEN is None:
     logger.critical("PLASMO_TOKEN is missing")
+PT_PLASMO_COOKIES = os.getenv("PLASMO_COOKIE", None)
 if PT_PLASMO_COOKIES is None:
     logger.critical("PLASMO_COOKIE is missing")
-
-__version__ = "1.5.10" + ("-alpha" if DEBUG else "")
-
-help_url = "https://thfk.notion.site/Plasmo-Tools-help-a5874f7c3a56433ea2c3816527740fa0"
-
-oauth2_url_for_projects = "https://rp.plo.su/oauth2?client_id=FHHGpr8ZbZb35ZFvwSgD9EMbvkQF35ZFvwSgD9EMbvkQGpr8&redirect_uri=https://pt.haffk.tech/oauth/&response_type=token&scope=bank:manage%20bank:history%20bank:search%20user:notifications%20bank:penalties"
-
+__version__ = "1.6.0" + ("-alpha" if DEBUG else "")
+DATABASE_PATH = "plasmotools.sqlite"
+HELP_URL = "https://thfk.notion.site/Plasmo-Tools-help-a5874f7c3a56433ea2c3816527740fa0"
+oauth2_url_for_projects = (
+    "https://rp.plo.su/oauth2?client_id=FHHGpr8ZbZb35ZFvwSgD9EMbvkQF35ZFvwSgD9EMbvkQGpr8"
+    "&redirect_uri=https://pt.haffk.tech/oauth/&response_type=token"
+    "&scope=bank:manage%20bank:history%20bank:search%20user:notifications%20bank:penalties"
+)
 blocked_users_ids = [
     744193929746055168,  # TheMeko
 ]
-
 owner_ids = [
     737501414141591594,  # thehaffk
     222718720127139840,  # Apehum
     191836876980748298,  # KPidS
     1017063823548616785,  # haffk alt
+    744193929746055168 if DEBUG else 4,  # meko
 ]
+
+INTERPOL_UNMANAGED_PENALTIES_CHANNEL_ID = 1136128085540999188
+ECONOMY_ARTODEL_LICENSE_ROLE_ID = 1003248014049165362
+ECONOMY_DD_OPERATIONS_CHANNEL_ID = 1137250011416121475
+ECONOMY_PATENTS_PUBLIC_CHANNEL_ID = 1122900180463784106
+ECONOMY_PATENTS_MODERATOR_CHANNEL_ID = 1137536310412853380
+ECONOMY_PATENTS_MODERATOR_ROLE_ID = 1139445058739912736
+DD_BANK_PATENTS_CARD = "DD-0004"
+ECONOMY_PATENTS_TREASURY_CARD = "EB-1530" if DEBUG else "EB-0017"
+# ECONOMY_MAIN_TREASURY_CARD = "EB-0014"
+ECONOMY_FAILED_PAYMENTS_ROLE_ID = 1140383608062885928
+ECONOMY_PATENTS_NUMBERS_CHANNEL_ID = 1122900705280266291
 
 
 class LogsServer:
@@ -53,8 +63,10 @@ class LogsServer:
 
     roles_notifications_role_id = 1046524223377637416
     errors_notifications_role_id = 876056190726045716
-    rrs_verifications_notifications_role_id = 843154786726445105
     moderator_role_id = 875736652977418292
+
+    rrs_verifications_notifications_role_id = 843154786726445105
+    rrs_alerts_role_id = 1120748226119729267
 
     pride_month_event_id = 1103678285570904204
 
@@ -126,6 +138,7 @@ class PlasmoRPGuild:
     interpol_role_id = 751723033357451335
     banker_role_id = 826367015014498314
     player_role_id = 746628733452025866
+    new_player_role_id = 1122893850692829184
     keeper_role_id = 1003276423747874896
     ne_komar_role_id = 956884028533919774
     fusion_role_id = 751722994170331136
@@ -155,6 +168,7 @@ class PlasmoRPGuild:
 
 disallowed_to_rrs_roles = [
     PlasmoRPGuild.player_role_id,
+    PlasmoRPGuild.new_player_role_id,
     PlasmoRPGuild.helper_role_id,
     PlasmoRPGuild.fusion_role_id,
     PlasmoRPGuild.president_role_id,
@@ -170,6 +184,7 @@ api_roles = {
     "banker": PlasmoRPGuild.banker_role_id,
     "keeper": PlasmoRPGuild.keeper_role_id,
     "player": PlasmoRPGuild.player_role_id,
+    "new_player": PlasmoRPGuild.new_player_role_id,
     "fusion": PlasmoRPGuild.fusion_role_id,
 }
 
