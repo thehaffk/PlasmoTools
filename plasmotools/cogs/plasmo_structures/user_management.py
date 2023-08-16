@@ -7,9 +7,9 @@ import disnake
 from disnake import ApplicationCommandInteraction, Webhook
 from disnake.ext import commands
 
-from plasmotools import checks, settings, models
-from plasmotools.checks import is_guild_registered
+from plasmotools import checks, models, settings
 from plasmotools.autocompleters.plasmo_structures import role_autocompleter
+from plasmotools.checks import is_guild_registered
 from plasmotools.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)

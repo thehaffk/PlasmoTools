@@ -5,7 +5,7 @@ import disnake
 from disnake import ApplicationCommandInteraction, MessageInteraction
 from disnake.ext import commands
 
-from plasmotools import checks, models
+from plasmotools import models
 from plasmotools.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)

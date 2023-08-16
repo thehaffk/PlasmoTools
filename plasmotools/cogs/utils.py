@@ -5,10 +5,10 @@ import disnake
 from disnake import ApplicationCommandInteraction, Localized
 from disnake.ext import commands
 
-from plasmotools import checks, settings, formatters
-from plasmotools.plasmo_api import utils, messenger, bank
-from plasmotools.plasmo_api.user import get_user_data
+from plasmotools import checks, formatters, settings
 from plasmotools.embeds import build_simple_embed
+from plasmotools.plasmo_api import bank, messenger, utils
+from plasmotools.plasmo_api.user import get_user_data
 
 logger = logging.getLogger(__name__)
 

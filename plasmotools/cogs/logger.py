@@ -10,7 +10,7 @@ import disnake
 from disnake.ext import commands
 from disnake.utils import escape_markdown
 
-from plasmotools import settings, models, plasmo_api
+from plasmotools import models, plasmo_api, settings
 from plasmotools.plasmo_api import messenger
 
 logger = logging.getLogger(__name__)

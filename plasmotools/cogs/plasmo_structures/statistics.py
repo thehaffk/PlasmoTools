@@ -3,7 +3,7 @@ import logging
 import disnake
 from disnake.ext import commands
 
-from plasmotools import checks, settings, plasmo_api
+from plasmotools import checks, plasmo_api, settings
 from plasmotools.embeds import build_simple_embed
 
 logger = logging.getLogger(__name__)

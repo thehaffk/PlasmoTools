@@ -5,8 +5,8 @@ import disnake
 from disnake.ext import commands
 
 from plasmotools import checks, settings
-from plasmotools.plasmo_api import banker
 from plasmotools.embeds import build_simple_embed
+from plasmotools.plasmo_api import banker
 
 logger = logging.getLogger(__name__)
 

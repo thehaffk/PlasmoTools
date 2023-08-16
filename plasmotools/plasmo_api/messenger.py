@@ -3,9 +3,7 @@ from typing import Optional
 
 import aiohttp
 
-from plasmotools import settings
-
-from plasmotools import plasmo_api
+from plasmotools import plasmo_api, settings
 
 logger = logging.getLogger(__name__)
 

@@ -4,8 +4,8 @@ import disnake
 from disnake.ext import commands
 
 from plasmotools import settings
-from plasmotools.plasmo_api import messenger
 from plasmotools.embeds import build_simple_embed
+from plasmotools.plasmo_api import messenger
 
 logger = logging.getLogger(__name__)
 

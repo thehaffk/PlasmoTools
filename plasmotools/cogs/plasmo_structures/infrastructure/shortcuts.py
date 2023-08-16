@@ -5,7 +5,7 @@ import disnake
 from disnake import ApplicationCommandInteraction, Localized
 from disnake.ext import commands
 
-from plasmotools import settings, models
+from plasmotools import models, settings
 from plasmotools.cogs.plasmo_structures.payouts import Payouts
 from plasmotools.embeds import build_simple_embed
 

@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 
-from plasmotools import log, settings, models
+from plasmotools import log, models, settings
 from plasmotools.bot import PlasmoTools
 
 log.setup()

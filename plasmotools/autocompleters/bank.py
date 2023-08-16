@@ -4,7 +4,7 @@ import disnake
 from aiohttp import ClientSession
 from disnake import Localized
 
-from plasmotools import settings, formatters
+from plasmotools import formatters, settings
 
 logger = logging.getLogger(__name__)
 

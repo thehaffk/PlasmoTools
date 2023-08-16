@@ -3,7 +3,7 @@ import logging
 import disnake
 from disnake.ext import commands, tasks
 
-from plasmotools import settings, plasmo_api
+from plasmotools import plasmo_api, settings
 from plasmotools.embeds import build_simple_embed
 from plasmotools.formatters import build_progressbar
 

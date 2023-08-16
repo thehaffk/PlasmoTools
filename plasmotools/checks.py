@@ -1,7 +1,7 @@
 import disnake
 from disnake.ext import commands
 
-from plasmotools import settings, models
+from plasmotools import models, settings
 from plasmotools.cogs.error_handler import GuildIsNotRegistered
 
 
