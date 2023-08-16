@@ -3,13 +3,9 @@ import logging
 import disnake
 from disnake import InteractionTimedOut
 from disnake.ext import commands
-from disnake.ext.commands.errors import (
-    CheckFailure,
-    MissingPermissions,
-    MissingRole,
-    NoPrivateMessage,
-    NotOwner,
-)
+from disnake.ext.commands.errors import (CheckFailure, MissingPermissions,
+                                         MissingRole, NoPrivateMessage,
+                                         NotOwner)
 
 from plasmotools import settings
 from plasmotools.embeds import build_simple_embed
