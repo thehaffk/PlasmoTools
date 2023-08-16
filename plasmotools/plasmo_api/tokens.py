@@ -5,12 +5,12 @@ import aiohttp
 
 async def get_token_scopes(token: str) -> List[str]:
     """
-    Request GET rp.plo.su/plasmo_api/oauth2/token with Authorization: Bearer <token>
+    Request GET plasmorp.com/api/oauth2/token with Authorization: Bearer <token>
     and return the scopes of the token.
     """
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            "https://rp.plo.su/api/oauth2/token",
+            "https://plasmorp.com/api/oauth2/token",
             headers={"Authorization": f"Bearer {token}"},
         ) as resp:
             if resp.status != 200:
