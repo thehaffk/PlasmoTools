@@ -18,7 +18,7 @@ if PT_PLASMO_COOKIES is None:
     logger.critical("PLASMO_COOKIE is missing")
 __version__ = "1.6.0" + ("-alpha" if DEBUG else "")
 DATABASE_PATH = "plasmotools.sqlite"
-HELP_URL = "https://thfk.notion.site/Plasmo-Tools-help-a5874f7c3a56433ea2c3816527740fa0"
+HELP_URL = "https://digitaldrugs.notion.site/Plasmo-Tools-ultimate-guide-a5874f7c3a56433ea2c3816527740fa0Л"
 oauth2_url_for_projects = (
     "https://plasmorp.com/oauth2?client_id=FHHGpr8ZbZb35ZFvwSgD9EMbvkQF35ZFvwSgD9EMbvkQGpr8"
     "&redirect_uri=https://pt.haffk.tech/oauth/&response_type=token"
