@@ -49,7 +49,7 @@ class DailyReconciliation(commands.Cog):
             for role_string in self.strings_to_roles_dict
         }
 
-    @commands.command("run-plasmo_api-sync")
+    @commands.command("run-api-sync")
     @commands.is_owner()
     async def manually_run_check(self, ctx):
         await ctx.message.add_reaction("✅")
