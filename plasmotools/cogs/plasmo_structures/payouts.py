@@ -81,7 +81,7 @@ class Payouts(commands.Cog):
         ----------
         inter
         name: Название проекта, например "Интерпол"
-        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/plasmo_api/webhooks/...)
+        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.comapiwebhooks/...)
         from_card_str: Карта, с которой будет производиться выплата
         plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
         """
@@ -153,7 +153,7 @@ class Payouts(commands.Cog):
         ----------
         inter
         project_id: Айди проекта
-        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.com/plasmo_api/webhooks/{id}/{token})
+        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.comapiwebhooks/{id}/{token})
         is_active: Доступен ли проект
         name: Название проекта, например "Интерпол" или "Постройка суда"
         from_card_str: Номер карты, с которой будет производиться выплата
@@ -446,7 +446,7 @@ class Payouts(commands.Cog):
             description=f"{user.mention} получает выплату в размере **{amount}** алм. ",
         ).set_author(
             name=plasmo_user.display_name,
-            icon_url="https://rp.plo.su/avatar/" + plasmo_user.display_name,
+            icon_url="https://plasmorp.com/avatar/" + plasmo_user.display_name,
         )
         if message != "":
             embed.add_field(name="Комментарий", value=message)

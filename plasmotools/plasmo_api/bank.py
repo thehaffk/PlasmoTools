@@ -23,7 +23,7 @@ async def transfer(
     """
     async with aiohttp.ClientSession() as session:
         async with session.post(
-            "https://rp.plo.su/api/bank/transfer",
+            "https://plasmorp.com/api/bank/transfer",
             json={
                 "from": from_card_str,
                 "to": to_card_str,
@@ -50,10 +50,10 @@ async def bill(
     token: str,
     message: str = "via PlasmoTools",
 ):
-    # POST plasmorp.com/plasmo_api/bank/bill
+    # POST plasmorp.comapibank/bill
     async with aiohttp.ClientSession() as session:
         async with session.post(
-            "https://rp.plo.su/api/bank/bill",
+            "https://plasmorp.com/api/bank/bill",
             json={
                 "from": from_card_str,
                 "to": to_card_str,
@@ -89,7 +89,7 @@ async def wait_for_bill(
     for _ in range(time // 10):
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"https://rp.plo.su/api/bank/cards/{card_str}/bill/{bill_id}/status",
+                f"https://plasmorp.com/api/bank/cards/{card_str}/bill/{bill_id}/status",
                 headers={
                     "Authorization": f"Bearer {token}",
                     "content-type": "application/json",
@@ -123,7 +123,7 @@ async def cancel_bill(card_str: str, bill_id: int, token: str):
     """
     async with aiohttp.ClientSession() as session:
         async with session.post(
-            f"https://rp.plo.su/api/bank/cards/{card_str}/bill/{bill_id}/cancel",
+            f"https://plasmorp.com/api/bank/cards/{card_str}/bill/{bill_id}/cancel",
             headers={
                 "Authorization": f"Bearer {token}",
                 "content-type": "application/json",
@@ -146,7 +146,7 @@ async def search_cards(token: str, query: str, silent: bool = False) -> list:
     async with aiohttp.ClientSession() as session:
         try:
             async with session.get(
-                "https://rp.plo.su/api/bank/search/cards",
+                "https://plasmorp.com/api/bank/search/cards",
                 params={"value": str(query)[:16]},
                 headers={
                     "Authorization": f"Bearer {token}",
@@ -170,12 +170,12 @@ async def search_cards(token: str, query: str, silent: bool = False) -> list:
 async def get_card_data(
     card_str: str, supress_warnings: bool = False
 ) -> Optional[dict]:
-    # https://rp.plo.su/api/bank/cards?ids=??-0000
+    # https://plasmorp.com/api/bank/cards?ids=??-0000
     async with aiohttp.ClientSession(
         headers={"Authorization": f"Bearer {settings.PT_PLASMO_TOKEN}"}
     ) as session:
         async with session.get(
-            "https://rp.plo.su/api/bank/cards",
+            "https://plasmorp.com/api/bank/cards",
             params={"ids": card_str},
         ) as resp:
             response_json = {}
@@ -201,7 +201,7 @@ async def get_penalties(tab: str = "active", offset=0) -> List[dict]:
         ) as session:
             penalties = []
             async with session.get(
-                "https://rp.plo.su/api/bank/penalties/helper?",
+                "https://plasmorp.com/api/bank/penalties/helper?",
                 params={"tab": tab, "offset": 0, "count": 100},
             ) as resp:
                 if resp.status != 200 or not (response_json := await resp.json()).get(
@@ -235,7 +235,7 @@ async def cancel_penalty(
         headers={"Authorization": f"Bearer {token}"}
     ) as session:
         async with session.delete(
-            "https://rp.plo.su/api/bank/penalty",
+            "https://plasmorp.com/api/bank/penalty",
             json={"penalty": penalty_id},
         ) as resp:
             if resp.status != 200 or not (await resp.json()).get("status", False):
