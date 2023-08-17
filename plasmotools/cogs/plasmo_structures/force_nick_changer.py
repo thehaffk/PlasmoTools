@@ -28,10 +28,17 @@ class ForceNickChanger(commands.Cog):
             return
 
         if plasmo_member.display_name != member.display_name:
-            await member.edit(
-                nick=plasmo_member.display_name,
-                reason="Changing nicknames in structures is not allowed",
-            )
+            try:
+                await member.edit(
+                    nick=plasmo_member.display_name,
+                    reason="Changing nicknames in structures is not allowed",
+                )
+            except disnake.Forbidden:
+                logger.warning(
+                    "Unable to update username for %s at %s",
+                    member.name,
+                    member.guild.name,
+                )
 
     @commands.Cog.listener("on_member_update")
     async def force_nick_changer(self, before: disnake.Member, after: disnake.Member):
