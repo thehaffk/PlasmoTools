@@ -5,8 +5,7 @@ import re
 from typing import List, Optional
 
 import disnake
-from disnake import (ApplicationCommandInteraction, Localized,
-                     MessageInteraction)
+from disnake import ApplicationCommandInteraction, Localized, MessageInteraction
 from disnake.ext import commands
 
 from plasmotools import formatters, models, settings
@@ -1667,7 +1666,7 @@ class BankerPatents(commands.Cog):
                 if not payment_status
                 else None,
                 embed=disnake.Embed(
-                    description=f"{settings.DD_BANK_PATENTS_CARD} -> {settings.ECONOMY_PATENTS_TREASURY_CARD}\n"
+                    description=f"{settings.DD_BANK_PATENTS_CARD} -> {db_patent.from_card_str}\n"
                     f"`Amount:` {economics_price + moderator_price}\n`Message:` "
                     f"Частичный возврат денег за патент {formatters.format_patent_number(db_patent.id)}\n"
                     f"`Статус:` {payment_status}"
