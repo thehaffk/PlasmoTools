@@ -1776,6 +1776,7 @@ class BankerPatents(commands.Cog):
                 "moderator_id": moderator_id,
                 "map_ids": map_ids,
                 "is_lamination_skipped": is_lamination_skipped,
+                "registration_date": datetime.datetime.now(),
             },
         )
 
