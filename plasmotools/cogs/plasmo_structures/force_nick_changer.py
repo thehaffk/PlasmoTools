@@ -24,6 +24,9 @@ class ForceNickChanger(commands.Cog):
         if plasmo_member is None:
             return
 
+        if plasmo_guild == member.guild:
+            return
+
         if plasmo_member.display_name != member.display_name:
             await member.edit(
                 nick=plasmo_member.display_name,
@@ -63,6 +66,10 @@ class ForceNickChanger(commands.Cog):
         await self.bot.wait_until_ready()
         logger.info("Running sync_plasmo_nickname on every player")
         for guild in self.bot.guilds:
+            if not (
+                await models.StructureGuild.objects.filter(discord_id=guild.id).exists()
+            ):
+                continue
             for member in guild.members:
                 await self._sync_plasmo_nickname(member=member)
 
