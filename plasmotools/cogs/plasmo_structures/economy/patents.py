@@ -5,8 +5,7 @@ import re
 from typing import List, Optional
 
 import disnake
-from disnake import (ApplicationCommandInteraction, Localized,
-                     MessageInteraction)
+from disnake import ApplicationCommandInteraction, Localized, MessageInteraction
 from disnake.ext import commands
 
 from plasmotools import formatters, models, settings
@@ -720,26 +719,6 @@ class BankerPatents(commands.Cog):
         Start registering new patent  {{PATENT_COMMAND}}
         """
         await inter.response.defer(ephemeral=True)
-
-        # Проверка на наличие роли банкира
-        if not settings.DEBUG:
-            plasmo_guild = self.bot.get_guild(settings.PlasmoRPGuild.guild_id)
-            plasmo_banker_role = plasmo_guild.get_role(
-                settings.PlasmoRPGuild.banker_role_id
-            )
-            plasmo_inter_author = plasmo_guild.get_member(inter.author)
-
-            if (
-                not plasmo_inter_author
-                or plasmo_banker_role not in plasmo_inter_author.roles
-            ):
-                await inter.edit_original_message(
-                    embed=build_simple_embed(
-                        description="Вам нужно быть банкиром для использования этой команды",
-                        failure=True,
-                    )
-                )
-                return
         patent_preview_embed = disnake.Embed(
             title="Патент XXXX",
             description=f"`Банкир:`{inter.author.mention}",
