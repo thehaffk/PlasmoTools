@@ -10,8 +10,7 @@ from disnake.ext import commands
 
 from plasmotools import checks, formatters, models, plasmo_api, settings
 from plasmotools.autocompleters.bank import search_bank_cards_autocompleter
-from plasmotools.autocompleters.plasmo_structures import \
-    payouts_projects_autocompleter
+from plasmotools.autocompleters.plasmo_structures import payouts_projects_autocompleter
 from plasmotools.checks import is_guild_registered
 from plasmotools.embeds import build_simple_embed
 from plasmotools.plasmo_api import bank
@@ -70,7 +69,7 @@ class Payouts(commands.Cog):
         name: str,
         webhook_url: str,
         plasmo_bearer_token: str,
-        from_card_str: int = commands.Param(
+        from_card_str: str = commands.Param(
             autocomplete=search_bank_cards_autocompleter
         ),
     ):
