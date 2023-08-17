@@ -97,7 +97,7 @@ class UserManagement(commands.Cog):
         ----------
         inter
         role: Роль
-        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.comapiwebhooks/...)
+        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/api/webhooks/...)
         available: Доступна ли роль для найма и снятия
         name: Название роли, например "Интерпол"
 
@@ -186,7 +186,7 @@ class UserManagement(commands.Cog):
         ----------
         inter
         role: Роль
-        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discord.comapiwebhooks/...)
+        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discord.com/api/webhooks/...)
         available: Доступна ли роль для найма и снятия
         name: Название роли, например "Интерпол"
 

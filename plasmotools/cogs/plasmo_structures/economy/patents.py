@@ -5,8 +5,7 @@ import re
 from typing import List, Optional
 
 import disnake
-from disnake import (ApplicationCommandInteraction, Localized,
-                     MessageInteraction)
+from disnake import ApplicationCommandInteraction, Localized, MessageInteraction
 from disnake.ext import commands
 
 from plasmotools import formatters, models, settings
@@ -739,6 +738,7 @@ class BankerPatents(commands.Cog):
                         failure=True,
                     )
                 )
+                return
         patent_preview_embed = disnake.Embed(
             title="Патент XXXX",
             description=f"`Банкир:`{inter.author.mention}",
@@ -825,8 +825,7 @@ class BankerPatents(commands.Cog):
             ):
                 return await inter.delete_original_response()
             if not patent_price_confirm_view.decision:
-                await inter.delete_original_response()
-                return
+                return await inter.delete_original_response()
 
             # Количество карт в арте
             patent_helper_embed.title = "Количество карт в арте"
@@ -914,8 +913,7 @@ class BankerPatents(commands.Cog):
         ):
             return await inter.delete_original_response()
         if not patent_price_confirm_view.decision:
-            await inter.delete_original_response()
-            return
+            return await inter.delete_original_response()
 
         if is_mapart:
             # Получение карт на руки
@@ -1073,17 +1071,18 @@ class BankerPatents(commands.Cog):
                     ),
                 ]
             )
-            await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
+            return await self.bot.get_channel(
+                settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
+            ).send(
                 embed=disnake.Embed(
                     description=f"{formatters.format_bank_card(number=4, bank_prefix='DD')}"
                     f" -> {formatters.format_bank_card(number=card_number, bank_prefix=card_bank)}\n"
                     f"Не удалось выставить счет. Ошибка: {e}\n"
                 )
             )
-            return
 
         if bill_id is None:
-            await inter.edit_original_message(
+            return await inter.edit_original_message(
                 embeds=[
                     patent_preview_embed,
                     build_simple_embed(
@@ -1092,7 +1091,6 @@ class BankerPatents(commands.Cog):
                     ),
                 ]
             )
-            return
         await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
             embed=disnake.Embed(
                 description=f"{settings.DD_BANK_PATENTS_CARD}"
@@ -1129,10 +1127,9 @@ class BankerPatents(commands.Cog):
                     ),
                 ]
             )
-            await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                embed=disnake.Embed(description=f"Счет {bill_id} отклонён")
-            )
-            return
+            return await self.bot.get_channel(
+                settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
+            ).send(embed=disnake.Embed(description=f"Счет {bill_id} отклонён"))
         if not is_paid:
             await inter.edit_original_message(
                 embeds=[
@@ -1148,12 +1145,11 @@ class BankerPatents(commands.Cog):
                     description=f"Счет {bill_id} истек или был отклонен DD банком вручную"
                 )
             )
-            await bank_api.cancel_bill(
+            return await bank_api.cancel_bill(
                 card_str=settings.DD_BANK_PATENTS_CARD,
                 bill_id=bill_id,
                 token=patents_payout_project.plasmo_bearer_token,
             )
-            return
         await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
             embed=disnake.Embed(
                 description=f"Счет {bill_id} на {total_patent_price} алм. оплачен"
@@ -1244,9 +1240,7 @@ class BankerPatents(commands.Cog):
                         if message.channel.id not in [
                             1137803532943233154,
                             951769772683587604,
-                        ]:
-                            return False
-                        if (
+                        ] or (
                             len(message.embeds) != 1
                             or message.embeds[0].description is None
                         ):
@@ -1373,18 +1367,16 @@ class BankerPatents(commands.Cog):
 
         db_patent = await models.Patent.objects.filter(message_id=message.id).first()
         if db_patent is None:
-            await inter.edit_original_response(
+            return await inter.edit_original_response(
                 embed=build_simple_embed(description="Патент не найден", failure=True),
             )
-            return
 
         if db_patent.status == "REJECTED":
-            await inter.edit_original_response(
+            return await inter.edit_original_response(
                 embed=build_simple_embed(
                     description="Патент уже отклонён", failure=True
                 ),
             )
-            return
         await models.Patent.objects.filter(id=db_patent.id).update(
             status="REJECTED",
             moderator_id=inter.author.id,
