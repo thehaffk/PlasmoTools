@@ -15,9 +15,6 @@ from plasmotools.embeds import build_simple_embed
 logger = logging.getLogger(__name__)
 
 
-# TODO: Auto remove all roles, when user leaves plasmo rp
-
-
 async def check_role(inter, guild, role) -> bool:
     if role is None or role.guild_discord_id != guild.discord_id:
         await inter.send(
@@ -359,7 +356,7 @@ class UserManagement(commands.Cog):
                         without_title=True,
                     )
                 )
-                rrs_result = await rrs_cog.process_UM_structure_role_change(
+                rrs_result = await rrs_cog.process_UM_structure_role_change(  # type: ignore
                     member=user,
                     role=structure_role,
                     author=inter.author,
@@ -540,7 +537,7 @@ class UserManagement(commands.Cog):
                         without_title=True,
                     )
                 )
-                rrs_result = await rrs_cog.process_UM_structure_role_change(
+                rrs_result = await rrs_cog.process_UM_structure_role_change(  # type: ignore
                     member=user,
                     role=structure_role,
                     author=inter.author,
