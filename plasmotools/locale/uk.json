@@ -4,7 +4,7 @@
     "SET_PAYOUTS_CARD_COMMAND_NAME": "встановити-картку-для-платежів",
     "SET_PAYOUTS_CARD_COMMAND_DESCRIPTION": "Встановити картку для платежів з гос. структур",
     "SET_PAYOUTS_CARD_PARAM_NAME": "картка",
-    "SET_PAYOUTS_CARD_PARAM_DESCRIPTION": "Номер картки у форматі 9000 або EB-9000. EB-0142 -> 142. EB-3666 -> 3666",
+    "SET_PAYOUTS_CARD_PARAM_DESCRIPTION": "Номер картки у форматі EB-9000. EB-0142. DD-3666",
 
     "SEARCH_CARDS_AUTOCOMPLETE_NOT_FOUND": "🔎 Нічого не знайдено",
     "SEARCH_CARDS_AUTOCOMPLETE_MUST_BE_MORE_THAN_2": "🔎 Запит повинен бути довший за 2 символи",

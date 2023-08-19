@@ -10,8 +10,7 @@ from disnake.ext import commands
 
 from plasmotools import checks, formatters, models, plasmo_api, settings
 from plasmotools.autocompleters.bank import search_bank_cards_autocompleter
-from plasmotools.autocompleters.plasmo_structures import \
-    payouts_projects_autocompleter
+from plasmotools.autocompleters.plasmo_structures import payouts_projects_autocompleter
 from plasmotools.checks import is_guild_registered
 from plasmotools.embeds import build_simple_embed
 from plasmotools.plasmo_api import bank
@@ -70,7 +69,7 @@ class Payouts(commands.Cog):
         name: str,
         webhook_url: str,
         plasmo_bearer_token: str,
-        from_card_str: int = commands.Param(
+        from_card_str: str = commands.Param(
             autocomplete=search_bank_cards_autocompleter
         ),
     ):
@@ -81,7 +80,7 @@ class Payouts(commands.Cog):
         ----------
         inter
         name: Название проекта, например "Интерпол"
-        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.comapiwebhooks/...)
+        webhook_url: Ссылка на вебхук для отправки уведомлений (в формате https://discord.com/api/webhooks/...)
         from_card_str: Карта, с которой будет производиться выплата
         plasmo_bearer_token: Токен плазмо, используйте /проекты, чтобы узнать как его получить
         """
@@ -153,7 +152,7 @@ class Payouts(commands.Cog):
         ----------
         inter
         project_id: Айди проекта
-        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.comapiwebhooks/{id}/{token})
+        webhook_url: Ссылка на вебхук для отправки уведомлений (https://discordapp.com/api/webhooks/{id}/{token})
         is_active: Доступен ли проект
         name: Название проекта, например "Интерпол" или "Постройка суда"
         from_card_str: Номер карты, с которой будет производиться выплата

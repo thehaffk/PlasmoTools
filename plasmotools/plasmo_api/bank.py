@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 async def transfer(
-    from_card_str: int,
-    to_card_str: int,
+    from_card_str: str,
+    to_card_str: str,
     amount: int,
     token: str,
     message: str = "via PlasmoTools",
@@ -50,7 +50,7 @@ async def bill(
     token: str,
     message: str = "via PlasmoTools",
 ):
-    # POST plasmorp.comapibank/bill
+    # POST plasmorp.com/api/bank/bill
     async with aiohttp.ClientSession() as session:
         async with session.post(
             "https://plasmorp.com/api/bank/bill",

@@ -91,6 +91,7 @@ class FastInfrastructurePayouts(commands.Cog):
         )
         if not result:
             await message.add_reaction("⚠")
+            return
 
         for reaction in message.reactions:
             await reaction.remove(user=self.bot.user)
@@ -143,6 +144,7 @@ class FastInfrastructurePayouts(commands.Cog):
         )
         if not result:
             await message.add_reaction("⚠")
+            return
 
         for reaction in message.reactions:
             await reaction.remove(user=self.bot.user)

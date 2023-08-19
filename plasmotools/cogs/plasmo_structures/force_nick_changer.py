@@ -24,11 +24,21 @@ class ForceNickChanger(commands.Cog):
         if plasmo_member is None:
             return
 
+        if plasmo_guild == member.guild:
+            return
+
         if plasmo_member.display_name != member.display_name:
-            await member.edit(
-                nick=plasmo_member.display_name,
-                reason="Changing nicknames in structures is not allowed",
-            )
+            try:
+                await member.edit(
+                    nick=plasmo_member.display_name,
+                    reason="Changing nicknames in structures is not allowed",
+                )
+            except disnake.Forbidden:
+                logger.warning(
+                    "Unable to update username for %s at %s",
+                    member.name,
+                    member.guild.name,
+                )
 
     @commands.Cog.listener("on_member_update")
     async def force_nick_changer(self, before: disnake.Member, after: disnake.Member):
@@ -63,6 +73,10 @@ class ForceNickChanger(commands.Cog):
         await self.bot.wait_until_ready()
         logger.info("Running sync_plasmo_nickname on every player")
         for guild in self.bot.guilds:
+            if not (
+                await models.StructureGuild.objects.filter(discord_id=guild.id).exists()
+            ):
+                continue
             for member in guild.members:
                 await self._sync_plasmo_nickname(member=member)
 
