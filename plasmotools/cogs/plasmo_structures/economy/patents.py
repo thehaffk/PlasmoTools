@@ -5,7 +5,12 @@ import re
 from typing import List, Optional
 
 import disnake
-from disnake import ApplicationCommandInteraction, Localized, MessageInteraction
+from disnake import (
+    ApplicationCommandInteraction,
+    Localized,
+    MessageInteraction,
+    GuildCommandInteraction,
+)
 from disnake.ext import commands
 
 from plasmotools import formatters, models, settings
@@ -1685,28 +1690,52 @@ class BankerPatents(commands.Cog):
         ):
             return
 
-        if inter.component.custom_id.startswith("patent_approve:"):
+        command_patentid = inter.component.custom_id.split(":")
+        if len(command_patentid) != 2:
+            return
+
+        command = command_patentid[0]
+        patent_id = int(command_patentid[1])
+
+        if command == "patent_approve":
             await inter.response.defer(ephemeral=True)
             await inter.message.edit(components=[])
             await self._process_moderator_decision(
-                patent_id=int(inter.component.custom_id.split(":")[1]),
+                patent_id=patent_id,
                 approoved=True,
                 moderator_id=inter.author.id,
             )
-        elif inter.component.custom_id.startswith("patent_reject:"):
+        elif command == "patent_reject":
             await inter.response.defer(ephemeral=True)
             await inter.message.edit(components=[])
             await self._process_moderator_decision(
-                patent_id=int(inter.component.custom_id.split(":")[1]),
+                patent_id=patent_id,
                 approoved=False,
                 moderator_id=inter.author.id,
             )
+        elif command == "patent_remoderate":
+            await inter.response.defer(ephemeral=True)
+            await inter.message.edit(
+                embed=await _get_patent_embed(
+                    patent_id=patent_id,
+                    for_internal_use=True,
+                ),
+                components=[
+                    disnake.ui.Button(
+                        style=disnake.ButtonStyle.gray,
+                        label="Sent to remoderation",
+                        disabled=True,
+                    ),
+                ],
+            )
+            await self._moderate_patent(patent_id=patent_id)
+
         else:
             return
 
         await inter.message.edit(
             embed=await _get_patent_embed(
-                patent_id=int(inter.component.custom_id.split(":")[1]),
+                patent_id=patent_id,
                 for_internal_use=True,
             ),
             components=[],
@@ -1723,14 +1752,15 @@ class BankerPatents(commands.Cog):
         subject: str,
         is_art: bool,
         owner_ids: str,
-        banker_id: int,
-        status: str,
-        message_id: int,
+        banker_id: str,
         price_breakdown: str,
         is_payment_on_hold: bool,
         is_refunded: bool,
         from_card_str: str,
         patent_id: int,
+        status: str = commands.Param(
+            choices=["WAIT", "AUTOAPPROVED", "REJECTED", "APPROVED"]
+        ),
         moderator_id: int = None,
         map_ids: str = None,
         is_lamination_skipped: bool = None,
@@ -1747,7 +1777,6 @@ class BankerPatents(commands.Cog):
         owner_ids: "123456789012345678;123456789012345678"
         banker_id: 123456789012345678
         status: "WAIT"
-        message_id: 123456789012345678
         price_breakdown: "100;0;0"
         is_payment_on_hold: true
         is_refunded: false
@@ -1766,9 +1795,8 @@ class BankerPatents(commands.Cog):
                 "subject": subject,
                 "is_art": is_art,
                 "owner_ids": owner_ids,
-                "banker_id": banker_id,
+                "banker_id": int(banker_id),
                 "status": status,
-                "message_id": message_id,
                 "price_breakdown": price_breakdown,
                 "is_payment_on_hold": is_payment_on_hold,
                 "is_refunded": is_refunded,
@@ -1785,6 +1813,47 @@ class BankerPatents(commands.Cog):
 
         await inter.edit_original_message(
             embed=build_simple_embed(description=f"Создан новый: {created}"),
+        )
+
+    @commands.slash_command(
+        name="get-patent", guild_ids=[settings.economy_guild.discord_id]
+    )
+    @commands.default_member_permissions(administrator=True)
+    async def get_patent_command(
+        self,
+        inter: GuildCommandInteraction,
+        patent_id: int,
+    ):
+        """
+        DEBUG COMMAND | Get patent embed
+
+        Parameters
+        ----------
+        inter: SlashInteraction
+        patent_id: 4
+        """
+        await inter.response.defer(ephemeral=True)
+        if (
+            inter.author.guild_permissions.administrator
+            or inter.author.id in self.bot.owner_ids
+        ):
+            await inter.edit_original_response(
+                embed=await _get_patent_embed(
+                    patent_id=patent_id, for_internal_use=True
+                ),
+                components=[
+                    disnake.ui.Button(
+                        style=disnake.ButtonStyle.red,
+                        label="Reprocess",
+                        custom_id=f"patent_remoderate:{patent_id}",
+                        disabled=inter.author.id not in self.bot.owner_ids,
+                    ),
+                ],
+            )
+            return
+
+        await inter.edit_original_response(
+            embed=await _get_patent_embed(patent_id=patent_id, for_internal_use=False),
         )
 
     async def cog_load(self):
