@@ -641,19 +641,22 @@ async def _get_patent_embed(
 `Тип:` {'арт' if db_patent.is_art else 'другое'}
 `Номера карт:` {', '.join([f'#{map_number}' for map_number in db_patent.map_ids.split(";")])
         if db_patent.map_ids else 'нет'}
+`Ламинирование:` {'Есть' if db_patent.is_lamination_skipped else 'Нет / Не нужно'}
 `Владельцы:` {', '.join([f'<@{owner}>' for owner in db_patent.owner_ids.split(";")])}
-`Зарегистрирован:` GMT+3 {db_patent.registration_date} 
+
+`Карта оплаты:` {db_patent.from_card_str}
+`Разделение цен:` {db_patent.price_breakdown}
+`Холд на карте DD:` {db_patent.is_payment_on_hold}
+`Оформлен возврат:` {db_patent.is_refunded}
+
+`Зарегистрирован:`<t:{int(db_patent.registration_date.timestamp())}:f> 
+`Message ID:` {('https://discord.com/channels/' + str(settings.economy_guild.discord_id)
+                + '/' + str(settings.ECONOMY_PATENTS_PUBLIC_CHANNEL_ID) + '/' + str(db_patent.message_id))
+        if db_patent.message_id else 'Нет'}
+
 `Банкир:` <@{db_patent.banker_id}>
 `Модератор:` {('<@' + str(db_patent.moderator_id) + '>') if db_patent.moderator_id else 'Нет'}
-`Message ID:` https://discord.com/channels/{settings.economy_guild.discord_id}\
-/{settings.ECONOMY_PATENTS_PUBLIC_CHANNEL_ID}/{db_patent.message_id}
-`Разделение цен:` {db_patent.price_breakdown}
-`Холд на счете DD Банка:` {db_patent.is_payment_on_hold}
-`Карта оплаты:` {db_patent.from_card_str}
-`Оформлен возврат:` {db_patent.is_refunded}
-`Ламинирование:` {not db_patent.is_lamination_skipped if db_patent.is_lamination_skipped is not None else 'Не нужно'}
-
-`Статус:` {db_patent.status}               
+`Статус:` **{db_patent.status}**               
         """
         return patent_embed
 
@@ -1542,7 +1545,7 @@ class BankerPatents(commands.Cog):
                         )
                     )
                 else:
-                    payment_status = await payouts_cog.payout(
+                    payment_status = await payouts_cog.payout(  # type: ignore
                         user=moderator,
                         amount=moderator_price,
                         project=patents_payout_project,
@@ -1582,7 +1585,7 @@ class BankerPatents(commands.Cog):
                         )
                     )
                 else:
-                    payment_status = await payouts_cog.payout(
+                    payment_status = await payouts_cog.payout(  # type: ignore
                         user=banker,
                         amount=banker_price,
                         project=patents_payout_project,
@@ -1632,7 +1635,7 @@ class BankerPatents(commands.Cog):
                         )
                     )
                 else:
-                    payment_status = await payouts_cog.payout(
+                    payment_status = await payouts_cog.payout(  # type: ignore
                         user=banker,
                         amount=banker_price,
                         project=patents_payout_project,
@@ -1659,24 +1662,30 @@ class BankerPatents(commands.Cog):
                             f"`Статус:` {payment_status}"
                         ),
                     )
-            payment_status, _ = await bank_api.transfer(
-                from_card_str=settings.DD_BANK_PATENTS_CARD,
-                to_card_str=db_patent.from_card_str,
-                amount=economics_price + moderator_price,
-                token=patents_payout_project.plasmo_bearer_token,
-                message=f"Частичный возврат денег за патент {formatters.format_patent_number(db_patent.id)}",
-            )
-            await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                content=("<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">")
-                if not payment_status
-                else None,
-                embed=disnake.Embed(
-                    description=f"{settings.DD_BANK_PATENTS_CARD} -> {db_patent.from_card_str}\n"
-                    f"`Amount:` {economics_price + moderator_price}\n`Message:` "
-                    f"Частичный возврат денег за патент {formatters.format_patent_number(db_patent.id)}\n"
-                    f"`Статус:` {payment_status}"
-                ),
-            )
+
+            if economics_price + moderator_price:
+                payment_status, _ = await bank_api.transfer(
+                    from_card_str=settings.DD_BANK_PATENTS_CARD,
+                    to_card_str=db_patent.from_card_str,
+                    amount=economics_price + moderator_price,
+                    token=patents_payout_project.plasmo_bearer_token,
+                    message=f"Частичный возврат денег за патент {formatters.format_patent_number(db_patent.id)}",
+                )
+                await self.bot.get_channel(
+                    settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
+                ).send(
+                    content=(
+                        "<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">"
+                    )
+                    if not payment_status
+                    else None,
+                    embed=disnake.Embed(
+                        description=f"{settings.DD_BANK_PATENTS_CARD} -> {db_patent.from_card_str}\n"
+                        f"`Amount:` {economics_price + moderator_price}\n`Message:` "
+                        f"Частичный возврат денег за патент {formatters.format_patent_number(db_patent.id)}\n"
+                        f"`Статус:` {payment_status}"
+                    ),
+                )
             await models.Patent.objects.filter(id=db_patent.id).update(
                 is_payment_on_hold=False,
                 is_refunded=True,
@@ -1685,8 +1694,8 @@ class BankerPatents(commands.Cog):
     @commands.Cog.listener("on_button_click")
     async def on_patent_review(self, inter: MessageInteraction):
         if (
-            inter.channel.id != settings.ECONOMY_PATENTS_MODERATOR_CHANNEL_ID
-            or not inter.component.custom_id.startswith("patent")
+            not inter.component.custom_id.startswith("patent")
+            or inter.guild_id != settings.economy_guild.discord_id
         ):
             return
 
@@ -1699,7 +1708,7 @@ class BankerPatents(commands.Cog):
 
         if command == "patent_approve":
             await inter.response.defer(ephemeral=True)
-            await inter.message.edit(components=[])
+            await inter.edit_original_response(components=[])
             await self._process_moderator_decision(
                 patent_id=patent_id,
                 approoved=True,
@@ -1707,7 +1716,7 @@ class BankerPatents(commands.Cog):
             )
         elif command == "patent_reject":
             await inter.response.defer(ephemeral=True)
-            await inter.message.edit(components=[])
+            await inter.edit_original_response(components=[])
             await self._process_moderator_decision(
                 patent_id=patent_id,
                 approoved=False,
@@ -1715,11 +1724,7 @@ class BankerPatents(commands.Cog):
             )
         elif command == "patent_remoderate":
             await inter.response.defer(ephemeral=True)
-            await inter.message.edit(
-                embed=await _get_patent_embed(
-                    patent_id=patent_id,
-                    for_internal_use=True,
-                ),
+            await inter.edit_original_response(
                 components=[
                     disnake.ui.Button(
                         style=disnake.ButtonStyle.gray,
@@ -1729,7 +1734,6 @@ class BankerPatents(commands.Cog):
                 ],
             )
             await self._moderate_patent(patent_id=patent_id)
-
         else:
             return
 
@@ -1738,7 +1742,6 @@ class BankerPatents(commands.Cog):
                 patent_id=patent_id,
                 for_internal_use=True,
             ),
-            components=[],
         )
 
     @commands.slash_command(
@@ -1750,7 +1753,6 @@ class BankerPatents(commands.Cog):
         self,
         inter: ApplicationCommandInteraction,
         subject: str,
-        is_art: bool,
         owner_ids: str,
         banker_id: str,
         price_breakdown: str,
@@ -1758,10 +1760,11 @@ class BankerPatents(commands.Cog):
         is_refunded: bool,
         from_card_str: str,
         patent_id: int,
+        patent_type: str = commands.Param(choices=["Арт", "Другое"]),
         status: str = commands.Param(
             choices=["WAIT", "AUTOAPPROVED", "REJECTED", "APPROVED"]
         ),
-        moderator_id: int = None,
+        moderator_id: str = None,
         map_ids: str = None,
         is_lamination_skipped: bool = None,
         moderate: bool = False,
@@ -1773,7 +1776,7 @@ class BankerPatents(commands.Cog):
         ----------
         inter: SlashInteraction
         subject: "арт Комар"
-        is_art: true
+        patent_type: Тип патента
         owner_ids: "123456789012345678;123456789012345678"
         banker_id: 123456789012345678
         status: "WAIT"
@@ -1789,11 +1792,11 @@ class BankerPatents(commands.Cog):
         """
         await inter.response.defer(ephemeral=True)
 
-        _, created = await models.Patent.objects.update_or_create(
+        db_patent, is_created = await models.Patent.objects.update_or_create(
             id=patent_id,
             defaults={
                 "subject": subject,
-                "is_art": is_art,
+                "is_art": patent_type == "Арт",
                 "owner_ids": owner_ids,
                 "banker_id": int(banker_id),
                 "status": status,
@@ -1801,19 +1804,22 @@ class BankerPatents(commands.Cog):
                 "is_payment_on_hold": is_payment_on_hold,
                 "is_refunded": is_refunded,
                 "from_card_str": from_card_str,
-                "moderator_id": moderator_id,
+                "moderator_id": int(moderator_id),
                 "map_ids": map_ids,
                 "is_lamination_skipped": is_lamination_skipped,
                 "registration_date": datetime.datetime.now(),
             },
         )
 
-        if moderate:
-            await self._moderate_patent(patent_id=patent_id)
-
         await inter.edit_original_message(
-            embed=build_simple_embed(description=f"Создан новый: {created}"),
+            embeds=[
+                build_simple_embed(description=f"Создан новый: {is_created}"),
+                _get_patent_embed(patent_id=db_patent.id, for_internal_use=True),
+            ]
         )
+
+        if moderate:
+            await self._moderate_patent(patent_id=db_patent.id)
 
     @commands.slash_command(
         name="get-patent", guild_ids=[settings.economy_guild.discord_id]
@@ -1829,7 +1835,7 @@ class BankerPatents(commands.Cog):
 
         Parameters
         ----------
-        inter: SlashInteraction
+        inter: GuildCommandInteraction
         patent_id: 4
         """
         await inter.response.defer(ephemeral=True)
