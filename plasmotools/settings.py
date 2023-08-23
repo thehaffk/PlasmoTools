@@ -142,7 +142,7 @@ class PlasmoRPGuild:
     ne_komar_role_id = 956884028533919774
     fusion_role_id = 751722994170331136
     helper_role_id = 1023622804794527805
-    moderator_role_id = 813670327376805889
+    ads_moderator_role_id = 813670327376805889
 
     monitored_roles = [
         admin_role_id,
@@ -153,6 +153,7 @@ class PlasmoRPGuild:
         banker_role_id,
         keeper_role_id,
         helper_role_id,
+        ads_moderator_role_id,
     ]
 
     notifications_channel_id = 754644298720477264

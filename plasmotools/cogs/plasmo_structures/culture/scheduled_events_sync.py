@@ -51,7 +51,7 @@ class ScheduledEventsSync(commands.Cog):
         monitored_guild_id = settings.culture_guild.discord_id
         target_guild_id = settings.PlasmoRPGuild.guild_id
         mod_channel_id = settings.PlasmoRPGuild.moderators_channel_id
-        mod_role_id = settings.PlasmoRPGuild.moderator_role_id
+        mod_role_id = settings.PlasmoRPGuild.ads_moderator_role_id
         if settings.DEBUG:
             monitored_guild_id = settings.DevServer.guild_id
             target_guild_id = settings.LogsServer.guild_id
