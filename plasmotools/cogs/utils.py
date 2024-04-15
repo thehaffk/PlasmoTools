@@ -102,12 +102,14 @@ class Utils(commands.Cog):
         if revoked_warns_text:
             api_embed.add_field(
                 name="Revoked warns",
-                value=revoked_warns_text
-                if len(revoked_warns_text) < 1024
-                else (
-                    "**Unable to display all warns bc of discord limits\n**"
-                    + revoked_warns_text[:950]
-                    + "..."
+                value=(
+                    revoked_warns_text
+                    if len(revoked_warns_text) < 1024
+                    else (
+                        "**Unable to display all warns bc of discord limits\n**"
+                        + revoked_warns_text[:950]
+                        + "..."
+                    )
                 ),
                 inline=False,
             )

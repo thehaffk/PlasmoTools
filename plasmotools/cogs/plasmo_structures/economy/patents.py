@@ -297,7 +297,10 @@ class PatentOwnersView(disnake.ui.View):
         return await interaction.delete_original_message()
 
     @disnake.ui.button(
-        label="Все владельцы выбраны", style=disnake.ButtonStyle.green, emoji="✅", row=1
+        label="Все владельцы выбраны",
+        style=disnake.ButtonStyle.green,
+        emoji="✅",
+        row=1,
     )
     async def confirm(
         self, _: disnake.ui.Button, interaction: disnake.MessageInteraction
@@ -1319,9 +1322,11 @@ class BankerPatents(commands.Cog):
         )
         await models.Patent.objects.filter(id=db_patent.id).update(
             is_lamination_skipped=is_map_lamination_skipped,
-            map_ids=";".join([str(map_number) for map_number in map_numbers])
-            if is_mapart
-            else None,
+            map_ids=(
+                ";".join([str(map_number) for map_number in map_numbers])
+                if is_mapart
+                else None
+            ),
         )
 
         await self._moderate_patent(patent_id=db_patent.id)
@@ -1513,10 +1518,10 @@ class BankerPatents(commands.Cog):
                     settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
                 ).send(
                     content=(
-                        "<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">"
-                    )
-                    if not payment_status
-                    else None,
+                        ("<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">")
+                        if not payment_status
+                        else None
+                    ),
                     embed=disnake.Embed(
                         description=f"{settings.DD_BANK_PATENTS_CARD} -> {settings.ECONOMY_PATENTS_TREASURY_CARD}\n"
                         f"`Amount:` {economics_price}\n`Message:` "
@@ -1553,10 +1558,14 @@ class BankerPatents(commands.Cog):
                         settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
                     ).send(
                         content=(
-                            "<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">"
-                        )
-                        if not payment_status
-                        else None,
+                            (
+                                "<@&"
+                                + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID)
+                                + ">"
+                            )
+                            if not payment_status
+                            else None
+                        ),
                         embed=disnake.Embed(
                             description=f"{settings.DD_BANK_PATENTS_CARD} -> {moderator.mention}\n"
                             f"`Amount:` {moderator_price}\n`Message:` "
@@ -1593,10 +1602,14 @@ class BankerPatents(commands.Cog):
                         settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
                     ).send(
                         content=(
-                            "<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">"
-                        )
-                        if not payment_status
-                        else None,
+                            (
+                                "<@&"
+                                + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID)
+                                + ">"
+                            )
+                            if not payment_status
+                            else None
+                        ),
                         embed=disnake.Embed(
                             description=f"{settings.DD_BANK_PATENTS_CARD} -> {banker.mention}\n"
                             f"`Amount:` {banker_price}\n`Message:` "
@@ -1643,10 +1656,14 @@ class BankerPatents(commands.Cog):
                         settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID
                     ).send(
                         content=(
-                            "<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">"
-                        )
-                        if not payment_status
-                        else None,
+                            (
+                                "<@&"
+                                + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID)
+                                + ">"
+                            )
+                            if not payment_status
+                            else None
+                        ),
                         embed=disnake.Embed(
                             description=f"{settings.DD_BANK_PATENTS_CARD} -> {banker.mention}\n"
                             f"`Amount:` {banker_price}\n`Message:` "
@@ -1663,9 +1680,11 @@ class BankerPatents(commands.Cog):
                 message=f"Частичный возврат денег за патент {formatters.format_patent_number(db_patent.id)}",
             )
             await self.bot.get_channel(settings.ECONOMY_DD_OPERATIONS_CHANNEL_ID).send(
-                content=("<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">")
-                if not payment_status
-                else None,
+                content=(
+                    ("<@&" + str(settings.ECONOMY_FAILED_PAYMENTS_ROLE_ID) + ">")
+                    if not payment_status
+                    else None
+                ),
                 embed=disnake.Embed(
                     description=f"{settings.DD_BANK_PATENTS_CARD} -> {db_patent.from_card_str}\n"
                     f"`Amount:` {economics_price + moderator_price}\n`Message:` "

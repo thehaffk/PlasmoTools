@@ -1,6 +1,7 @@
 """
 Cog-file for listener, detects bans, unbans, role changes, cheats, deaths, fwarns in Plasmo RP Guild / Server
 """
+
 import asyncio
 import logging
 import random
@@ -168,9 +169,11 @@ class PlasmoLogger(commands.Cog):
         )
 
         log_embed = disnake.Embed(
-            color=disnake.Color.dark_green()
-            if is_role_added
-            else disnake.Color.dark_red(),
+            color=(
+                disnake.Color.dark_green()
+                if is_role_added
+                else disnake.Color.dark_red()
+            ),
             title=f"{user.display_name}  - Роль {role.name} {'добавлена' if is_role_added else 'снята'}",
             description=description_text,
         )

@@ -176,15 +176,17 @@ class Payouts(commands.Cog):
         await db_project.update(
             name=name if name is not None else db_project.name,
             is_active=is_active if is_active is not None else db_project.is_active,
-            from_card_str=from_card_str
-            if from_card_str is not None
-            else db_project.from_card_str,
-            plasmo_bearer_token=plasmo_bearer_token
-            if plasmo_bearer_token is not None
-            else db_project.plasmo_bearer_token,
-            webhook_url=webhook_url
-            if webhook_url is not None
-            else db_project.webhook_url,
+            from_card_str=(
+                from_card_str if from_card_str is not None else db_project.from_card_str
+            ),
+            plasmo_bearer_token=(
+                plasmo_bearer_token
+                if plasmo_bearer_token is not None
+                else db_project.plasmo_bearer_token
+            ),
+            webhook_url=(
+                webhook_url if webhook_url is not None else db_project.webhook_url
+            ),
         )
         await inter.send(
             embed=build_simple_embed(
@@ -468,16 +470,18 @@ class Payouts(commands.Cog):
                     )
 
         db_guild = await models.StructureGuild.objects.get(
-            discord_id=interaction.guild.id
-            if interaction is not None
-            else author.guild.id
+            discord_id=(
+                interaction.guild.id if interaction is not None else author.guild.id
+            )
         )
         await self.bot.get_channel(db_guild.logs_channel_id).send(
             embed=embed.add_field(
                 "Выплатил",
-                interaction.author.mention
-                if interaction is not None
-                else author.mention,
+                (
+                    interaction.author.mention
+                    if interaction is not None
+                    else author.mention
+                ),
                 inline=False,
             )
             .add_field(
